@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Server Dashboard</title>
+    <link rel="stylesheet" href="styles/style.css" />
+</head>
+<body>
+
+    <div class="login-page" id="login-page">
+        <div class="login-container">
+        <h2>Log In</h2>
+        <button id="login" class="discord-login" onclick="discordLogin()">Login Using Discord</button>
+        </div>
+    </div>
+
+    <div class="servers-page hidden" id="servers-page">
+        <header class="topbar">
+        <div class="left-section" id="welcome">Welcome , to Ultimate CAD</div>
+            <div class="center-section">
+                <button>Create Server</button>
+            </div>
+            <div class="right-section">
+                <button onclick="refresh()">Settings</button>
+                <button onclick="logOut()">Log out</button>
+            </div>
+        </header>
+
+        <main class="dashboard">
+            <div class="serverslist">
+                <!-- Server list displayed in a table -->
+                <table id="server-table" class="server-table">
+                    <thead>
+                        <tr>
+                            <th>Server ID</th>
+                            <th>Server Name</th>
+                        </tr>
+                    </thead>
+                    <tbody id="server-list">
+                        <!-- Server entries will be dynamically inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <div class="popup hidden" id="join-popup">
+            <div class="popup-content">
+                <span class="close" onclick="closeJoinPopup()">&times;</span>
+                <h2>Enter Join Code</h2>
+                <form>
+                    <input type="text" id="join-code" placeholder="Join Code" required />
+                    <button type="submit" id="join-button" onclick="serverJoin()">Join Server</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "ultimate-cad",
+  "version": "1.0.0",
+  "description": "Roleplay CAD for Roleplay Communities",
+  "license": "ISC",
+  "author": "Muhammad Faiq Imran",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js"
+  }
+}

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CAD Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="../styles/pdStyle.css" />
+</head>
+<body>
+    <div class="navbar">
+        <button id="logout-btn">CLOCK-OUT</button>
+        <button id="home-btn" onclick="homeOpen()">HOME</button>
+        <button id="map-btn" onclick="mapOpen()">MAP</button>
+        <button id="cad-btn" onclick="cadOpen()">CAD</button>
+        <button id="search-btn" onclick="searchOpen()">SEARCH</button>
+        <button id="reports-btn" onclick="reportsOpen()">REPORTS</button>
+        <button id="history-btn" onclick="historyOpen()">CALL HISTORY</button>
+        <button id="notes-btn" onclick="notesPopup()">NOTEPAD</button>
+
+        <!-- Status buttons -->
+        <div class="status-buttons">
+            <button class="available" data-status="AVAILABLE">Available</button>
+            <button class="unavailable" data-status="UNAVAILABLE">Unavailable</button>
+            <button class="on-scene" data-status="ON SCENE">On Scene</button>
+            <button class="enroute" data-status="ENROUTE">Enroute</button>
+            <button class="busy" data-status="BUSY">Busy</button>
+        </div>
+    </div>
+
+    <div id="home-page">
+        <h1>Welcome to the CAD, this CAD serves Orange County and involves the following departments.</h1>
+        <ul>
+            <li>CWPD</li>
+            <li>HPD</li>
+            <li>OCSO</li>
+            <li>MST</li>
+            <li>OCFD</li>
+            <li>MSPW</li>
+            <li>Emergency Communications Department</li>
+        </ul>
+        <p>This CAD was developed by Ultimate Systems Studio.</p>
+    </div>
+    
+    <div id="map-page" class="hidden">
+        <img src="https://policeroleplay.community/images/ERLC_Map.png" alt="Map">
+    </div>
+
+    <div id="cad-page" class="hidden">
+        <h3>Active Calls</h3>
+        <table class="calls-table" id="calls-table">
+            <thead>
+                <tr>
+                    <th>Call#</th><th>Nature</th><th>Location</th>
+                    <th>Priority</th><th>Units</th>
+                </tr>
+            </thead>
+            <tbody id="calls-body"></tbody>
+        </table>
+        <br>
+        <button onclick="createCallPopup()">Add Call</button>
+        
+        <h3>Active BOLOs</h3>
+        <table class="bolo-table" id="bolo-table">
+            <thead>
+                <tr>
+                    <th>Type</th><th>Reason</th><th>Description</th>
+                </tr>
+            </thead>
+            <tbody id="bolo-body"></tbody>
+        </table>
+        <br>
+        <button onclick="createBoloPopup()">Add BOLO</button>
+        
+        <h3>On Duty Units</h3>
+        <table class="officers-table">
+            <thead>
+                <tr>
+                    <th>Officer</th><th>Callsign</th><th>Status</th><th>Current Call</th><th>Department</th><th>Location</th>
+                </tr>
+            </thead>
+            <tbody id="officers-body"></tbody>
+        </table>
+    </div>
+
+    <div id="search-page" class="hidden">
+        <h3>Search</h3>
+        <form id="search-form">
+            <label for="search-input">Enter Name, Plate or VIN/Serial Number:</label>
+            <input type="text" id="search-input" placeholder="Name or Plate" required>
+            <button type="submit">Search</button>
+        </form>
+        <div id="search-results">
+            <div class="ped-results">
+                <h4>Pedestrian Results</h4>
+                <table class="ped-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th><th>Age</th><th>Lisences/Permits</th><th>Reports</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ped-table-body"></tbody>
+                </table>
+            </div>
+
+            <div class="vic-results">
+                <h4>Vehicle Results</h4>
+                <table class="vic-table">
+                    <thead>
+                        <tr>
+                            <th>Plate</th><th>VIN/Serial</th><th>Owner</th><th>Model</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vic-table-body"></tbody>
+                </table>
+            </div>
+
+            <div class="gun-results">
+                <h4>Gun Results</h4>
+                <table class="gun-table">
+                    <thead>
+                        <tr>
+                            <th>Serial</th><th>Type</th><th>Owner</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gun-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="reports-page" class="hidden">
+        <div class="reports-btn">
+            <button onclick="openWWPopup()">Written Warning</button>
+            <button onclick="openCitePopup()">Issue Citation</button>
+            <button onclick="openArrestPopup()">Arrest Report</button>
+            <button onclick="openIRPopup()">Incident Report</button>
+            <button onclick="openUOFRPopup()">Use of Force Report</button>
+            <button onclick="openWarrantPopup()">Warrant Report</button>
+            <button onclick="openCRPopup()">Crash Report(Traffic Units)</button>
+            <button onclick="openIvRPopup()">Investigation Report(investigative Units)</button>
+            <button onclick="openAARPopup()">After Action Report(Tactical Units)</button>
+            <button onclick="openSRRPopup()">Supervisor Request Report(Supervisor Units)</button>
+        </div>
+    </div>
+
+    <div id="history-page" class="hidden">
+        <h3>Call History</h3>
+        <table class="calls-table" id="history-table">
+            <thead>
+                <tr>
+                    <th>Call#</th><th>Nature</th><th>Location</th>
+                    <th>Priority</th><th>Units</th>
+                </tr>
+            </thead>
+            <tbody id="calls-body"></tbody>
+        </table>
+    </div>
+
+    <div id="notepad-popup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close" onclick="closeNotepadPopup()">&times;</span>
+            <h2>Note Pad</h2>
+            <textarea id="notepad-textarea" placeholder="Write your notes here..."></textarea>
+            <button id="save-notes-btn" onclick="saveNotes()">Save Notes</button>
+        </div>
+    </div>
+
+    <div id="add-call-popup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close" onclick="closeCreateCallPopup()">&times;</span>
+            <h2>Create Call</h2>
+            <form id="create-call-form">
+                <label for="call-nature">Nature of Call</label>
+                <input type="text" id="call-nature" required />
+                <label for="call-location">Location</label>
+                <input type="text" id="call-location" required />
+                <label for="call-priority">Priority</label>
+                <select id="call-priority">
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                </select>
+                <button type="submit" onclick="createCall()">Create Call</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="add-bolo-popup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close" onclick="closeCreateBoloPopup()">&times;</span>
+            <h2>Create BOLO</h2>
+            <form id="create-bolo-form">
+                <label for="bolo-type">Type</label>
+                <select id="bolo-type">
+                    <option value="Vehicle">Vehicle</option>
+                    <option value="Ped">Ped</option>
+                </select>
+                <label for="bolo-reason">Reason</label>
+                <input type="text" id="bolo-reason" required />
+                <label for="bolo-description">Description</label>
+                <textarea id="bolo-description" required></textarea>
+                <button type="submit" onclick="createBolo()">Create BOLO</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="edit-call-popup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close" onclick="closeEditCallPopup()">&times;</span>
+            <h2>Edit Call</h2>
+            <form id="edit-call-form">
+                <p id="call-ID">Call ID: </p>
+                <label for="edit-call-nature">Nature of Call</label>
+                <input type="text" id="edit-call-nature" required />
+                <label for="edit-call-location">Location</label>
+                <input type="text" id="edit-call-location" required />
+                <label for="edit-call-priority">Priority</label>
+                <select id="edit-call-priority">
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                </select>
+                <button id="call-attach">Attach</button>
+                <button id="code-4" type="submit">CODE 4</button>
+                <button id="update-call" type="submit" >Update Call</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="edit-bolo-popup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close" onclick="closeEditBoloPopup()">&times;</span>
+            <h2>Edit BOLO</h2>
+            <form id="edit-bolo-form">
+                <label for="edit-bolo-type">Type</label>
+                <select id="edit-bolo-type">
+                    <option value="Vehicle">Vehicle</option>
+                    <option value="Ped">Ped</option>
+                </select>
+                <label for="edit-bolo-reason">Reason</label>
+                <input type="text" id="edit-bolo-reason" required />
+                <label for="edit-bolo-description">Description</label>
+                <textarea id="edit-bolo-description" required></textarea>
+                <br>
+                <button id="delete-bolo" type="submit">End BOLO</button>
+                <button id="update-bolo" type="submit">Update BOLO</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="written-warning-popup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close" onclick="closeWWPopup()">&times;</span>
+            <h2>Written Warning</h2>
+            <form id="written-warning-form">
+                <label for="ww-name">Name</label>
+                <input type="text" id="ww-name" required />
+                <label for="ww-plate">Plate</label>
+                <input type="text" id="ww-plate"/>
+                <label for="ww-charge">Charge</label>
+                <textarea id="ww-charge" required></textarea>
+                <button type="submit" onclick="issueWW()">Issue Written Warning</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="citation-report-popup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close" onclick="closeCitePopup()">&times;</span>
+            <h2>Issue Citation</h2>
+            <form id="citation-report-form">
+                <label for="cite-name">Name</label>
+                <input type="text" id="cite-name" required />
+                <label for="cite-plate">Plate</label>
+                <input type="text" id="cite-plate"/>
+                <label for="cite-charge">Charge</label>
+                <textarea id="cite-charge" required></textarea>
+                <label for="cite-fine">Fine Amount</label>
+                <input type="number" id="cite-fine" required />
+                <button type="submit" onclick="issueCite()">Issue Citation</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="arrest-report-popup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close" onclick="closeArrestPopup()">&times;</span>
+            <h2>Arrest Report</h2>
+            <form id="arrest-report-form">
+                <label for="arrest-call-id"></label>
+                <input type="hidden" id="arrest-call-id" />
+                <label for="arrest-unit">Unit Number</label>
+                <label for="arrest-name">Name</label>
+                <input type="text" id="arrest-name" required />
+                <label for="arrest-charge">Charge</label>
+                <textarea id="arrest-charge" required></textarea>
+                <label for="arrest-searched">Searched?</label>
+                <checkbox id="arrest-searched" />
+                <label for="arrest-evidence">Items Found?</label>
+                <textarea id="arrest-evidence" placeholder="Items Found"></textarea>
+                <label for="arrest-rights">Mirandized?</label>
+                <checkbox id="arrest-rights" />
+                <button type="submit" onclick="issueArrest()">Issue Arrest Report</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="uof-report-popup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close" onclick="closeUOFRPopup()">&times;</span>
+            <h2>Use of Force Report</h2>
+            <form id="uof-report-form">
+                <label for="uof-call-id">Call ID</label>
+                <input type="text" id="uof-call-id" required />
+                <label for="uof-type">Type</label>
+                <select id="uof-type">
+                    <option value="Taser">Taser</option>
+                    <option value="Pepper Spray">Pepper Spray</option>
+                    <option value="Baton">Baton</option>
+                    <option value="Beanbag">Beanbag</option>
+                    <option value="Firearm">Firearm</option>
+                    <option value="Vehicle">Vehicle</option>
+                </select>
+                <label for="uof-reason">Reason, explain suspects behavior on the scene.</label>
+                <textarea id="uof-reason"></textarea>
+                <button type="submit" onclick="issueUOF()">Issue Use of Force Report</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="incident-report-popup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close" onclick="closeIRPopup()">&times;</span>
+            <h2>Incident Report</h2>
+            <form id="incident-report-form">
+                <label for="ir-call-id">Call Id</label>
+                <input type="text" id="ir-call-id" required />
+                <label for="ir-type">Type Tag</label>
+                <input type="text" id="ir-type" required />
+                <label for="ir-description">Description of Incident</label>
+                <textarea id="ir-description" required></textarea>
+                <button type="submit" onclick="issueIR()">Issue Incident Report</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="warrant-report-popup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close" onclick="closeWarrantPopup()">&times;</span>
+            <h2>Warrant Report</h2>
+            <form id="warrant-report-form">
+                <label for="warrant-name">Name</label>
+                <input type="text" id="warrant-name" required />
+                <label for="warrant-type">Type</label>
+                <select id="warrant-type">
+                    <option value="Arrest">Arrest</option>
+                    <option value="Search">Search</option>
+                </select>
+                <button type="submit" onclick="issueWarrant()">Issue Warrant Report</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="crash-report-popup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close" onclick="closeCRPopup()">&times;</span>
+            <h2>Crash Report</h2>
+            <form id="crash-report-form">
+                <label for="cr-call-id">Call ID</label>
+                <input type="text" id="cr-call-id" required/>
+                <label for="cr-plate">Plate</label>
+                <input type="text" id="cr-plate" required/>
+                <label for="cr-description">Description of Crash</label>
+                <textarea id="cr-description" required></textarea>
+                <button type="submit" onclick="issueCR()">Issue</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="investigation-report-popup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close" onclick="closeIvRPopup()">&times;</span>
+            <h2>Investigation Report</h2>
+            <form id="investigation-report-form">
+                <label for="investigation-name">Name</label>
+                <input type="text" id="investigation-name" required />
+                <label for="investigation-plate">Plate</label>
+                <input type="text" id="investigation-plate"/>
+                <label for="investigation-description">Description of Investigation</label>
+                <textarea id="investigation-description" required></textarea>
+                <button type="submit" onclick="issueIvR()">Issue Investigation Report</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="after-action-report-popup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close" onclick="closeAARPopup()">&times;</span>
+            <h2>After Action Report</h2>
+            <form id="after-action-report-form">
+                <label for="aar-call-id">Call ID</label>
+                <input type="text" id="aar-call-id" required />
+                <label for="aar-description">Description of Action Taken</label>
+                <textarea id="aar-description" required></textarea>
+                <button type="submit" onclick="issueAAR()">Issue After Action Report</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- <div id="supervisor-request-report-popup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close" onclick="closeSRRPopup()">&times;</span>
+            <h2>Supervisor Request Report</h2>
+            <form id="supervisor-request-report-form">
+                <label for="srr-name">Name</label>
+                <input type="text" id="srr-name" required />
+                <label for="srr-plate">Plate</label>
+                <input type="text" id="srr-plate"/>
+                <label for="srr-description">Description of Request</label>
+                <textarea id="srr-description" required></textarea>
+                <button type="submit" onclick="issueSRR()">Issue Supervisor Request Report</button>
+            </form>
+        </div>
+    </div> -->
+
+    <!-- Keep the notepad popup at the bottom so it shows on top of all other elements. -->
+    <div id="notepad-popup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close" onclick="closeNotepadPopup()">&times;</span>
+            <h2>Notepad</h2>
+            <textarea id="notepad-textarea" placeholder="Write your notes here..."></textarea>
+            <button id="save-notes-btn" onclick="saveNotes()">Save Notes</button>
+        </div>
+    </div>
+<script src="../scripts/pdScript.js"></script>
+</body>
+</html>

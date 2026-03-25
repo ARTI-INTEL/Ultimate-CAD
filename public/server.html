@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CAD Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="../styles/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="left-section" id="welcome">Welcome to .</div>
+    <div class="center-section">
+      <button>Civilian/Characters</button>
+    </div>
+    <div class="right-section">
+      <button onclick="serverSettings()" class="">Server Settings</button>
+    </div>
+  </header>
+
+  <div class="login-forms">
+    <div class="login-container" id="le-login-container">
+      <h2>Law Enforcment(WIP)</h2>
+      <form class="login-form" id="le-login-form">
+        <label for="name">Name</label>
+        <input type="text" id="name" required />
+        <label for="unit">Callsign</label>
+        <input type="text" id="unit" required />
+        <label for="agency">Department and Division</label>
+        <input type="text" id="agency" required />
+        <button type="submit">LOGIN</button>
+        <div id="login-error"></div>
+      </form>
+    </div>
+
+    <div class="login-container" id="fr-login-container">
+      <h2>Fire and Rescue(WIP)</h2>
+      <form class="login-form" id="fr-login-form">
+        <label for="name">Name</label>
+        <input type="text" id="name" required />
+        <label for="unit">Appratus Callsign</label>
+        <input type="text" id="unit" required />
+        <label for="agency">Department and Company/Division</label>
+        <input type="text" id="agency" required />
+        <button type="submit">LOGIN</button>
+        <div id="login-error"></div>
+      </form>
+    </div>
+
+    <div class="login-container" id="pw-login-container">
+      <h2>Public Works/Department of Transport(WIP)</h2>
+      <form class="login-form" id="pw-login-form">
+        <label for="name">Name</label>
+        <input type="text" id="name" required />
+        <label for="unit">Callsign</label>
+        <input type="text" id="unit" required />
+        <label for="agency">Department and Division</label>
+        <input type="text" id="agency" required />
+        <button type="submit">LOGIN</button>
+        <div id="login-error"></div>
+      </form>
+    </div>
+
+  </div>
+
+  <script>
+    // Select the server id from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const serverId = urlParams.get('serverId');
+
+    // Fetch the server name and set it
+    getServerName(serverId).then(serverData => {
+      document.getElementById('welcome').textContent = `Welcome to ${serverData.name}`;
+    }).catch(err => {
+      console.error("Error fetching server name:", err);
+    });
+
+    document.getElementById('le-login-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const name = document.querySelector('#le-login-form #name').value.trim();
+      const unit = document.querySelector('#le-login-form #unit').value.trim();
+      const agency = document.querySelector('#le-login-form #agency').value.trim();
+
+      if (name && unit && agency) {
+        const officer = {
+          name,
+          unit,
+          status: "AVAILABLE",
+          call: "",
+          agency,
+          location: "",
+          description: "(MDC) 10-41"
+        };
+        localStorage.setItem('loggedOfficer', JSON.stringify(officer));
+        const urlParams = new URLSearchParams(window.location.search);
+        const serverId = urlParams.get('serverId');
+        const userId = urlParams.get('userId');
+        window.location.href = `police_cad.html?serverId=${serverId}?userId=${userId}`;
+      } else {
+        document.querySelector('#le-login-form #login-error').textContent = "Please fill all fields.";
+      }
+    });
+
+    function getServerName(serverId) {
+      return fetch(`http://localhost:3000/getServerName/${serverId}`)
+        .then(res => res.json());
+    }
+  </script>
+
+</body>
+</html>

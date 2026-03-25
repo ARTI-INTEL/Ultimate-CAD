@@ -1,0 +1,247 @@
+.hidden {
+  display: none !important;
+}
+
+/*center popup to the center of the screen */
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #222;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+  z-index: 1000;
+  padding: 10px 20px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #000000;
+    color: #fff;
+}
+
+/* === Topbar/Header === */
+.topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #222;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Left, Center, Right Sections */
+.topbar .left-section {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.topbar .center-section,
+.topbar .right-section {
+    display: flex;
+    gap: 10px;
+}
+
+/* Buttons in Header */
+.topbar button {
+    background-color: #444;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.topbar button:hover {
+    background-color: #666;
+}
+
+/* === Dashboard === */
+.dashboard {
+    padding: 80px 20px 20px; /* Top padding so content isn't hidden under topbar */
+}
+
+/* === Server Table === */
+.server-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #333;
+    color: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.server-table th, 
+.server-table td {
+    padding: 12px;
+    text-align: left;
+}
+
+.server-table thead {
+    background-color: #444;
+}
+
+.server-table tbody tr:nth-child(even) {
+    background-color: #3a3a3a;
+}
+
+.server-table tbody tr:hover {
+    background-color: #555;
+}
+
+.login-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 15px;
+    border: 3px solid gray;
+    text-align: center;
+    width: 300px;
+}
+
+.login-container h2 {
+    margin-bottom: 20px;
+    color: rgb(22, 21, 21);
+}
+
+.discord-login {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #5865F2; /* Discord purple-blue */
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 15px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.discord-login:hover {
+    background-color: #4752c4;
+}
+
+.login-links {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+}
+
+.login-links a {
+    text-decoration: none;
+    color: black;
+}
+
+.login-links a:hover {
+    text-decoration: underline;
+}
+
+/* Login page */
+.login-container {
+  padding: 30px 40px;
+  border-radius: 8px;
+  box-shadow: 0 0 15px #2954c3;
+  width: 320px;
+  text-align: center;
+  margin: auto;
+  margin-top: 10%;
+}
+
+.login-container h2 {
+  margin-bottom: 20px;
+  font-weight: bold;
+  font-size: 1.6em;
+}
+
+.login-form label {
+  display: block;
+  text-align: left;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 4px;
+  border: none;
+  margin-bottom: 18px;
+  font-family: 'Consolas', monospace;
+  font-size: 14px;
+}
+
+.login-form button {
+  color: rgb(0, 0, 0);
+  border: none;
+  padding: 10px 0;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Consolas', monospace;
+  width: 100%;
+  font-size: 16px;
+}
+
+.login-error {
+  margin-top: 12px;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: #ff4c4c;
+}
+
+.login-forms{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#le-login-container{
+    background-color: #183263;
+}
+
+#fr-login-container{
+    background-color: #711818;
+}
+
+#pw-login-container{
+    background-color: #dcb207;
+}
+
+#le-login-container button {
+    background-color: #1e3a8a;
+}
+
+#fr-login-container button {
+    background-color: #851616;
+}
+
+#pw-login-container button{
+    background-color: #eec007;
+}
+
+#le-login-form button:hover {
+  background-color: #2954c3;
+}
+
+#fr-login-container button:hover {
+    background-color: #a31616;
+}
+
+#pw-login-container button:hover{
+    background-color: #ffcc00;
+}
