@@ -67,7 +67,7 @@ function checkServer(discordId) {
 
 function discordLogin() {
     // Replace this with your actual Discord OAuth URL 
-    window.location.href = "https://discord.com/oauth2/authorize?client_id=1403334739724861563&response_type=token&redirect_uri=http%3A%2F%2F127.0.0.1%3A5500%2Findex.html&scope=identify+guilds"; // 
+    window.location.href = "https://discord.com/oauth2/authorize?client_id=1403334739724861563&response_type=token&redirect_uri=http%3A%2F%2F127.0.0.1%3A5500%2Fpublic/dashboard.html&scope=identify+guilds"; // 
 }
 
 function checkLoginStatus() {
