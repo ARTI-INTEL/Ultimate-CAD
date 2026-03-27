@@ -51,11 +51,10 @@ window.onload = async () => {
       headers: { authorization: `${tokenType} ${accessToken}` },
     }).then(res => res.json());
 
-    document.getElementById('welcome').innerText =
-      `Welcome ${discordUser.username}, to Ultimate CAD!`;
+    const welcomeEl = document.getElementById('welcome');
+    if (welcomeEl) welcomeEl.innerText = `Welcome ${discordUser.username}, to Ultimate CAD!`;
 
-    document.getElementById('login-page').classList.add('hidden');
-    document.getElementById('servers-page').classList.remove('hidden');
+    togglePage(false);
 
     // Register or retrieve user from our DB
     await syncUser(discordUser.id, discordUser.username);
@@ -76,15 +75,23 @@ window.onload = async () => {
 //  AUTH
 // ─────────────────────────────────────────────
 
+// FIX: Guard every getElementById call — script.js is shared across pages
+// that don't all have both #login-page and #servers-page
+function togglePage(showLogin) {
+  const loginPage   = document.getElementById('login-page');
+  const serversPage = document.getElementById('servers-page');
+  if (loginPage)   loginPage.classList.toggle('hidden', !showLogin);
+  if (serversPage) serversPage.classList.toggle('hidden', showLogin);
+}
+
 function checkLoginStatus() {
   const isLoggedIn = !!localStorage.getItem('userId');
   localStorage.setItem('loggedIn', isLoggedIn ? 'true' : 'false');
-  document.getElementById('login-page').classList.toggle('hidden', isLoggedIn);
-  document.getElementById('servers-page').classList.toggle('hidden', !isLoggedIn);
+  togglePage(!isLoggedIn);
 }
 
 function discordLogin() {
-  window.location.href = 'https://discord.com/oauth2/authorize?client_id=1403334739724861563&response_type=token&redirect_uri=http%3A%2F%2F127.0.0.1%3A5500%2Fpublic/dashboard.html&scope=identify+guilds';
+  window.location.href = 'https://discord.com/oauth2/authorize?client_id=1403334739724861563&response_type=token&redirect_uri=http%3A%2F%2F127.0.0.1%3A5500%2Fpublic%2Fdashboard.html&scope=identify+guilds';
 }
 
 function logOut() {
@@ -126,6 +133,8 @@ async function syncUser(discordId, username) {
 
 async function loadServerList(guilds) {
   const body = document.getElementById('server-list');
+  if (!body) return;
+
   body.innerHTML = '';
 
   for (const guild of guilds) {
@@ -145,10 +154,14 @@ async function loadServerList(guilds) {
   }
 }
 
-document.getElementById('server-list').addEventListener('click', (e) => {
-  const row = e.target.closest('tr');
-  if (row && row.cells.length >= 2) joinServer(row);
-});
+// Click a server row to join — guard in case element doesn't exist on this page
+const serverListEl = document.getElementById('server-list');
+if (serverListEl) {
+  serverListEl.addEventListener('click', (e) => {
+    const row = e.target.closest('tr');
+    if (row && row.cells.length >= 2) joinServer(row);
+  });
+}
 
 async function joinServer(row) {
   const selectedServerId = row.cells[0].innerText;
@@ -165,7 +178,7 @@ async function joinServer(row) {
     localStorage.setItem('serverName', row.cells[1].innerText);
 
     if (membership && membership.length > 0) {
-      window.location.href = `html/server.html?serverId=${selectedServerId}&userId=${userId}`;
+      window.location.href = `server.html?serverId=${selectedServerId}&userId=${userId}`;
     } else {
       document.getElementById('join-popup').classList.remove('hidden');
     }
@@ -209,7 +222,7 @@ async function serverJoin() {
       body: JSON.stringify({ userId, serverId: selectedServerId }),
     });
     closeJoinPopup();
-    window.location.href = `html/server.html?serverId=${selectedServerId}&userId=${userId}`;
+    window.location.href = `server.html?serverId=${selectedServerId}&userId=${userId}`;
   } catch (err) {
     console.error('Error verifying join code:', err);
     alert('Something went wrong. Please try again.');
