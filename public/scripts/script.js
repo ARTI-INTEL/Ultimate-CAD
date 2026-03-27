@@ -39,49 +39,53 @@ window.onload = async () => {
   const accessToken = fragment.get('access_token');
   const tokenType   = fragment.get('token_type');
 
-  // Case 1: Returning from Discord OAuth — access token is in the URL hash
   if (accessToken) {
     await handleDiscordCallback(accessToken, tokenType);
     return;
   }
 
-  // Case 2: Already logged in from a previous session
+  // If already logged in and on index/login page, redirect to dashboard
+  const userId = localStorage.getItem('userId');
+  if (userId && window.location.pathname.endsWith('index.html') || 
+      userId && window.location.pathname === '/') {
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
   checkLoginStatus();
 };
-
 // ─────────────────────────────────────────────
 //  DISCORD OAUTH CALLBACK
 // ─────────────────────────────────────────────
 
 async function handleDiscordCallback(accessToken, tokenType) {
   try {
-    // Get Discord user info
     const discordUser = await fetch('https://discord.com/api/users/@me', {
       headers: { authorization: `${tokenType} ${accessToken}` },
     }).then(res => res.json());
 
-    // Sync user with our DB — register if new, retrieve if existing
     await syncUser(discordUser.id, discordUser.username);
 
-    // Get guilds and match against registered servers
     const guilds = await fetch('https://discord.com/api/users/@me/guilds', {
       headers: { authorization: `${tokenType} ${accessToken}` },
     }).then(res => res.json());
 
-    // Show the dashboard
+    // Save everything we need for refresh
+    localStorage.setItem('username', discordUser.username);
+    localStorage.setItem('guilds', JSON.stringify(guilds));
+
+    cachedGuilds = guilds;
     togglePage(false);
 
     const welcomeEl = document.getElementById('welcome');
     if (welcomeEl) welcomeEl.innerText = `Welcome ${discordUser.username}, to Ultimate CAD!`;
 
     await loadServerList(guilds);
-
-    // Clean the token out of the URL without reloading the page
     history.replaceState(null, '', window.location.pathname);
 
   } catch (err) {
     console.error('Discord OAuth callback error:', err);
-    togglePage(true); // Fall back to login page on error
+    togglePage(true);
   }
 }
 
@@ -96,9 +100,23 @@ function togglePage(showLogin) {
   if (serversPage) serversPage.classList.toggle('hidden', showLogin);
 }
 
-function checkLoginStatus() {
-  const isLoggedIn = !!localStorage.getItem('userId');
-  togglePage(!isLoggedIn);
+async function checkLoginStatus() {
+  const userId   = localStorage.getItem('userId');
+  const username = localStorage.getItem('username');
+  const guilds   = JSON.parse(localStorage.getItem('guilds') || '[]');
+
+  if (!userId) {
+    togglePage(true);
+    return;
+  }
+
+  togglePage(false);
+  cachedGuilds = guilds;
+
+  const welcomeEl = document.getElementById('welcome');
+  if (welcomeEl) welcomeEl.innerText = `Welcome ${username || ''}, to Ultimate CAD!`;
+
+  await loadServerList(guilds);
 }
 
 function discordLogin() {
@@ -110,6 +128,8 @@ function logOut() {
   localStorage.removeItem('loggedIn');
   localStorage.removeItem('discordID');
   localStorage.removeItem('serverId');
+  localStorage.removeItem('username');
+  localStorage.removeItem('guilds');
   checkLoginStatus();
 }
 
@@ -151,20 +171,26 @@ async function loadServerList(guilds) {
 
   body.innerHTML = '';
 
-  for (const guild of guilds) {
-    try {
-      const servers = await apiFetch(`/servers/check/${guild.id}`);
-      if (servers && servers.length > 0) {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${servers[0].idserver}</td>
-          <td>${servers[0].name}</td>
-        `;
-        body.appendChild(row);
-      }
-    } catch (_) {
-      // Guild not registered — skip silently
+  const userId = localStorage.getItem('userId');
+
+  try {
+    const servers = await apiFetch(`/servers/my-servers/${userId}`);
+    servers.forEach(server => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${server.idserver}</td>
+        <td>${server.name}</td>
+      `;
+      body.appendChild(row);
+    });
+
+    if (servers.length === 0) {
+      const row = document.createElement('tr');
+      row.innerHTML = `<td colspan="2" style="text-align:center; color:#888;">No servers yet — create or join one!</td>`;
+      body.appendChild(row);
     }
+  } catch (err) {
+    console.error('Failed to load server list:', err);
   }
 }
 
@@ -240,5 +266,75 @@ async function serverJoin() {
   } catch (err) {
     console.error('Error verifying join code:', err);
     alert('Something went wrong. Please try again.');
+  }
+}
+
+// ─────────────────────────────────────────────
+//  CREATE SERVER
+// ─────────────────────────────────────────────
+
+let cachedGuilds = []; // store guilds from OAuth for the dropdown
+let discordLinkMode = 'pick'; // 'pick' or 'manual'
+
+function openCreateServerPopup() {
+  document.getElementById('create-server-popup').classList.remove('hidden');
+  populateGuildDropdown();
+}
+
+function closeCreateServerPopup() {
+  document.getElementById('create-server-popup').classList.add('hidden');
+  document.getElementById('cs-error').textContent = '';
+}
+
+function setDiscordMode(mode) {
+  discordLinkMode = mode;
+  document.getElementById('discord-pick-section').classList.toggle('hidden', mode !== 'pick');
+  document.getElementById('discord-manual-section').classList.toggle('hidden', mode !== 'manual');
+}
+
+function populateGuildDropdown() {
+  const select = document.getElementById('cs-guild-select');
+  select.innerHTML = '<option value="">— Select a Discord server —</option>';
+  cachedGuilds.forEach(guild => {
+    const opt = document.createElement('option');
+    opt.value = guild.id;
+    opt.textContent = guild.name;
+    select.appendChild(opt);
+  });
+}
+
+async function submitCreateServer() {
+  const name        = document.getElementById('cs-name').value.trim();
+  const description = document.getElementById('cs-description').value.trim();
+  const iconUrl     = document.getElementById('cs-icon').value.trim();
+  const joinCode    = document.getElementById('cs-joincode').value.trim();
+  const errorEl     = document.getElementById('cs-error');
+
+  let discordId = null;
+  if (discordLinkMode === 'pick') {
+    discordId = document.getElementById('cs-guild-select').value || null;
+  } else {
+    discordId = document.getElementById('cs-discord-id').value.trim() || null;
+  }
+
+  if (!name) {
+    errorEl.textContent = 'Server name is required.';
+    return;
+  }
+
+  try {
+    const server = await apiFetch('/servers/create', {
+      method: 'POST',
+      body: JSON.stringify({ name, description, iconUrl, joinCode, discordId }),
+    });
+    closeCreateServerPopup();
+    // Add the new server to the table immediately
+    const body = document.getElementById('server-list');
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${server.idserver}</td><td>${server.name}</td>`;
+    body.appendChild(row);
+    alert(`Server "${server.name}" created! Join code: ${server.join_code}`);
+  } catch (err) {
+    errorEl.textContent = err.message || 'Failed to create server.';
   }
 }

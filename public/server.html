@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>CAD Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="../styles/style.css" />
+  <link rel="stylesheet" href="styles/style.css" />
 </head>
 <body>
   <header class="topbar">
@@ -63,11 +63,15 @@
   </div>
 
   <script>
-    // Select the server id from the URL
     const urlParams = new URLSearchParams(window.location.search);
-    const serverId = urlParams.get('serverId');
+    const serverId  = urlParams.get('serverId');
+    const userId    = urlParams.get('userId') || localStorage.getItem('userId');
 
-    // Fetch the server name and set it
+    // If userId missing from URL, restore from localStorage
+    if (!userId) {
+      window.location.href = `server.html?serverId=${serverId}&userId=${localStorage.getItem('userId')}`;
+    }
+
     getServerName(serverId).then(serverData => {
       document.getElementById('welcome').textContent = `Welcome to ${serverData.name}`;
     }).catch(err => {
@@ -94,15 +98,15 @@
         const urlParams = new URLSearchParams(window.location.search);
         const serverId = urlParams.get('serverId');
         const userId = urlParams.get('userId');
-        window.location.href = `police_cad.html?serverId=${serverId}?userId=${userId}`;
+        window.location.href = `leoCAD.html?serverId=${serverId}?userId=${userId}`;
       } else {
         document.querySelector('#le-login-form #login-error').textContent = "Please fill all fields.";
       }
     });
 
     function getServerName(serverId) {
-      return fetch(`http://localhost:3000/getServerName/${serverId}`)
-        .then(res => res.json());
+    return fetch(`http://localhost:3000/servers/name/${serverId}`)
+      .then(res => res.json());
     }
   </script>
 
