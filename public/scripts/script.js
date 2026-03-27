@@ -35,48 +35,60 @@ async function apiFetch(path, options = {}) {
 // ─────────────────────────────────────────────
 
 window.onload = async () => {
-  checkLoginStatus();
-
-  if (localStorage.getItem('loggedIn') !== 'true') return;
-
   const fragment    = new URLSearchParams(window.location.hash.slice(1));
   const accessToken = fragment.get('access_token');
   const tokenType   = fragment.get('token_type');
 
-  if (!accessToken) return;
+  // Case 1: Returning from Discord OAuth — access token is in the URL hash
+  if (accessToken) {
+    await handleDiscordCallback(accessToken, tokenType);
+    return;
+  }
 
+  // Case 2: Already logged in from a previous session
+  checkLoginStatus();
+};
+
+// ─────────────────────────────────────────────
+//  DISCORD OAUTH CALLBACK
+// ─────────────────────────────────────────────
+
+async function handleDiscordCallback(accessToken, tokenType) {
   try {
     // Get Discord user info
     const discordUser = await fetch('https://discord.com/api/users/@me', {
       headers: { authorization: `${tokenType} ${accessToken}` },
     }).then(res => res.json());
 
-    const welcomeEl = document.getElementById('welcome');
-    if (welcomeEl) welcomeEl.innerText = `Welcome ${discordUser.username}, to Ultimate CAD!`;
-
-    togglePage(false);
-
-    // Register or retrieve user from our DB
+    // Sync user with our DB — register if new, retrieve if existing
     await syncUser(discordUser.id, discordUser.username);
 
-    // Load servers the user's Discord guilds match
+    // Get guilds and match against registered servers
     const guilds = await fetch('https://discord.com/api/users/@me/guilds', {
       headers: { authorization: `${tokenType} ${accessToken}` },
     }).then(res => res.json());
 
+    // Show the dashboard
+    togglePage(false);
+
+    const welcomeEl = document.getElementById('welcome');
+    if (welcomeEl) welcomeEl.innerText = `Welcome ${discordUser.username}, to Ultimate CAD!`;
+
     await loadServerList(guilds);
 
+    // Clean the token out of the URL without reloading the page
+    history.replaceState(null, '', window.location.pathname);
+
   } catch (err) {
-    console.error('Login flow error:', err);
+    console.error('Discord OAuth callback error:', err);
+    togglePage(true); // Fall back to login page on error
   }
-};
+}
 
 // ─────────────────────────────────────────────
 //  AUTH
 // ─────────────────────────────────────────────
 
-// FIX: Guard every getElementById call — script.js is shared across pages
-// that don't all have both #login-page and #servers-page
 function togglePage(showLogin) {
   const loginPage   = document.getElementById('login-page');
   const serversPage = document.getElementById('servers-page');
@@ -86,7 +98,6 @@ function togglePage(showLogin) {
 
 function checkLoginStatus() {
   const isLoggedIn = !!localStorage.getItem('userId');
-  localStorage.setItem('loggedIn', isLoggedIn ? 'true' : 'false');
   togglePage(!isLoggedIn);
 }
 
@@ -108,21 +119,24 @@ function logOut() {
 
 async function syncUser(discordId, username) {
   try {
+    // Try to find existing user first
     const user = await apiFetch(`/users/getUserByDiscordId/${discordId}`);
     localStorage.setItem('userId', user.iduser);
     localStorage.setItem('discordID', discordId);
+    console.log('Existing user loaded:', user.iduser);
   } catch (err) {
-    if (err.message.includes('404') || err.message.includes('not found')) {
-      try {
-        const newUsers = await apiFetch('/users/register', {
-          method: 'POST',
-          body: JSON.stringify({ discordId, username }),
-        });
-        localStorage.setItem('userId', newUsers[0].iduser);
-        localStorage.setItem('discordID', discordId);
-      } catch (regErr) {
-        console.error('Registration error:', regErr);
-      }
+    // 404 = new user, register them
+    try {
+      const newUsers = await apiFetch('/users/register', {
+        method: 'POST',
+        body: JSON.stringify({ discordId, username }),
+      });
+      localStorage.setItem('userId', newUsers[0].iduser);
+      localStorage.setItem('discordID', discordId);
+      console.log('New user registered:', newUsers[0].iduser);
+    } catch (regErr) {
+      console.error('Registration failed:', regErr);
+      throw regErr;
     }
   }
 }
@@ -154,7 +168,7 @@ async function loadServerList(guilds) {
   }
 }
 
-// Click a server row to join — guard in case element doesn't exist on this page
+// Click a server row to join
 const serverListEl = document.getElementById('server-list');
 if (serverListEl) {
   serverListEl.addEventListener('click', (e) => {
