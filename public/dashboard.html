@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ultimate CAD - Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- Navbar -->
+  <div class="navbar navbar-dark">
+    <span style="position:absolute;left:32px;top:23px;font-size:36px;font-weight:800;color:#fff;width:610px;">
+      Welcome to Ultimate CAD (User)
+    </span>
+    <button class="nav-btn nav-btn-dark"
+      style="position:absolute;right:26px;top:21px;width:150px;height:47px;"
+      onclick="window.location.href='settings.html'">
+      Settings
+    </button>
+  </div>
+
+  <!-- Servers Panel Header -->
+  <div class="panel-header" style="position:absolute;left:78px;top:160px;width:1763px;height:90px;">
+    <span style="position:absolute;left:75px;top:13px;font-size:48px;font-weight:700;color:#fff;">Server</span>
+    <!-- Search box -->
+    <div style="position:absolute;right:0;top:16px;width:381px;height:57px;background:#222;border-radius:15px;display:flex;align-items:center;">
+      <input class="input-field" placeholder="Search|" style="background:transparent;font-size:24px;padding:0 16px;">
+    </div>
+  </div>
+
+  <!-- Servers Panel Body -->
+  <div class="panel-body" style="position:absolute;left:78px;top:250px;width:1763px;height:697px;">
+    <!-- Server entries will render here -->
+    <div id="servers-list" style="padding:8px 0;">
+      <!-- Sample entry (will be dynamically generated) -->
+      <div class="server-row" style="display:flex;align-items:center;height:72px;padding:0 32px;cursor:pointer;border-radius:10px;margin:4px 8px;"
+        onmouseenter="this.style.background='#333'" onmouseleave="this.style.background='transparent'"
+        onclick="window.location.href='server-page.html'">
+        <span style="font-size:48px;font-weight:700;color:#fff;flex:1;">Hardline Roleplay</span>
+        <span style="font-size:48px;font-weight:700;color:#fff;width:200px;text-align:right;">6,000</span>
+        <span style="font-size:48px;font-weight:700;color:#fff;width:580px;text-align:right;">(Owner)Detective_1990</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Server Button -->
+  <button class="action-btn"
+    style="position:absolute;left:726px;top:984px;width:468px;height:67px;"
+    onclick="showCreateServerModal()">
+    Create Server
+  </button>
+
+  <!-- Create Server Modal Overlay -->
+  <div class="modal-overlay" id="createServerModal">
+    <div class="modal-box" style="left:86px;top:361px;width:1748px;height:157px;">
+      <!-- Row 1 -->
+      <div style="position:absolute;left:16px;top:15px;width:350px;height:57px;background:#222;border-radius:15px;display:flex;align-items:center;">
+        <span class="input-label" style="left:16px;top:3px;">Server Name</span>
+        <input class="input-field" placeholder="Server Name" style="background:transparent;padding-top:18px;">
+      </div>
+      <div style="position:absolute;left:378px;top:15px;width:350px;height:57px;background:#222;border-radius:15px;display:flex;align-items:center;">
+        <span class="input-label" style="left:16px;top:3px;">Join Code</span>
+        <input class="input-field" placeholder="Join Code" style="background:transparent;padding-top:18px;">
+      </div>
+      <div style="position:absolute;left:739px;top:15px;width:989px;height:57px;background:#222;border-radius:15px;display:flex;align-items:center;">
+        <span class="input-label" style="left:16px;top:3px;">Description</span>
+        <input class="input-field" placeholder="Description" style="background:transparent;padding-top:18px;">
+      </div>
+      <!-- Row 2 -->
+      <div style="position:absolute;left:16px;top:83px;width:350px;height:57px;background:#222;border-radius:15px;display:flex;align-items:center;">
+        <span class="input-label" style="left:16px;top:3px;">Discord Server (Dropdown)</span>
+        <select class="input-field" style="background:transparent;padding-top:18px;">
+          <option value="">Select Discord Server</option>
+        </select>
+      </div>
+      <!-- Create Button -->
+      <button class="action-btn action-btn-blue"
+        style="position:absolute;right:0;bottom:0;width:190px;height:59px;font-size:32px;"
+        onclick="hideCreateServerModal()">
+        Create
+      </button>
+      <!-- Close -->
+      <button onclick="hideCreateServerModal()" style="position:absolute;right:8px;top:8px;background:none;border:none;color:#fff;font-size:20px;cursor:pointer;">✕</button>
+    </div>
+  </div>
+
+</div>
+<script src="js/scale.js"></script>
+<script>
+function showCreateServerModal() {
+  document.getElementById('createServerModal').classList.add('active');
+}
+function hideCreateServerModal() {
+  document.getElementById('createServerModal').classList.remove('active');
+}
+</script>
+</body>
+</html>

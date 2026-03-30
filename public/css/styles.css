@@ -1,0 +1,235 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg-primary: #000000;
+  --bg-dark: #111111;
+  --bg-panel: #222222;
+  --bg-panel-header: #444444;
+  --bg-navy: #1e3a8a;
+  --bg-blue: #2954c3;
+  --bg-discord: #5865f2;
+  --text-white: #ffffff;
+  --status-green: #00ff2f;
+  --status-red: #ff0004;
+  --status-yellow: #ffbb00;
+  --status-blue: #00b2ff;
+  --radius-btn: 15px;
+  --radius-panel: 15px;
+  --font: 'Inter', sans-serif;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-primary);
+  font-family: var(--font);
+  color: var(--text-white);
+}
+
+/* Scale the 1920x1080 design to fit viewport */
+.page-wrapper {
+  width: 1920px;
+  height: 1080px;
+  position: relative;
+  transform-origin: top left;
+  overflow: hidden;
+}
+
+/* ===== NAVBAR SHARED ===== */
+.navbar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 89px;
+}
+
+.navbar-dark { background: var(--bg-panel); }
+.navbar-navy { background: var(--bg-navy); }
+
+.nav-btn {
+  position: absolute;
+  border-radius: var(--radius-btn);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  color: var(--text-white);
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 24px;
+  text-align: center;
+  transition: opacity 0.15s;
+}
+.nav-btn:hover { opacity: 0.85; }
+
+.nav-btn-blue { background: var(--bg-blue); }
+.nav-btn-dark { background: var(--bg-panel-header); }
+.nav-btn-discord { background: var(--bg-discord); border-radius: 22px; }
+
+/* Status buttons */
+.status-btn {
+  position: absolute;
+  height: 47px;
+  border-radius: var(--radius-btn);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  color: var(--text-white);
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 24px;
+  top: 21px;
+}
+.status-green { background: var(--status-green); }
+.status-red { background: var(--status-red); }
+.status-yellow { background: var(--status-yellow); }
+.status-cyan { background: var(--status-blue); }
+
+/* ===== PANELS ===== */
+.panel-header {
+  background: var(--bg-panel-header);
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+}
+.panel-body {
+  background: var(--bg-panel);
+  border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+}
+.panel-full {
+  background: var(--bg-panel);
+  border-radius: var(--radius-panel);
+}
+
+/* ===== TABLE ===== */
+.table-header {
+  background: var(--bg-panel-header);
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+  display: flex;
+  align-items: center;
+}
+.table-row {
+  background: var(--bg-panel);
+  border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+}
+.table-label {
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--text-white);
+  position: absolute;
+}
+
+/* ===== FORM INPUTS ===== */
+.input-field {
+  background: var(--bg-panel);
+  border: none;
+  border-radius: var(--radius-btn);
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 20px;
+  font-weight: 700;
+  padding: 10px 16px;
+  outline: none;
+  width: 100%;
+}
+.input-field::placeholder {
+  color: rgba(255,255,255,0.5);
+}
+.input-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.6);
+  position: absolute;
+}
+
+/* ===== ACTION BUTTON ===== */
+.action-btn {
+  background: var(--bg-panel-header);
+  border: none;
+  border-radius: var(--radius-btn);
+  color: var(--text-white);
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.action-btn:hover { background: #555; }
+.action-btn-sm {
+  font-size: 20px;
+}
+.action-btn-blue {
+  background: var(--bg-blue);
+}
+.action-btn-blue:hover { background: #3366dd; }
+
+/* ===== OVERLAY MODAL ===== */
+.modal-overlay {
+  position: absolute;
+  left: 0; top: 0;
+  width: 1920px; height: 1080px;
+  background: rgba(0,0,0,0.65);
+  display: none;
+  z-index: 100;
+}
+.modal-overlay.active { display: block; }
+.modal-box {
+  background: var(--bg-panel);
+  border-radius: var(--radius-panel);
+  position: absolute;
+}
+
+/* Typography helpers */
+.text-xl { font-size: 48px; font-weight: 700; }
+.text-lg { font-size: 36px; font-weight: 700; }
+.text-md { font-size: 32px; font-weight: 700; }
+.text-sm { font-size: 24px; font-weight: 500; }
+.text-xs { font-size: 20px; font-weight: 700; }
+.text-bold { font-weight: 700; }
+.text-extrabold { font-weight: 800; }
+.text-center { text-align: center; }
+.text-white { color: var(--text-white); }
+
+/* Section title above tables */
+.section-title {
+  position: absolute;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+/* Scrollable list area inside panels */
+.list-area {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #444 #111;
+}
+.list-area::-webkit-scrollbar { width: 6px; }
+.list-area::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+
+/* Textarea */
+.textarea-field {
+  background: var(--bg-panel);
+  border: none;
+  border-radius: var(--radius-btn);
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 18px;
+  font-weight: 500;
+  padding: 12px 16px;
+  outline: none;
+  resize: none;
+  width: 100%;
+}
