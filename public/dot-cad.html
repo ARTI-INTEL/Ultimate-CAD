@@ -5,72 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DOT CAD</title>
   <link rel="stylesheet" href="css/styles.css">
-  <style>
-    /* DOT theme: amber/yellow navbar, black button text */
-    .dot-navbar { background: #eec007; }
-    .dot-btn {
-      position: absolute;
-      height: 47px;
-      border-radius: 15px;
-      border: none;
-      background: #dcb207;
-      color: #000;            /* black text — exact from Figma */
-      font-family: 'Inter', sans-serif;
-      font-size: 24px;
-      font-weight: 500;
-      cursor: pointer;
-      top: 19px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s;
-    }
-    .dot-btn:hover { background: #c9a206; }
-    .dot-btn.active { background: #b89100; outline: 2px solid #000; }
-    .panel { display: none; position: absolute; left: 0; top: 89px; width: 1920px; height: 991px; }
-    .panel.active { display: block; }
-
-    .tbl-hdr { background: #444; border-radius: 15px 15px 0 0; position: absolute; }
-    .tbl-body { background: #222; border-radius: 0 0 15px 15px; position: absolute; }
-    .tbl-col { position: absolute; font-size: 24px; font-weight: 700; color: #fff; top: 50%; transform: translateY(-50%); }
-    .tbl-row { display: flex; align-items: center; height: 44px; padding: 0 17px; border-bottom: 1px solid #333; cursor: pointer; }
-    .tbl-row:hover { background: #2a2a2a; }
-
-    .act-btn {
-      background: #444; border: none; border-radius: 15px; color: #fff;
-      font-family: 'Inter', sans-serif; font-size: 32px; font-weight: 700;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      transition: background 0.15s; position: absolute;
-    }
-    .act-btn:hover { background: #555; }
-    .act-btn-amber { background: #dcb207; color: #000; }
-    .act-btn-amber:hover { background: #c9a206; }
-
-    .fld {
-      background: #333; border-radius: 12px; position: relative;
-      display: flex; flex-direction: column; padding: 6px 12px; flex-shrink: 0;
-    }
-    .fld label { font-size: 11px; color: rgba(255,255,255,0.55); font-weight: 700; }
-    .fld input, .fld select, .fld textarea {
-      background: transparent; border: none; color: #fff;
-      font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 700;
-      outline: none; width: 100%; margin-top: 2px;
-    }
-    .fld textarea { resize: none; }
-
-    .modal-overlay { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; background: rgba(0,0,0,0.6); display: none; z-index: 200; }
-    .modal-overlay.open { display: block; }
-    .modal-box { background: #222; border-radius: 15px; position: absolute; }
-    .close-btn { position: absolute; right: 10px; top: 10px; background: #555; border: none; color: #fff; border-radius: 8px; width: 30px; height: 30px; cursor: pointer; font-size: 16px; }
-
-    #dot-notepad { position: absolute; left: 86px; top: 130px; width: 1748px; height: 820px; background: #222; border: none; border-radius: 15px; color: #fff; font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 500; padding: 20px; outline: none; resize: none; }
-
-    .report-tab { background: #444; border: none; border-radius: 15px; color: #fff; font-family: 'Inter', sans-serif; font-size: 24px; font-weight: 700; cursor: pointer; height: 44px; display: inline-flex; align-items: center; justify-content: center; padding: 0 20px; transition: background 0.15s; }
-    .report-tab:hover { background: #555; }
-    .report-tab.active { background: #dcb207; color: #000; outline: 2px solid #000; }
-  </style>
 </head>
-<body>
+<body class="dot-theme">
 <div class="page-wrapper">
 
   <!-- ======== NAVBAR ======== -->
@@ -83,7 +19,6 @@
     <button class="dot-btn" id="btn-reports" style="left:658px;width:133px;" onclick="showPanel('reports')">Reports</button>
     <button class="dot-btn" id="btn-callhistory" style="left:804px;width:196px;" onclick="showPanel('callhistory')">Call History</button>
     <button class="dot-btn" id="btn-notepad" style="left:1013px;width:150px;" onclick="showPanel('notepad')">Notepad</button>
-    <!-- Status buttons — white text, same across all depts -->
     <button style="position:absolute;left:1431px;top:21px;width:79px;height:47px;border-radius:15px;border:none;background:#00ff2f;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:500;cursor:pointer;">10-8</button>
     <button style="position:absolute;left:1523px;top:21px;width:79px;height:47px;border-radius:15px;border:none;background:#ff0004;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:500;cursor:pointer;">10-7</button>
     <button style="position:absolute;left:1615px;top:21px;width:79px;height:47px;border-radius:15px;border:none;background:#00b2ff;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:500;cursor:pointer;">10-97</button>
@@ -137,13 +72,11 @@
         <input style="background:transparent;border:none;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:700;outline:none;padding:0 20px;width:100%;" placeholder="Enter License Plate or VIN" id="dot-car-search" oninput="dotSearchCar()">
       </div>
     </div>
-    <!-- PEDs Table -->
     <div class="tbl-hdr" style="left:14px;top:333px;width:644px;height:41px;">
       <span class="tbl-col" style="left:23px;">First Name</span>
       <span class="tbl-col" style="left:344px;">Last Name</span>
     </div>
     <div class="tbl-body" id="dot-ped-results" style="left:14px;top:374px;width:644px;min-height:42px;max-height:200px;overflow-y:auto;"></div>
-    <!-- Cars Table -->
     <div class="tbl-hdr" style="left:673px;top:333px;width:811px;height:41px;">
       <span class="tbl-col" style="left:19px;">Owner</span>
       <span class="tbl-col" style="left:322px;">Plate</span>
@@ -152,7 +85,6 @@
     </div>
     <div class="tbl-body" id="dot-car-results" style="left:673px;top:374px;width:811px;min-height:42px;max-height:200px;overflow-y:auto;"></div>
 
-    <!-- PED Detail Modal -->
     <div class="modal-overlay" id="dot-ped-detail">
       <div class="modal-box" style="left:86px;top:540px;width:1748px;height:357px;padding:16px;">
         <button class="close-btn" onclick="closeModal('dot-ped-detail')">✕</button>
@@ -189,7 +121,7 @@
   <!-- ======== PANEL: NOTEPAD ======== -->
   <div class="panel" id="panel-notepad">
     <p style="position:absolute;left:86px;top:16px;font-size:32px;font-weight:700;color:#fff;">Notepad</p>
-    <textarea id="dot-notepad" placeholder="Type your notes here..."></textarea>
+    <textarea id="dot-notepad" class="cad-notepad" placeholder="Type your notes here..."></textarea>
   </div>
 
   <!-- ======== MODAL: CREATE CALL ======== -->
@@ -212,7 +144,6 @@
 </div>
 <script src="js/scale.js"></script>
 <script>
-// ─── Panel switching ───────────────────────────────────────
 const panels = ['home','map','cad','search','reports','callhistory','notepad'];
 function showPanel(id) {
   panels.forEach(p => {
@@ -228,7 +159,6 @@ function showPanel(id) {
 function showModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-// ─── Data ──────────────────────────────────────────────────
 let dotCalls = [], dotCallId = 4001;
 const dotHistory = [
   {id:4001,nature:'Road Hazard',location:'Hwy 101 Mile 22',priority:'Medium',unit:'D-1'},
@@ -238,7 +168,6 @@ const dotHistory = [
 const mockPeds=[{fn:'John',ln:'Smith',dob:'01/01/1990',age:35,gender:'Male',occ:'Mechanic',addr:'123 Main St',skin:'Light',hair:'Brown',eye:'Blue',height:'6ft',weight:'180lbs'}];
 const mockCars=[{owner:'John Smith',plate:'ABC123',vehicle:'Toyota Camry',color:'White',vin:'1HGBH41',reg:'12/2025',ins:'Active',insExp:'06/2025'}];
 
-// ─── Calls ─────────────────────────────────────────────────
 function dotCreateCall() {
   dotCalls.push({id: dotCallId++, nature: document.getElementById('dot-call-nature').value||'Unknown', location: document.getElementById('dot-call-location').value||'Unknown', priority: document.getElementById('dot-call-priority').value});
   renderDotCalls();
@@ -260,7 +189,6 @@ function renderDotCalls() {
 }
 function dotCloseCall(i) { dotCalls.splice(i,1); renderDotCalls(); }
 
-// ─── Search ─────────────────────────────────────────────────
 function dotSearchPed(){
   const q=document.getElementById('dot-ped-search').value.toLowerCase();
   const r=q.length<2?[]:mockPeds.filter(p=>p.fn.toLowerCase().includes(q)||p.ln.toLowerCase().includes(q));
@@ -278,7 +206,6 @@ function dotShowPed(i){
   showModal('dot-ped-detail');
 }
 
-// ─── Reports ───────────────────────────────────────────────
 function dotShowReport(type, btn) {
   document.querySelectorAll('.report-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
@@ -308,7 +235,6 @@ function fldRow(flds) {
   return `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">${flds.map(([l,w,id])=>`<div style="background:#333;border-radius:10px;padding:6px 12px;width:${w}px;flex-shrink:0;"><div style="font-size:11px;color:rgba(255,255,255,0.55);font-weight:700;">${l}</div><input id="${id}" style="background:transparent;border:none;color:#fff;font-family:'Inter',sans-serif;font-size:16px;font-weight:700;outline:none;width:100%;margin-top:2px;" placeholder="${l}"></div>`).join('')}</div>`;
 }
 
-// ─── Call History ──────────────────────────────────────────
 function dotFilterHistory(){
   const q=document.getElementById('dot-hist-search').value.toLowerCase();
   dotRenderHistory(dotHistory.filter(c=>String(c.id).includes(q)||c.nature.toLowerCase().includes(q)));
@@ -326,7 +252,6 @@ function dotRenderHistory(list){
 
 function pc(p){return{Low:'#00ff2f',Medium:'#ffbb00',High:'#ff8800',Critical:'#ff0004'}[p]||'#fff';}
 
-// Init
 renderDotCalls(); dotRenderHistory(dotHistory); dotShowReport('incident', document.getElementById('rtab-incident'));
 </script>
 </body>
