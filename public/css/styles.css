@@ -41,6 +41,26 @@ html, body {
   position: relative;
 }
 
+Global page layout
+/* .page-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: 20px;
+    padding-right: 20px;
+} */
+
+/* Ensure body uses full width */
+/* body {
+    margin: 0;
+    padding: 0;
+} */
+
+/* Prevent elements from overflowing */
+ /* {
+    box-sizing: border-box;
+} */
+
 .main-container {
   width: 100%;
   max-width: 1600px;
