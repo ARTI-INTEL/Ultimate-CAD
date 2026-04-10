@@ -1,0 +1,420 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg-primary: #000000;
+  --bg-dark: #111111;
+  --bg-panel: #222222;
+  --bg-panel-header: #444444;
+  --bg-navy: #1e3a8a;
+  --bg-blue: #2954c3;
+  --bg-discord: #5865f2;
+  --text-white: #ffffff;
+  --status-green: #00ff2f;
+  --status-red: #ff0004;
+  --status-yellow: #ffbb00;
+  --status-blue: #00b2ff;
+  --radius-btn: 15px;
+  --radius-panel: 15px;
+  --font: 'Inter', sans-serif;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-primary);
+  font-family: var(--font);
+  color: var(--text-white);
+  zoom: 0.9;
+}
+
+/* Scale the 1920x1080 design to fit viewport */
+.page-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+}
+
+Global page layout
+/* .page-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: 20px;
+    padding-right: 20px;
+} */
+
+/* Ensure body uses full width */
+/* body {
+    margin: 0;
+    padding: 0;
+} */
+
+/* Prevent elements from overflowing */
+ /* {
+    box-sizing: border-box;
+} */
+
+.main-container {
+  width: 100%;
+  max-width: 1600px;
+  margin: auto;
+}
+
+/* ===== NAVBAR SHARED ===== */
+.navbar {
+  position: relative;
+  width: 100%;
+  height: 89px;
+}
+
+.navbar-dark { background: var(--bg-panel); }
+.navbar-navy { background: var(--bg-navy); }
+
+.nav-btn {
+  position: absolute;
+  border-radius: var(--radius-btn);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  color: var(--text-white);
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 24px;
+  text-align: center;
+  transition: opacity 0.15s;
+}
+.nav-btn:hover { opacity: 0.85; }
+
+.nav-btn-blue     { background: var(--bg-blue); }
+.nav-btn-dark     { background: var(--bg-panel-header); }
+.nav-btn-discord  { background: var(--bg-discord); border-radius: 22px; }
+
+/* Status buttons */
+.status-btn {
+  position: absolute;
+  height: 47px;
+  border-radius: var(--radius-btn);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  color: var(--text-white);
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 24px;
+  top: 21px;
+}
+.status-green  { background: var(--status-green); }
+.status-red    { background: var(--status-red); }
+.status-yellow { background: var(--status-yellow); }
+.status-cyan   { background: var(--status-blue); }
+
+/* ===== PANELS ===== */
+.panel-header {
+  background: var(--bg-panel-header);
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+}
+.panel-body {
+  background: var(--bg-panel);
+  border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+}
+.panel-full {
+  background: var(--bg-panel);
+  border-radius: var(--radius-panel);
+}
+
+/* CAD panel switcher */
+.panel { display: none; position: absolute; left: 0; top: 89px; width: 1920px; height: 991px; }
+.panel.active { display: block; }
+
+/* ===== TABLE ===== */
+.table-header {
+  background: var(--bg-panel-header);
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+  display: flex;
+  align-items: center;
+}
+.table-row {
+  background: var(--bg-panel);
+  border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+}
+.table-label {
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--text-white);
+  position: absolute;
+}
+
+/* CAD-style table components */
+.tbl-hdr { background: #444; border-radius: 15px 15px 0 0; position: absolute; }
+.tbl-body { background: #222; border-radius: 0 0 15px 15px; position: absolute; overflow-y: auto; }
+.tbl-col {
+  position: absolute; font-size: 24px; font-weight: 700;
+  color: #fff; top: 50%; transform: translateY(-50%); white-space: nowrap;
+}
+.tbl-row {
+  display: flex; align-items: center; height: 44px;
+  padding: 0 17px; border-bottom: 1px solid #333; cursor: pointer;
+}
+.tbl-row:hover { background: #2a2a2a; }
+
+/* ===== FORM INPUTS ===== */
+.input-field {
+  background: var(--bg-panel);
+  border: none;
+  border-radius: var(--radius-btn);
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 20px;
+  font-weight: 700;
+  padding: 10px 16px;
+  outline: none;
+  width: 100%;
+}
+.input-field::placeholder { color: rgba(255,255,255,0.5); }
+
+.input-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.6);
+  position: absolute;
+}
+
+/* CAD field box */
+.fld {
+  background: #333; border-radius: 12px;
+  display: flex; flex-direction: column;
+  padding: 6px 12px; flex-shrink: 0;
+}
+.fld label { font-size: 11px; color: rgba(255,255,255,0.55); font-weight: 700; }
+.fld input,
+.fld select,
+.fld textarea {
+  background: transparent; border: none; color: #fff;
+  font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 700;
+  outline: none; width: 100%; margin-top: 2px;
+}
+.fld textarea { resize: none; }
+
+/* ===== ACTION BUTTONS ===== */
+.action-btn {
+  background: var(--bg-panel-header);
+  border: none;
+  border-radius: var(--radius-btn);
+  color: var(--text-white);
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.action-btn:hover        { background: #555; }
+.action-btn-sm           { font-size: 20px; }
+.action-btn-blue         { background: var(--bg-blue); }
+.action-btn-blue:hover   { background: #3366dd; }
+
+/* CAD act-btn family */
+.act-btn {
+  background: #444; border: none; border-radius: 15px; color: #fff;
+  font-family: 'Inter', sans-serif; font-size: 32px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s; position: absolute;
+}
+.act-btn:hover         { background: #555; }
+.act-btn-blue          { background: #2954c3; }
+.act-btn-blue:hover    { background: #3a6ae0; }
+.act-btn-red           { background: #851616; }
+.act-btn-red:hover     { background: #a01c1c; }
+.act-btn-amber         { background: #dcb207; color: #000; }
+.act-btn-amber:hover   { background: #c9a206; }
+
+/* ===== OVERLAY MODAL ===== */
+.modal-overlay {
+  position: absolute;
+  left: 0; top: 0;
+  width: 1920px; height: 1080px;
+  background: rgba(0,0,0,0.65);
+  display: none;
+  z-index: 100;
+}
+.modal-overlay.active { display: block; }
+.modal-overlay.open   { display: block; }    /* used by CAD pages */
+.modal-box { background: #222; border-radius: 15px; position: absolute; }
+
+.close-btn {
+  position: absolute; right: 10px; top: 10px;
+  background: #555; border: none; color: #fff;
+  border-radius: 8px; width: 30px; height: 30px;
+  cursor: pointer; font-size: 16px; z-index: 1;
+}
+
+/* ===== SEARCH INPUT BOX (light, LEO search panel) ===== */
+.search-input-box {
+  width: 458px; height: 66px;
+  background: #d9d9d9; border-radius: 15px;
+  display: flex; align-items: center;
+}
+.search-input-box input {
+  background: transparent; border: none;
+  color: #000; font-family: 'Inter', sans-serif;
+  font-size: 24px; font-weight: 700; outline: none;
+  padding: 0 20px; width: 100%;
+}
+.search-input-box input::placeholder { color: rgba(0,0,0,0.31); }
+
+/* ===== REPORT TABS ===== */
+.report-tab {
+  background: #444; border: none; border-radius: 15px; color: #fff;
+  font-family: 'Inter', sans-serif; font-size: 24px; font-weight: 700;
+  cursor: pointer; height: 44px; padding: 0 20px;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.report-tab:hover  { background: #555; }
+.report-tab.active { background: #2954c3; outline: 2px solid #fff; }
+
+/* Theme overrides for report tab active state */
+.fr-theme  .report-tab.active { background: #851616; outline: 2px solid #fff; }
+.dot-theme .report-tab.active { background: #dcb207; color: #000; outline: 2px solid #000; }
+
+/* ===== NOTEPAD ===== */
+.cad-notepad {
+  position: absolute; left: 86px; top: 130px;
+  width: 1748px; height: 820px;
+  background: #222; border: none; border-radius: 15px;
+  color: #fff; font-family: 'Inter', sans-serif;
+  font-size: 20px; font-weight: 500; padding: 20px;
+  outline: none; resize: none;
+}
+
+/* Dispatcher notepad is slightly taller */
+#notepad-text {
+  position: absolute; left: 86px; top: 130px;
+  width: 1748px; height: 870px;
+  background: #222; border: none; border-radius: 15px;
+  color: #fff; font-family: 'Inter', sans-serif;
+  font-size: 20px; font-weight: 500; padding: 20px;
+  outline: none; resize: none;
+}
+
+/* ===== LEO THEME ===== */
+.leo-navbar { background: #1e3a8a; }
+
+.leo-btn {
+  position: absolute; height: 47px; border-radius: 15px; border: none;
+  background: #2954c3; color: #fff; font-family: 'Inter', sans-serif;
+  font-size: 24px; font-weight: 500; cursor: pointer; top: 19px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.leo-btn:hover  { background: #3a6ae0; }
+.leo-btn.active { background: #3a6ae0; outline: 2px solid #fff; }
+
+/* ===== F&R THEME ===== */
+.fr-navbar { background: #711818; }
+
+.fr-btn {
+  position: absolute; height: 47px; border-radius: 15px; border: none;
+  background: #851616; color: #fff; font-family: 'Inter', sans-serif;
+  font-size: 24px; font-weight: 500; cursor: pointer; top: 19px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.fr-btn:hover  { background: #a01c1c; }
+.fr-btn.active { background: #c02020; outline: 2px solid #fff; }
+
+/* ===== DOT THEME ===== */
+.dot-navbar { background: #eec007; }
+
+.dot-btn {
+  position: absolute; height: 47px; border-radius: 15px; border: none;
+  background: #dcb207; color: #000; font-family: 'Inter', sans-serif;
+  font-size: 24px; font-weight: 500; cursor: pointer; top: 19px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.dot-btn:hover  { background: #c9a206; }
+.dot-btn.active { background: #b89100; outline: 2px solid #000; }
+
+/* ===== DISPATCHER THEME ===== */
+.d-navbar { background: #222; }
+
+.d-btn {
+  position: absolute; height: 47px; border-radius: 15px; border: none;
+  background: #444; color: #fff; font-family: 'Inter', sans-serif;
+  font-size: 24px; font-weight: 500; cursor: pointer; top: 19px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.d-btn:hover  { background: #666; }
+.d-btn.active { background: #666; outline: 2px solid #fff; }
+
+/* ===== INDEX PAGE ===== */
+body.index-bg { background: #222; }
+
+/* ===== SERVER PAGE — dept panels ===== */
+.dept-heading {
+  position: absolute;
+  left: 39px; top: 31px;
+  font-size: 28px;       /* reduced from 48px so text never covers input fields */
+  font-weight: 700;
+  color: #fff;
+  width: 347px;
+  line-height: 1.3;
+}
+
+/* Typography helpers */
+.text-xl       { font-size: 48px; font-weight: 700; }
+.text-lg       { font-size: 36px; font-weight: 700; }
+.text-md       { font-size: 32px; font-weight: 700; }
+.text-sm       { font-size: 24px; font-weight: 500; }
+.text-xs       { font-size: 20px; font-weight: 700; }
+.text-bold     { font-weight: 700; }
+.text-extrabold{ font-weight: 800; }
+.text-center   { text-align: center; }
+.text-white    { color: var(--text-white); }
+
+/* Section title above tables */
+.section-title {
+  position: absolute;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+/* Scrollable list area inside panels */
+.list-area {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #444 #111;
+}
+.list-area::-webkit-scrollbar       { width: 6px; }
+.list-area::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+
+/* Textarea */
+.textarea-field {
+  background: var(--bg-panel);
+  border: none;
+  border-radius: var(--radius-btn);
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 18px;
+  font-weight: 500;
+  padding: 12px 16px;
+  outline: none;
+  resize: none;
+  width: 100%;
+}

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dispatcher CAD</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- ======== NAVBAR ======== -->
+  <div class="d-navbar" style="position:absolute;left:0;top:0;width:1920px;height:89px;">
+    <button class="d-btn" style="left:20px;width:183px;" onclick="window.location.href='server-page.html'">Clock-Out</button>
+    <button class="d-btn active" id="btn-home" style="left:217px;width:111px;" onclick="showPanel('home')">Home</button>
+    <button class="d-btn" id="btn-map" style="left:340px;width:79px;" onclick="showPanel('map')">Map</button>
+    <button class="d-btn" id="btn-cad" style="left:433px;width:79px;" onclick="showPanel('cad')">CAD</button>
+    <button class="d-btn" id="btn-search" style="left:525px;width:119px;" onclick="showPanel('search')">Search</button>
+    <button class="d-btn" id="btn-reports" style="left:658px;width:133px;" onclick="showPanel('reports')">Reports</button>
+    <button class="d-btn" id="btn-callhistory" style="left:804px;width:196px;" onclick="showPanel('callhistory')">Call History</button>
+    <button class="d-btn" id="btn-notepad" style="left:1013px;width:150px;" onclick="showPanel('notepad')">Notepad</button>
+    <button style="position:absolute;left:1431px;top:21px;width:79px;height:47px;border-radius:15px;border:none;background:#00ff2f;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:500;cursor:pointer;">10-8</button>
+    <button style="position:absolute;left:1523px;top:21px;width:79px;height:47px;border-radius:15px;border:none;background:#ff0004;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:500;cursor:pointer;">10-7</button>
+    <button style="position:absolute;left:1615px;top:21px;width:79px;height:47px;border-radius:15px;border:none;background:#00b2ff;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:500;cursor:pointer;">10-97</button>
+    <button style="position:absolute;left:1707px;top:21px;width:79px;height:47px;border-radius:15px;border:none;background:#00ff2f;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:500;cursor:pointer;">10-23</button>
+    <button style="position:absolute;left:1799px;top:21px;width:79px;height:47px;border-radius:15px;border:none;background:#ffbb00;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:500;cursor:pointer;">10-6</button>
+  </div>
+
+  <!-- ======== PANEL: HOME ======== -->
+  <div class="panel active" id="panel-home">
+    <p style="position:absolute;left:41px;top:44px;font-size:32px;font-weight:500;color:#fff;width:617px;line-height:1.6;">
+      Welcome to the CAD for the County, you will be serving the following agencies as a Dispatcher.
+    </p>
+    <ul style="position:absolute;left:89px;top:190px;font-size:32px;font-weight:500;color:#fff;line-height:1.8;">
+      <li>Law Enforcement Agencies</li>
+      <li>Fire &amp; Rescue Departments</li>
+      <li>Department of Transportation/Public Works</li>
+    </ul>
+  </div>
+
+  <!-- ======== PANEL: MAP ======== -->
+  <div class="panel" id="panel-map">
+    <div style="position:absolute;left:388px;top:0;width:1143px;height:991px;background:#1a1a2e;border-radius:0;display:flex;align-items:center;justify-content:center;">
+      <div style="text-align:center;color:rgba(255,255,255,0.2);">
+        <div style="font-size:80px;">🗺️</div>
+        <p style="font-size:28px;font-weight:700;margin-top:16px;">Map View</p>
+        <p style="font-size:18px;margin-top:8px;">Integrate your map here</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== PANEL: CAD ======== -->
+  <div class="panel" id="panel-cad">
+    <span style="position:absolute;left:86px;top:22px;font-size:32px;font-weight:700;color:#fff;">Active Calls</span>
+    <div class="tbl-hdr" style="left:86px;top:64px;width:1748px;height:41px;">
+      <span class="tbl-col" style="left:17px;">Call #</span>
+      <span class="tbl-col" style="left:131px;">Nature</span>
+      <span class="tbl-col" style="left:503px;">Location</span>
+      <span class="tbl-col" style="left:905px;">Priority</span>
+      <span class="tbl-col" style="left:1236px;">Unit</span>
+    </div>
+    <div class="tbl-body" id="d-calls-list" style="left:86px;top:105px;width:1748px;min-height:42px;max-height:130px;overflow-y:auto;"></div>
+    <button class="act-btn" style="left:86px;top:162px;width:192px;height:44px;" onclick="showModal('d-call-modal')">Create Call</button>
+
+    <span style="position:absolute;left:86px;top:222px;font-size:32px;font-weight:700;color:#fff;">Active BOLO's</span>
+    <div class="tbl-hdr" style="left:86px;top:270px;width:1748px;height:41px;">
+      <span class="tbl-col" style="left:25px;">Type</span>
+      <span class="tbl-col" style="left:272px;">Reason</span>
+      <span class="tbl-col" style="left:877px;">Description</span>
+    </div>
+    <div class="tbl-body" id="d-bolos-list" style="left:86px;top:311px;width:1748px;min-height:42px;max-height:100px;overflow-y:auto;"></div>
+    <button class="act-btn" style="left:86px;top:368px;width:214px;height:44px;" onclick="showModal('d-bolo-modal')">Create BOLO</button>
+
+    <span style="position:absolute;left:86px;top:455px;font-size:32px;font-weight:700;color:#fff;">Active Units</span>
+    <div class="tbl-hdr" style="left:86px;top:503px;width:1748px;height:41px;">
+      <span class="tbl-col" style="left:2px;">Callsign</span>
+      <span class="tbl-col" style="left:151px;">Type (LEO/FD)</span>
+      <span class="tbl-col" style="left:457px;">Department, Division and Unit</span>
+      <span class="tbl-col" style="left:824px;">Location</span>
+      <span class="tbl-col" style="left:1657px;">Status</span>
+    </div>
+    <div class="tbl-body" id="d-units-list" style="left:86px;top:544px;width:1748px;min-height:42px;max-height:400px;overflow-y:auto;"></div>
+  </div>
+
+  <!-- ======== PANEL: SEARCH ======== -->
+  <div class="panel" id="panel-search">
+    <div style="position:absolute;left:71px;top:89px;">
+      <p style="font-size:48px;font-weight:700;color:#fff;margin-bottom:8px;">Search PED</p>
+      <div style="width:458px;height:66px;background:#222;border-radius:15px;display:flex;align-items:center;">
+        <input style="background:transparent;border:none;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:700;outline:none;padding:0 20px;width:100%;" placeholder="Enter First Name or Last Name" id="d-ped-search" oninput="dSearchPed()">
+      </div>
+    </div>
+    <div style="position:absolute;left:731px;top:89px;">
+      <p style="font-size:48px;font-weight:700;color:#fff;margin-bottom:8px;">Search Car</p>
+      <div style="width:458px;height:66px;background:#222;border-radius:15px;display:flex;align-items:center;">
+        <input style="background:transparent;border:none;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:700;outline:none;padding:0 20px;width:100%;" placeholder="Enter License Plate or VIN" id="d-car-search" oninput="dSearchCar()">
+      </div>
+    </div>
+    <div style="position:absolute;left:1391px;top:89px;">
+      <p style="font-size:48px;font-weight:700;color:#fff;margin-bottom:8px;">Search Gun</p>
+      <div style="width:458px;height:66px;background:#222;border-radius:15px;display:flex;align-items:center;">
+        <input style="background:transparent;border:none;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:700;outline:none;padding:0 20px;width:100%;" placeholder="Enter Serial Number" id="d-gun-search" oninput="dSearchGun()">
+      </div>
+    </div>
+    <div class="tbl-hdr" style="left:14px;top:333px;width:644px;height:41px;">
+      <span class="tbl-col" style="left:23px;">First Name</span>
+      <span class="tbl-col" style="left:344px;">Last Name</span>
+    </div>
+    <div class="tbl-body" id="d-ped-results" style="left:14px;top:374px;width:644px;min-height:42px;max-height:200px;overflow-y:auto;"></div>
+    <div class="tbl-hdr" style="left:673px;top:333px;width:811px;height:41px;">
+      <span class="tbl-col" style="left:19px;">Owner</span>
+      <span class="tbl-col" style="left:322px;">Plate</span>
+      <span class="tbl-col" style="left:489px;">Vehicle</span>
+      <span class="tbl-col" style="left:729px;">Color</span>
+    </div>
+    <div class="tbl-body" id="d-car-results" style="left:673px;top:374px;width:811px;min-height:42px;max-height:200px;overflow-y:auto;"></div>
+    <div class="tbl-hdr" style="left:1501px;top:333px;width:405px;height:41px;">
+      <span class="tbl-col" style="left:19px;">Owner</span>
+      <span class="tbl-col" style="left:209px;">Serial #</span>
+    </div>
+    <div class="tbl-body" id="d-gun-results" style="left:1501px;top:374px;width:405px;min-height:42px;max-height:200px;overflow-y:auto;"></div>
+  </div>
+
+  <!-- ======== PANEL: REPORTS (read only) ======== -->
+  <div class="panel" id="panel-reports">
+    <p style="position:absolute;left:86px;top:40px;font-size:32px;font-weight:700;color:#fff;">Reports</p>
+    <div style="position:absolute;left:86px;top:100px;width:1748px;height:820px;background:#222;border-radius:15px;display:flex;align-items:center;justify-content:center;">
+      <p style="font-size:24px;color:rgba(255,255,255,0.3);">No reports to display. Reports are filed by responding units.</p>
+    </div>
+  </div>
+
+  <!-- ======== PANEL: CALL HISTORY ======== -->
+  <div class="panel" id="panel-callhistory">
+    <span style="position:absolute;left:102px;top:37px;font-size:32px;font-weight:700;color:#fff;">Past Calls</span>
+    <div class="tbl-hdr" style="left:86px;top:90px;width:1748px;height:41px;">
+      <span class="tbl-col" style="left:17px;">Call #</span>
+      <span class="tbl-col" style="left:131px;">Nature</span>
+      <span class="tbl-col" style="left:503px;">Location</span>
+      <span class="tbl-col" style="left:905px;">Priority</span>
+      <span class="tbl-col" style="left:1236px;">Unit</span>
+      <div style="position:absolute;right:0;top:5px;width:213px;height:30px;background:#111;border-radius:10px;display:flex;align-items:center;">
+        <input style="background:transparent;border:none;color:#fff;font-family:'Inter',sans-serif;font-size:15px;outline:none;padding:0 12px;width:100%;" placeholder="Search..." id="d-hist-search" oninput="dFilterHistory()">
+      </div>
+    </div>
+    <div class="tbl-body" id="d-history-list" style="left:86px;top:131px;width:1748px;min-height:42px;max-height:820px;overflow-y:auto;border-radius:0 0 15px 15px;"></div>
+  </div>
+
+  <!-- ======== PANEL: NOTEPAD ======== -->
+  <div class="panel" id="panel-notepad">
+    <p style="position:absolute;left:86px;top:16px;font-size:32px;font-weight:700;color:#fff;">Notepad</p>
+    <textarea id="notepad-text" placeholder="Type your notes here..."></textarea>
+  </div>
+
+  <!-- ======== MODAL: CREATE CALL ======== -->
+  <div class="modal-overlay" id="d-call-modal">
+    <div class="modal-box" style="left:86px;top:568px;width:1748px;height:492px;padding:15px;">
+      <button onclick="closeModal('d-call-modal')" class="close-btn">✕</button>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+        <div class="fld" style="position:relative;width:129px;height:57px;"><label>CALL ID</label><span style="color:#fff;font-size:17px;font-weight:700;" id="d-callid-display">—</span></div>
+        <div class="fld" style="position:relative;width:185px;height:57px;"><label>Nature Of Call</label><input id="d-call-nature" placeholder="e.g. Traffic Stop"></div>
+        <div class="fld" style="position:relative;width:349px;height:57px;"><label>Call Title</label><input id="d-call-title" placeholder="Call Title"></div>
+        <div class="fld" style="position:relative;width:623px;height:57px;"><label>Location of Call</label><input id="d-call-location" placeholder="Location"></div>
+        <div class="fld" style="position:relative;width:185px;height:57px;"><label>Priority</label><select id="d-call-priority"><option style="background:#222">Low</option><option style="background:#222">Medium</option><option style="background:#222">High</option><option style="background:#222">Critical</option></select></div>
+        <div class="fld" style="position:relative;width:185px;height:57px;"><label>Status</label><select id="d-call-status"><option style="background:#222">ACTIVE</option><option style="background:#222">CLOSED</option></select></div>
+      </div>
+      <div class="fld" style="position:relative;width:100%;height:332px;"><label>Description</label><textarea id="d-call-desc" style="height:290px;" placeholder="Enter call description..."></textarea></div>
+      <button class="act-btn act-btn-blue" style="position:absolute;left:808px;bottom:12px;width:132px;height:44px;font-size:28px;" onclick="dCreateCall()">Create</button>
+    </div>
+  </div>
+
+  <!-- ======== MODAL: CREATE BOLO ======== -->
+  <div class="modal-overlay" id="d-bolo-modal">
+    <div class="modal-box" style="left:86px;top:568px;width:1748px;height:492px;padding:15px;">
+      <button onclick="closeModal('d-bolo-modal')" class="close-btn">✕</button>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <div class="fld" style="position:relative;width:349px;height:57px;"><label>Type (Person/Vehicle)</label><select id="d-bolo-type"><option style="background:#222">Person</option><option style="background:#222">Vehicle</option></select></div>
+        <div class="fld" style="position:relative;width:1349px;height:57px;"><label>Last Known Location</label><input id="d-bolo-loc" placeholder="Last Known Location"></div>
+      </div>
+      <div class="fld" style="position:relative;width:100%;height:332px;"><label>Description</label><textarea id="d-bolo-desc" style="height:290px;" placeholder="Enter BOLO description..."></textarea></div>
+      <button class="act-btn act-btn-blue" style="position:absolute;left:808px;bottom:12px;width:132px;height:44px;font-size:28px;" onclick="dCreateBolo()">Create</button>
+    </div>
+  </div>
+
+</div>
+<script src="js/scale.js"></script>
+<script>
+const panels = ['home','map','cad','search','reports','callhistory','notepad'];
+function showPanel(id) {
+  panels.forEach(p => {
+    document.getElementById('panel-'+p).classList.remove('active');
+    const btn = document.getElementById('btn-'+p);
+    if (btn) btn.classList.remove('active');
+  });
+  document.getElementById('panel-'+id).classList.add('active');
+  const btn = document.getElementById('btn-'+id);
+  if (btn) btn.classList.add('active');
+}
+
+function showModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+let dCalls = [], dBolos = [], dCallId = 2001;
+
+const mockHistory = [
+  {id:2001,nature:'Traffic Stop',location:'Main St',priority:'Low',unit:'L-1'},
+  {id:2002,nature:'Structure Fire',location:'45 Oak Ave',priority:'Critical',unit:'F-2'},
+  {id:2003,nature:'10-50 Accident',location:'Hwy 101',priority:'High',unit:'L-3'},
+];
+
+const mockUnits = [
+  {callsign:'L-1',type:'LEO',dept:'Blaine County Sheriff',location:'Main St',status:'10-8'},
+  {callsign:'L-3',type:'LEO',dept:'LSPD Patrol Div',location:'Grove St',status:'10-97'},
+  {callsign:'F-2',type:'FD',dept:'Sandy Shores Fire Dept',location:'Base',status:'10-8'},
+];
+
+function dCreateCall() {
+  dCalls.push({
+    id: dCallId++,
+    nature: document.getElementById('d-call-nature').value || 'Unknown',
+    location: document.getElementById('d-call-location').value || 'Unknown',
+    priority: document.getElementById('d-call-priority').value,
+    status: document.getElementById('d-call-status').value,
+  });
+  renderDCalls();
+  closeModal('d-call-modal');
+  ['d-call-nature','d-call-title','d-call-location','d-call-desc'].forEach(id => document.getElementById(id).value='');
+}
+function renderDCalls() {
+  const el = document.getElementById('d-calls-list');
+  if (!dCalls.length) { el.innerHTML='<div style="height:42px;"></div>'; return; }
+  el.innerHTML = dCalls.map((c,i) => `
+    <div class="tbl-row">
+      <span style="font-size:20px;font-weight:700;color:#fff;width:80px;">${c.id}</span>
+      <span style="font-size:20px;font-weight:700;color:#fff;flex:1;">${c.nature}</span>
+      <span style="font-size:20px;font-weight:700;color:#fff;width:300px;">${c.location}</span>
+      <span style="font-size:20px;font-weight:700;color:${pc(c.priority)};width:120px;">${c.priority}</span>
+      <span style="font-size:20px;font-weight:700;color:#fff;width:120px;">—</span>
+      <button onclick="dCloseCall(${i})" style="background:#ff0004;border:none;color:#fff;border-radius:8px;padding:3px 10px;cursor:pointer;font-size:13px;font-weight:700;margin-left:auto;">CODE 4</button>
+    </div>`).join('');
+}
+function dCloseCall(i) { dCalls.splice(i,1); renderDCalls(); }
+
+function dCreateBolo() {
+  dBolos.push({type: document.getElementById('d-bolo-type').value, desc: document.getElementById('d-bolo-desc').value});
+  renderDBolos();
+  closeModal('d-bolo-modal');
+  document.getElementById('d-bolo-loc').value='';
+  document.getElementById('d-bolo-desc').value='';
+}
+function renderDBolos() {
+  const el = document.getElementById('d-bolos-list');
+  if (!dBolos.length) { el.innerHTML='<div style="height:42px;"></div>'; return; }
+  el.innerHTML = dBolos.map((b,i) => `
+    <div class="tbl-row">
+      <span style="font-size:20px;font-weight:700;color:#fff;width:200px;">${b.type}</span>
+      <span style="font-size:20px;font-weight:700;color:#fff;flex:1;">${b.desc.substring(0,80)}</span>
+      <button onclick="dRemoveBolo(${i})" style="background:#ff0004;border:none;color:#fff;border-radius:8px;padding:3px 10px;cursor:pointer;font-size:13px;font-weight:700;">Remove</button>
+    </div>`).join('');
+}
+function dRemoveBolo(i) { dBolos.splice(i,1); renderDBolos(); }
+
+function renderUnits() {
+  const el = document.getElementById('d-units-list');
+  el.innerHTML = mockUnits.map(u => `
+    <div class="tbl-row">
+      <span style="font-size:20px;font-weight:700;color:#fff;width:100px;">${u.callsign}</span>
+      <span style="font-size:20px;font-weight:700;color:${u.type==='LEO'?'#00b2ff':'#ff6633'};width:120px;">${u.type}</span>
+      <span style="font-size:20px;font-weight:700;color:#fff;flex:1;">${u.dept}</span>
+      <span style="font-size:20px;font-weight:700;color:#fff;width:250px;">${u.location}</span>
+      <span style="font-size:20px;font-weight:700;color:#00ff2f;">${u.status}</span>
+    </div>`).join('');
+}
+
+const mockPeds=[{fn:'John',ln:'Smith'},{fn:'Jane',ln:'Doe'}];
+const mockCars=[{owner:'John Smith',plate:'ABC123',vehicle:'Toyota Camry',color:'White'}];
+const mockGuns=[{owner:'John Smith',serial:'GUN001'}];
+function dSearchPed(){
+  const q=document.getElementById('d-ped-search').value.toLowerCase();
+  const r=q.length<2?[]:mockPeds.filter(p=>p.fn.toLowerCase().includes(q)||p.ln.toLowerCase().includes(q));
+  document.getElementById('d-ped-results').innerHTML=r.length?r.map(p=>`<div class="tbl-row"><span style="font-size:19px;color:#fff;flex:1;">${p.fn}</span><span style="font-size:19px;color:#fff;">${p.ln}</span></div>`).join(''):'<div style="height:42px;"></div>';
+}
+function dSearchCar(){
+  const q=document.getElementById('d-car-search').value.toLowerCase();
+  const r=q.length<2?[]:mockCars.filter(c=>c.plate.toLowerCase().includes(q));
+  document.getElementById('d-car-results').innerHTML=r.length?r.map(c=>`<div class="tbl-row"><span style="font-size:19px;color:#fff;width:180px;">${c.owner}</span><span style="font-size:19px;color:#fff;width:100px;">${c.plate}</span><span style="font-size:19px;color:#fff;flex:1;">${c.vehicle}</span><span style="font-size:19px;color:#fff;">${c.color}</span></div>`).join(''):'<div style="height:42px;"></div>';
+}
+function dSearchGun(){
+  const q=document.getElementById('d-gun-search').value.toLowerCase();
+  const r=q.length<2?[]:mockGuns.filter(g=>g.serial.toLowerCase().includes(q));
+  document.getElementById('d-gun-results').innerHTML=r.length?r.map(g=>`<div class="tbl-row"><span style="font-size:19px;color:#fff;flex:1;">${g.owner}</span><span style="font-size:19px;color:#fff;">${g.serial}</span></div>`).join(''):'<div style="height:42px;"></div>';
+}
+
+function dFilterHistory(){
+  const q=document.getElementById('d-hist-search').value.toLowerCase();
+  renderHistory(mockHistory.filter(c=>String(c.id).includes(q)||c.nature.toLowerCase().includes(q)));
+}
+function renderHistory(list){
+  document.getElementById('d-history-list').innerHTML=list.length?list.map(c=>`
+    <div class="tbl-row">
+      <span style="font-size:20px;font-weight:700;color:#fff;width:80px;">${c.id}</span>
+      <span style="font-size:20px;font-weight:700;color:#fff;flex:1;">${c.nature}</span>
+      <span style="font-size:20px;font-weight:700;color:#fff;width:300px;">${c.location}</span>
+      <span style="font-size:20px;font-weight:700;color:${pc(c.priority)};width:120px;">${c.priority}</span>
+      <span style="font-size:20px;font-weight:700;color:#fff;">${c.unit}</span>
+    </div>`).join(''):'<div style="padding:20px;text-align:center;color:rgba(255,255,255,0.3);">No calls found</div>';
+}
+
+function pc(p){return{Low:'#00ff2f',Medium:'#ffbb00',High:'#ff8800',Critical:'#ff0004'}[p]||'#fff';}
+
+renderDCalls(); renderDBolos(); renderUnits(); renderHistory(mockHistory);
+</script>
+</body>
+</html>
