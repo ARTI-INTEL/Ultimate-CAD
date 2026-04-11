@@ -3,108 +3,103 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ultimate CAD - Server Page</title>
+  <title>Ultimate CAD — Server</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/server-page.css">
 </head>
 <body>
-<div class="page-wrapper">
+<div class="page-wrapper" id="server-root">
 
-  <!-- Navbar -->
-  <div class="navbar navbar-dark">
-    <span style="position:absolute;left:32px;top:23px;font-size:36px;font-weight:800;color:#fff;">
-      Welcome to (Server Name) (User)
-    </span>
-    <button class="nav-btn nav-btn-dark"
-      style="position:absolute;right:26px;top:20px;width:150px;height:47px;"
-      onclick="window.location.href='dashboard.html'">
-      Dashboard
-    </button>
+  <!-- ======== NAVBAR ======== -->
+  <div class="sp-navbar" id="sp-navbar">
+    <span class="sp-welcome-text" id="sp-welcome-text">Welcome to Ultimate CAD</span>
+    <div class="sp-nav-actions">
+      <!-- Owner-only: hidden by default, shown via JS -->
+      <button class="sp-nav-btn sp-nav-btn--settings" id="btn-server-settings">Server Settings</button>
+      <button class="sp-nav-btn sp-nav-btn--dashboard" id="btn-dashboard">Dashboard</button>
+    </div>
   </div>
 
-  <!-- LEO Panel -->
-  <div style="position:absolute;left:72px;top:202px;width:425px;height:675px;background:#222;border-radius:15px;">
-    <p class="dept-heading">Law Enforcement</p>
-    <!-- Name -->
-    <div style="position:absolute;left:39px;top:123px;width:347px;height:57px;background:#444;border-radius:15px;display:flex;align-items:center;padding:0 16px;">
-      <input class="input-field" placeholder="Name" style="background:transparent;">
+  <!-- ======== DEPARTMENT PANELS ======== -->
+  <div class="sp-panels-row">
+
+    <!-- LEO Panel -->
+    <div class="sp-dept-panel" id="panel-leo">
+      <p class="dept-heading">Law Enforcement</p>
+      <div class="sp-field-group">
+        <div class="sp-field-box">
+          <input class="sp-field-input" id="leo-name" placeholder="Name" autocomplete="off">
+        </div>
+        <div class="sp-field-box">
+          <input class="sp-field-input" id="leo-callsign" placeholder="Callsign" autocomplete="off">
+        </div>
+        <div class="sp-field-box">
+          <input class="sp-field-input" id="leo-rank" placeholder="Rank" autocomplete="off">
+        </div>
+        <div class="sp-field-box">
+          <input class="sp-field-input" id="leo-department" placeholder="Department" autocomplete="off">
+        </div>
+      </div>
+      <p class="sp-error-msg" id="leo-error"></p>
+      <button class="sp-join-btn sp-join-btn--leo" id="btn-join-leo">Join LEO CAD</button>
     </div>
-    <!-- Callsign -->
-    <div style="position:absolute;left:39px;top:206px;width:347px;height:57px;background:#444;border-radius:15px;display:flex;align-items:center;padding:0 16px;">
-      <input class="input-field" placeholder="Callsign" style="background:transparent;">
+
+    <!-- F&R Panel -->
+    <div class="sp-dept-panel" id="panel-fr">
+      <p class="dept-heading">Fire and Rescue</p>
+      <div class="sp-field-group">
+        <div class="sp-field-box">
+          <input class="sp-field-input" id="fr-name" placeholder="Name" autocomplete="off">
+        </div>
+        <div class="sp-field-box">
+          <input class="sp-field-input" id="fr-callsign" placeholder="Callsign" autocomplete="off">
+        </div>
+        <div class="sp-field-box">
+          <input class="sp-field-input" id="fr-rank" placeholder="Rank" autocomplete="off">
+        </div>
+        <div class="sp-field-box">
+          <input class="sp-field-input" id="fr-department" placeholder="Department" autocomplete="off">
+        </div>
+      </div>
+      <p class="sp-error-msg" id="fr-error"></p>
+      <button class="sp-join-btn sp-join-btn--fr" id="btn-join-fr">Join F&amp;R CAD</button>
     </div>
-    <!-- Rank -->
-    <div style="position:absolute;left:39px;top:289px;width:347px;height:57px;background:#444;border-radius:15px;display:flex;align-items:center;padding:0 16px;">
-      <input class="input-field" placeholder="Rank" style="background:transparent;">
+
+    <!-- DOT Panel -->
+    <div class="sp-dept-panel" id="panel-dot">
+      <p class="dept-heading">Dept of Transport</p>
+      <div class="sp-field-group">
+        <div class="sp-field-box">
+          <input class="sp-field-input" id="dot-name" placeholder="Name" autocomplete="off">
+        </div>
+        <div class="sp-field-box">
+          <input class="sp-field-input" id="dot-callsign" placeholder="Callsign" autocomplete="off">
+        </div>
+        <div class="sp-field-box">
+          <input class="sp-field-input" id="dot-rank" placeholder="Rank" autocomplete="off">
+        </div>
+        <div class="sp-field-box">
+          <input class="sp-field-input" id="dot-department" placeholder="Department" autocomplete="off">
+        </div>
+      </div>
+      <p class="sp-error-msg" id="dot-error"></p>
+      <button class="sp-join-btn sp-join-btn--dot" id="btn-join-dot">Join DOT CAD</button>
     </div>
-    <!-- Department -->
-    <div style="position:absolute;left:39px;top:372px;width:347px;height:57px;background:#444;border-radius:15px;display:flex;align-items:center;padding:0 16px;">
-      <input class="input-field" placeholder="Department" style="background:transparent;">
-    </div>
-    <!-- Join Button -->
-    <button class="action-btn"
-      style="position:absolute;left:110px;top:533px;width:205px;height:57px;font-size:24px;"
-      onclick="window.location.href='leo-cad.html'">
-      Join LEO CAD
-    </button>
+
+  </div><!-- /.sp-panels-row -->
+
+  <!-- ======== BOTTOM ACTIONS ======== -->
+  <div class="sp-bottom-bar">
+    <button class="sp-bottom-btn" id="btn-civilian">Civilian / Character</button>
+    <button class="sp-bottom-btn" id="btn-dispatcher">Dispatcher</button>
   </div>
 
-  <!-- F&R Panel -->
-  <div style="position:absolute;left:747px;top:202px;width:425px;height:675px;background:#222;border-radius:15px;">
-    <p class="dept-heading">Fire and Rescue</p>
-    <div style="position:absolute;left:39px;top:123px;width:347px;height:57px;background:#444;border-radius:15px;display:flex;align-items:center;padding:0 16px;">
-      <input class="input-field" placeholder="Name" style="background:transparent;">
-    </div>
-    <div style="position:absolute;left:39px;top:206px;width:347px;height:57px;background:#444;border-radius:15px;display:flex;align-items:center;padding:0 16px;">
-      <input class="input-field" placeholder="Callsign" style="background:transparent;">
-    </div>
-    <div style="position:absolute;left:39px;top:289px;width:347px;height:57px;background:#444;border-radius:15px;display:flex;align-items:center;padding:0 16px;">
-      <input class="input-field" placeholder="Rank" style="background:transparent;">
-    </div>
-    <div style="position:absolute;left:39px;top:372px;width:347px;height:57px;background:#444;border-radius:15px;display:flex;align-items:center;padding:0 16px;">
-      <input class="input-field" placeholder="Department" style="background:transparent;">
-    </div>
-    <button class="action-btn"
-      style="position:absolute;left:110px;top:533px;width:205px;height:57px;font-size:24px;"
-      onclick="window.location.href='fr-cad.html'">
-      Join F&R CAD
-    </button>
-  </div>
+</div><!-- /.page-wrapper -->
 
-  <!-- DOT Panel -->
-  <div style="position:absolute;left:1422px;top:202px;width:425px;height:675px;background:#222;border-radius:15px;">
-    <p class="dept-heading">Dept of Transport</p>
-    <div style="position:absolute;left:39px;top:123px;width:347px;height:57px;background:#444;border-radius:15px;display:flex;align-items:center;padding:0 16px;">
-      <input class="input-field" placeholder="Name" style="background:transparent;">
-    </div>
-    <div style="position:absolute;left:39px;top:206px;width:347px;height:57px;background:#444;border-radius:15px;display:flex;align-items:center;padding:0 16px;">
-      <input class="input-field" placeholder="Callsign" style="background:transparent;">
-    </div>
-    <div style="position:absolute;left:39px;top:289px;width:347px;height:57px;background:#444;border-radius:15px;display:flex;align-items:center;padding:0 16px;">
-      <input class="input-field" placeholder="Rank" style="background:transparent;">
-    </div>
-    <div style="position:absolute;left:39px;top:372px;width:347px;height:57px;background:#444;border-radius:15px;display:flex;align-items:center;padding:0 16px;">
-      <input class="input-field" placeholder="Department" style="background:transparent;">
-    </div>
-    <button class="action-btn"
-      style="position:absolute;left:110px;top:533px;width:205px;height:57px;font-size:24px;"
-      onclick="window.location.href='dot-cad.html'">
-      Join DOT CAD
-    </button>
-  </div>
-
-  <!-- Bottom Buttons -->
-  <button class="action-btn"
-    style="position:absolute;left:476px;top:950px;width:468px;height:67px;"
-    onclick="window.location.href='civilian.html'">
-    Civilian/Character
-  </button>
-  <button class="action-btn"
-    style="position:absolute;left:976px;top:950px;width:468px;height:67px;"
-    onclick="window.location.href='dispatcher-cad.html'">
-    Dispatcher
-  </button>
-
-</div>
 <script src="js/scale.js"></script>
+<script src="js/server-page.js"></script>
 </body>
 </html>

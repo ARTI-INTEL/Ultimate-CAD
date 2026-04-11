@@ -1,0 +1,215 @@
+/* ============================================================
+   SERVER PAGE — server-page.css
+   Fixed 1920×1080 canvas, same zoom-scaling pattern as the
+   rest of the project. No inline styles in the HTML.
+   ============================================================ */
+
+/* ── Navbar ─────────────────────────────────────────────────── */
+.sp-navbar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 89px;
+  background: var(--bg-panel);        /* #222 */
+  display: flex;
+  align-items: center;
+  padding: 0 26px 0 32px;
+  flex-shrink: 0;
+}
+
+.sp-welcome-text {
+  flex: 1;
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--text-white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 24px;
+}
+
+.sp-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.sp-nav-btn {
+  height: 47px;
+  border-radius: var(--radius-btn);
+  border: none;
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 24px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.sp-nav-btn--dashboard {
+  width: 150px;
+  background: var(--bg-panel-header);   /* #444 */
+}
+.sp-nav-btn--dashboard:hover { background: #555; }
+
+.sp-nav-btn--settings {
+  width: 210px;
+  background: var(--bg-blue);           /* #2954c3 */
+}
+.sp-nav-btn--settings:hover { background: #3a6ae0; }
+
+/* Hidden by default — JS adds .sp-owner-visible on the root when owner */
+#btn-server-settings {
+  display: none;
+}
+.sp-owner #btn-server-settings {
+  display: flex;
+}
+
+/* ── Department panels row ──────────────────────────────────── */
+.sp-panels-row {
+  position: absolute;
+  left: 72px;
+  top: 202px;
+  width: 1776px;    /* 72 + 425 + 250 + 425 + 250 + 425 + 72 ~ right edge = 1849, but original ends ~1847 */
+  display: flex;
+  align-items: flex-start;
+  gap: 250px;
+}
+
+/* ── Individual panel ───────────────────────────────────────── */
+.sp-dept-panel {
+  width: 425px;
+  height: 675px;
+  background: var(--bg-panel);      /* #222 */
+  border-radius: var(--radius-panel);
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* dept-heading is already defined in styles.css:
+   position:absolute; left:39px; top:31px;
+   font-size:28px; font-weight:700; color:#fff;
+   We rely on that rule here. */
+
+/* ── Input field group ──────────────────────────────────────── */
+.sp-field-group {
+  position: absolute;
+  left: 39px;
+  top: 123px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;          /* 206-123=83 but box is 57 so gap = 83-57=26 */
+}
+
+.sp-field-box {
+  width: 347px;
+  height: 57px;
+  background: var(--bg-panel-header);  /* #444 */
+  border-radius: var(--radius-btn);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.sp-field-input {
+  background: transparent;
+  border: none;
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 20px;
+  font-weight: 600;
+  outline: none;
+  width: 100%;
+}
+.sp-field-input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 400;
+}
+
+/* ── Error message ──────────────────────────────────────────── */
+.sp-error-msg {
+  position: absolute;
+  left: 39px;
+  top: 498px;           /* just above the join button */
+  width: 347px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ff6b6b;
+  min-height: 18px;
+  text-align: center;
+}
+
+/* ── Join button ────────────────────────────────────────────── */
+.sp-join-btn {
+  position: absolute;
+  left: 110px;
+  top: 533px;
+  width: 205px;
+  height: 57px;
+  border-radius: var(--radius-btn);
+  border: none;
+  font-family: var(--font);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-white);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+/* default (neutral) */
+.sp-join-btn                { background: var(--bg-panel-header); }
+.sp-join-btn:hover          { background: #555; }
+
+/* per-dept accent colours */
+.sp-join-btn--leo           { background: var(--bg-blue); }
+.sp-join-btn--leo:hover     { background: #3a6ae0; }
+
+.sp-join-btn--fr            { background: #851616; }
+.sp-join-btn--fr:hover      { background: #a01c1c; }
+
+.sp-join-btn--dot           { background: #dcb207; color: #000; }
+.sp-join-btn--dot:hover     { background: #c9a206; }
+
+/* Loading state */
+.sp-join-btn.sp-loading {
+  opacity: 0.65;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Bottom bar ─────────────────────────────────────────────── */
+.sp-bottom-bar {
+  position: absolute;
+  left: 476px;
+  top: 950px;
+  display: flex;
+  gap: 32px;          /* original gap: 976 - (476+468) = 32 */
+}
+
+.sp-bottom-btn {
+  width: 468px;
+  height: 67px;
+  background: var(--bg-panel-header);
+  border: none;
+  border-radius: var(--radius-btn);
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 28px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.sp-bottom-btn:hover { background: #555; }
