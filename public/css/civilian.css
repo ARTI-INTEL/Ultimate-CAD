@@ -1,0 +1,344 @@
+/* ============================================================
+   CIVILIAN PAGE — civilian.css
+   Fixed 1920×1080 canvas, zoom-scaling pattern.
+   All layout and visual rules for civilian.html.
+   ============================================================ */
+
+/* ── Navbar ─────────────────────────────────────────────────── */
+.civ-navbar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 89px;
+  background: #222;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.civ-btn {
+  height: 47px;
+  min-width: 150px;
+  padding: 0 18px;
+  border-radius: var(--radius-btn);
+  border: none;
+  background: var(--bg-panel-header);
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 24px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.civ-btn:hover { background: #555; }
+
+.civ-btn--active {
+  background: var(--bg-blue);
+  outline: 2px solid var(--text-white);
+}
+
+/* ── Panels ─────────────────────────────────────────────────── */
+/* inherits .panel from styles.css (display:none / display:block) */
+
+/* ── Section titles ─────────────────────────────────────────── */
+.civ-section-title {
+  position: absolute;
+  left: 86px;
+  top: 22px;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+.civ-sub-title {
+  position: absolute;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+/* ── Characters panel layout ─────────────────────────────────── */
+
+/* Characters table header */
+.civ-chars-hdr {
+  position: absolute;
+  left: 86px;
+  top: 64px;
+  width: 1748px;
+  height: 41px;
+}
+
+/* Characters table body */
+.civ-body {
+  position: absolute;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #444 #111;
+}
+
+.civ-body::-webkit-scrollbar       { width: 6px; }
+.civ-body::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+
+.civ-chars-body {
+  left: 86px;
+  top: 105px;
+  width: 1748px;
+  min-height: 42px;
+  max-height: 160px;
+}
+
+/* ── Column positions — Characters ─────────────────────────── */
+#col-chars-fn     { left: 17px; }
+#col-chars-ln     { left: 240px; }
+#col-chars-dob    { left: 480px; }
+#col-chars-age    { left: 680px; }
+#col-chars-gender { left: 800px; }
+#col-chars-occ    { left: 990px; }
+#col-chars-addr   { left: 1240px; }
+
+/* ── Vehicles sub-table ──────────────────────────────────────── */
+#chars-veh-title {
+  left: 86px;
+  top: 285px;
+}
+
+.civ-veh-sub-hdr {
+  position: absolute;
+  left: 86px;
+  top: 318px;
+  width: 1748px;
+  height: 41px;
+}
+
+.civ-veh-sub-body {
+  left: 86px;
+  top: 359px;
+  width: 1748px;
+  min-height: 42px;
+  max-height: 120px;
+}
+
+/* ── Column positions — Vehicles sub-table ───────────────────── */
+#col-sub-owner  { left: 17px; }
+#col-sub-plate  { left: 260px; }
+#col-sub-model  { left: 440px; }
+#col-sub-color  { left: 720px; }
+#col-sub-vin    { left: 880px; }
+#col-sub-reg    { left: 1130px; }
+#col-sub-ins    { left: 1360px; }
+
+/* ── Firearms sub-table ──────────────────────────────────────── */
+#chars-fa-title {
+  left: 86px;
+  top: 500px;
+}
+
+.civ-fa-sub-hdr {
+  position: absolute;
+  left: 86px;
+  top: 532px;
+  width: 1748px;
+  height: 41px;
+}
+
+.civ-fa-sub-body {
+  left: 86px;
+  top: 573px;
+  width: 1748px;
+  min-height: 42px;
+  max-height: 120px;
+}
+
+/* ── Column positions — Firearms sub-table ───────────────────── */
+#col-sub-fa-owner  { left: 17px; }
+#col-sub-fa-serial { left: 280px; }
+#col-sub-fa-name   { left: 660px; }
+#col-sub-fa-type   { left: 1040px; }
+
+/* ── Action buttons ──────────────────────────────────────────── */
+.civ-actions {
+  position: absolute;
+  left: 86px;
+  top: 720px;
+  display: flex;
+  gap: 14px;
+}
+
+#vehicles-actions,
+#firearms-actions {
+  top: 200px;
+}
+
+.civ-action-btn {
+  height: 47px;
+  min-width: 192px;
+  padding: 0 20px;
+  border-radius: var(--radius-btn);
+  border: none;
+  background: var(--bg-panel-header);
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 24px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.civ-action-btn:hover { background: #555; }
+
+/* ── Vehicles panel layout ───────────────────────────────────── */
+.civ-vehicles-hdr {
+  position: absolute;
+  left: 86px;
+  top: 64px;
+  width: 1748px;
+  height: 41px;
+}
+
+.civ-vehicles-body {
+  left: 86px;
+  top: 105px;
+  width: 1748px;
+  min-height: 42px;
+  max-height: 600px;
+}
+
+/* ── Column positions — Vehicles ─────────────────────────────── */
+#col-veh-owner  { left: 17px; }
+#col-veh-plate  { left: 260px; }
+#col-veh-model  { left: 440px; }
+#col-veh-color  { left: 720px; }
+#col-veh-vin    { left: 880px; }
+#col-veh-reg    { left: 1130px; }
+#col-veh-ins    { left: 1360px; }
+#col-veh-insexp { left: 1560px; }
+
+/* ── Firearms panel layout ───────────────────────────────────── */
+.civ-firearms-hdr {
+  position: absolute;
+  left: 86px;
+  top: 64px;
+  width: 1748px;
+  height: 41px;
+}
+
+.civ-firearms-body {
+  left: 86px;
+  top: 105px;
+  width: 1748px;
+  min-height: 42px;
+  max-height: 600px;
+}
+
+/* ── Column positions — Firearms ─────────────────────────────── */
+#col-fa-owner  { left: 17px; }
+#col-fa-serial { left: 280px; }
+#col-fa-name   { left: 660px; }
+#col-fa-type   { left: 1040px; }
+
+/* ── Table rows ──────────────────────────────────────────────── */
+.civ-row {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 17px;
+  border-bottom: 1px solid #333;
+  cursor: pointer;
+  gap: 0;
+}
+
+.civ-row:hover { background: #2a2a2a; }
+
+.civ-row span {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text-white);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.civ-row span.civ-col-flex {
+  flex: 1;
+}
+
+.civ-row span.civ-ins-active  { color: var(--status-green); }
+.civ-row span.civ-ins-expired { color: var(--status-red); }
+
+.civ-row-selected { background: rgba(41, 84, 195, 0.2); }
+.civ-row-selected:hover { background: rgba(41, 84, 195, 0.3); }
+
+/* Empty-state message inside tbl-body */
+.civ-empty {
+  padding: 14px 17px;
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Modals ──────────────────────────────────────────────────── */
+.civ-modal-box {
+  left: 86px;
+  top: 140px;
+  width: 1748px;
+  padding: 28px 32px 32px;
+}
+
+.civ-modal-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-white);
+  margin-bottom: 20px;
+}
+
+/* Grid of input fields inside modals */
+.civ-modal-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+/* Default field width */
+.civ-modal-grid .fld {
+  width: 350px;
+  height: 60px;
+  flex-shrink: 0;
+}
+
+/* Wide field (address, VIN, etc.) */
+.civ-modal-grid .fld.civ-fld-wide {
+  width: 730px;
+}
+
+/* Modal submit button */
+.civ-modal-submit {
+  height: 50px;
+  min-width: 180px;
+  padding: 0 24px;
+  border-radius: var(--radius-btn);
+  border: none;
+  font-family: var(--font);
+  font-size: 26px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.civ-submit-blue          { background: var(--bg-blue); color: var(--text-white); }
+.civ-submit-blue:hover    { background: #3a6ae0; }

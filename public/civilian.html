@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Civilian — Ultimate CAD</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/civilian.css">
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- ======== NAVBAR ======== -->
+  <div class="civ-navbar" id="civ-navbar">
+    <button class="civ-btn" id="btn-back">Back to Server</button>
+    <button class="civ-btn civ-btn--active" id="btn-tab-characters" data-tab="characters">Characters</button>
+    <button class="civ-btn" id="btn-tab-vehicles" data-tab="vehicles">Vehicles</button>
+    <button class="civ-btn" id="btn-tab-firearms" data-tab="firearms">Firearms</button>
+  </div>
+
+  <!-- ======== PANEL: CHARACTERS ======== -->
+  <div class="panel active" id="panel-characters">
+
+    <span class="civ-section-title">My Characters</span>
+
+    <!-- Characters table -->
+    <div class="tbl-hdr civ-hdr civ-chars-hdr" id="chars-table-hdr">
+      <span class="tbl-col" id="col-chars-fn">First Name</span>
+      <span class="tbl-col" id="col-chars-ln">Last Name</span>
+      <span class="tbl-col" id="col-chars-dob">D.O.B</span>
+      <span class="tbl-col" id="col-chars-age">AGE</span>
+      <span class="tbl-col" id="col-chars-gender">Gender</span>
+      <span class="tbl-col" id="col-chars-occ">Occupation</span>
+      <span class="tbl-col" id="col-chars-addr">Address</span>
+    </div>
+    <div class="tbl-body civ-body civ-chars-body" id="chars-list"></div>
+
+    <!-- Vehicles sub-table -->
+    <span class="civ-sub-title" id="chars-veh-title">Vehicles</span>
+    <div class="tbl-hdr civ-hdr civ-veh-sub-hdr" id="chars-veh-hdr">
+      <span class="tbl-col" id="col-sub-owner">Owner</span>
+      <span class="tbl-col" id="col-sub-plate">Plate</span>
+      <span class="tbl-col" id="col-sub-model">Model</span>
+      <span class="tbl-col" id="col-sub-color">Color</span>
+      <span class="tbl-col" id="col-sub-vin">VIN</span>
+      <span class="tbl-col" id="col-sub-reg">Reg Expiry</span>
+      <span class="tbl-col" id="col-sub-ins">Insurance</span>
+    </div>
+    <div class="tbl-body civ-body civ-veh-sub-body" id="chars-veh-list"></div>
+
+    <!-- Firearms sub-table -->
+    <span class="civ-sub-title" id="chars-fa-title">Firearms</span>
+    <div class="tbl-hdr civ-hdr civ-fa-sub-hdr" id="chars-fa-hdr">
+      <span class="tbl-col" id="col-sub-fa-owner">Owner</span>
+      <span class="tbl-col" id="col-sub-fa-serial">Serial #</span>
+      <span class="tbl-col" id="col-sub-fa-name">Name</span>
+      <span class="tbl-col" id="col-sub-fa-type">Type</span>
+    </div>
+    <div class="tbl-body civ-body civ-fa-sub-body" id="chars-fa-list"></div>
+
+    <!-- Action buttons -->
+    <div class="civ-actions" id="chars-actions">
+      <button class="civ-action-btn" id="btn-add-character">Add Character</button>
+      <button class="civ-action-btn" id="btn-add-vehicle">Add Vehicle</button>
+      <button class="civ-action-btn" id="btn-add-firearm">Add Firearm</button>
+    </div>
+
+  </div>
+
+  <!-- ======== PANEL: VEHICLES ======== -->
+  <div class="panel" id="panel-vehicles">
+
+    <span class="civ-section-title">Vehicles</span>
+
+    <div class="tbl-hdr civ-hdr civ-vehicles-hdr" id="vehicles-table-hdr">
+      <span class="tbl-col" id="col-veh-owner">Owner</span>
+      <span class="tbl-col" id="col-veh-plate">Plate</span>
+      <span class="tbl-col" id="col-veh-model">Model</span>
+      <span class="tbl-col" id="col-veh-color">Color</span>
+      <span class="tbl-col" id="col-veh-vin">VIN</span>
+      <span class="tbl-col" id="col-veh-reg">Reg Expiry</span>
+      <span class="tbl-col" id="col-veh-ins">Insurance</span>
+      <span class="tbl-col" id="col-veh-insexp">Ins. Expiry</span>
+    </div>
+    <div class="tbl-body civ-body civ-vehicles-body" id="vehicles-list"></div>
+
+    <div class="civ-actions" id="vehicles-actions">
+      <button class="civ-action-btn" id="btn-add-vehicle-tab">Add Vehicle</button>
+    </div>
+
+  </div>
+
+  <!-- ======== PANEL: FIREARMS ======== -->
+  <div class="panel" id="panel-firearms">
+
+    <span class="civ-section-title">Firearms</span>
+
+    <div class="tbl-hdr civ-hdr civ-firearms-hdr" id="firearms-table-hdr">
+      <span class="tbl-col" id="col-fa-owner">Owner</span>
+      <span class="tbl-col" id="col-fa-serial">Serial #</span>
+      <span class="tbl-col" id="col-fa-name">Gun Name</span>
+      <span class="tbl-col" id="col-fa-type">Type</span>
+    </div>
+    <div class="tbl-body civ-body civ-firearms-body" id="firearms-list"></div>
+
+    <div class="civ-actions" id="firearms-actions">
+      <button class="civ-action-btn" id="btn-add-firearm-tab">Add Firearm</button>
+    </div>
+
+  </div>
+
+  <!-- ======== MODAL: Add / Edit Character ======== -->
+  <div class="modal-overlay" id="modal-character">
+    <div class="modal-box civ-modal-box">
+      <button class="close-btn" id="btn-close-char-modal">✕</button>
+      <p class="civ-modal-title">Create Character</p>
+
+      <div class="civ-modal-grid">
+        <div class="fld">
+          <label>First Name</label>
+          <input id="char-fn" autocomplete="off" placeholder="First Name">
+        </div>
+        <div class="fld">
+          <label>Last Name</label>
+          <input id="char-ln" autocomplete="off" placeholder="Last Name">
+        </div>
+        <div class="fld">
+          <label>D.O.B</label>
+          <input id="char-dob" autocomplete="off" placeholder="MM/DD/YYYY">
+        </div>
+        <div class="fld">
+          <label>AGE</label>
+          <input id="char-age" autocomplete="off" placeholder="Age" type="number">
+        </div>
+        <div class="fld">
+          <label>Gender</label>
+          <input id="char-gender" autocomplete="off" placeholder="Gender">
+        </div>
+        <div class="fld">
+          <label>Occupation</label>
+          <input id="char-occ" autocomplete="off" placeholder="Occupation">
+        </div>
+        <div class="fld">
+          <label>Height</label>
+          <input id="char-height" autocomplete="off" placeholder="e.g. 5'11&quot;">
+        </div>
+        <div class="fld">
+          <label>Weight</label>
+          <input id="char-weight" autocomplete="off" placeholder="e.g. 175 lbs">
+        </div>
+        <div class="fld">
+          <label>Skin Tone</label>
+          <input id="char-skin" autocomplete="off" placeholder="Skin Tone">
+        </div>
+        <div class="fld">
+          <label>Hair Tone</label>
+          <input id="char-hair" autocomplete="off" placeholder="Hair Colour">
+        </div>
+        <div class="fld">
+          <label>Eye Color</label>
+          <input id="char-eye" autocomplete="off" placeholder="Eye Colour">
+        </div>
+        <div class="fld civ-fld-wide">
+          <label>Address</label>
+          <input id="char-addr" autocomplete="off" placeholder="Home Address">
+        </div>
+      </div>
+
+      <button class="civ-modal-submit civ-submit-blue" id="btn-submit-char">Create</button>
+    </div>
+  </div>
+
+  <!-- ======== MODAL: Add Vehicle ======== -->
+  <div class="modal-overlay" id="modal-vehicle">
+    <div class="modal-box civ-modal-box">
+      <button class="close-btn" id="btn-close-veh-modal">✕</button>
+      <p class="civ-modal-title">Add Vehicle</p>
+
+      <div class="civ-modal-grid">
+        <div class="fld">
+          <label>Owner (Character Name)</label>
+          <input id="veh-owner" autocomplete="off" placeholder="Character Name">
+        </div>
+        <div class="fld">
+          <label>Plate</label>
+          <input id="veh-plate" autocomplete="off" placeholder="ABC123">
+        </div>
+        <div class="fld civ-fld-wide">
+          <label>VIN</label>
+          <input id="veh-vin" autocomplete="off" placeholder="Vehicle Identification Number">
+        </div>
+        <div class="fld">
+          <label>Brand / Model</label>
+          <input id="veh-model" autocomplete="off" placeholder="e.g. Toyota Camry">
+        </div>
+        <div class="fld">
+          <label>Color</label>
+          <input id="veh-color" autocomplete="off" placeholder="Color">
+        </div>
+        <div class="fld">
+          <label>Reg Expiry</label>
+          <input id="veh-reg" autocomplete="off" placeholder="MM/YYYY">
+        </div>
+        <div class="fld">
+          <label>Insurance Status</label>
+          <select id="veh-ins">
+            <option value="Active">Active</option>
+            <option value="Expired">Expired</option>
+          </select>
+        </div>
+        <div class="fld">
+          <label>Insurance Expiry</label>
+          <input id="veh-insexp" autocomplete="off" placeholder="MM/YYYY">
+        </div>
+      </div>
+
+      <button class="civ-modal-submit civ-submit-blue" id="btn-submit-veh">Add Vehicle</button>
+    </div>
+  </div>
+
+  <!-- ======== MODAL: Add Firearm ======== -->
+  <div class="modal-overlay" id="modal-firearm">
+    <div class="modal-box civ-modal-box">
+      <button class="close-btn" id="btn-close-fa-modal">✕</button>
+      <p class="civ-modal-title">Register Firearm</p>
+
+      <div class="civ-modal-grid">
+        <div class="fld">
+          <label>Owner (Character Name)</label>
+          <input id="fa-owner" autocomplete="off" placeholder="Character Name">
+        </div>
+        <div class="fld">
+          <label>Serial Number</label>
+          <input id="fa-serial" autocomplete="off" placeholder="Serial Number">
+        </div>
+        <div class="fld">
+          <label>Gun Name</label>
+          <input id="fa-name" autocomplete="off" placeholder="e.g. Glock 19">
+        </div>
+        <div class="fld">
+          <label>Type</label>
+          <input id="fa-type" autocomplete="off" placeholder="e.g. Semi-Auto">
+        </div>
+      </div>
+
+      <button class="civ-modal-submit civ-submit-blue" id="btn-submit-fa">Register</button>
+    </div>
+  </div>
+
+</div>
+<script src="js/scale.js"></script>
+<script src="js/civilian.js"></script>
+</body>
+</html>
