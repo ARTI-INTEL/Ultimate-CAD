@@ -37,7 +37,7 @@ html, body {
 /* Scale the 1920x1080 design to fit viewport */
 .page-wrapper {
   width: 100%;
-  min-height: 100vh;
+  min-height: 100%;
   position: relative;
 }
 
@@ -245,7 +245,7 @@ Global page layout
 .modal-overlay {
   position: absolute;
   left: 0; top: 0;
-  width: 1920px; height: 1080px;
+  width: 1920px; height: 100%;
   background: rgba(0,0,0,0.65);
   display: none;
   z-index: 100;

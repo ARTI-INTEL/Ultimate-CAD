@@ -191,8 +191,7 @@
 .sp-bottom-bar {
   position: absolute;
   left: 476px;
-  /* top: 950px; */
-  bottom: 20px;
+  top: 950px;
   display: flex;
   gap: 32px;          /* original gap: 976 - (476+468) = 32 */
 }

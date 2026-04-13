@@ -1,0 +1,591 @@
+/* ============================================================
+   SERVER SETTINGS — server-settings.css
+   Fixed 1920×1080 canvas.  Matches SVG pixel layout:
+     Left member panel : x=78  → x=862  (w=784)
+     Right config panel: x=960 → x=1842 (w=882)
+     Logo upload area  : x=1039→x=1325  (w=286, h=228)
+   No inline styles in HTML.
+   ============================================================ */
+
+/* ── Navbar ─────────────────────────────────────────────────── */
+.ss-navbar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 89px;
+  background: var(--bg-panel);
+  display: flex;
+  align-items: center;
+  padding: 0 26px 0 32px;
+}
+
+.ss-nav-title {
+  flex: 1;
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--text-white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 24px;
+}
+
+.ss-nav-actions {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.ss-nav-btn {
+  height: 47px;
+  border-radius: var(--radius-btn);
+  border: none;
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 24px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.ss-nav-btn--back       { width: 183px; background: var(--bg-panel-header); }
+.ss-nav-btn--back:hover { background: #555; }
+
+.ss-nav-btn--dashboard       { width: 183px; background: var(--bg-blue); }
+.ss-nav-btn--dashboard:hover { background: #3a6ae0; }
+
+/* ── Left: Member panel ─────────────────────────────────────── */
+.ss-members-panel {
+  position: absolute;
+  left: 78px;
+  top: 161px;
+  width: 784px;
+  height: 878px;          /* 161→1039 = 878px */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header row */
+.ss-members-hdr {
+  height: 75px;
+  background: var(--bg-panel-header);
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  flex-shrink: 0;
+}
+
+.ss-mhdr-col {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ss-mhdr-col--name     { width: 200px; flex-shrink: 0; }
+.ss-mhdr-col--role     { width: 120px; flex-shrink: 0; }
+.ss-mhdr-col--dept     { flex: 1; }
+.ss-mhdr-col--callsign { width: 100px; flex-shrink: 0; }
+.ss-mhdr-col--joined   { width: 130px; flex-shrink: 0; }
+.ss-mhdr-col--action   { width: 120px; flex-shrink: 0; text-align: right; }
+
+/* Body */
+.ss-members-body {
+  flex: 1;
+  background: var(--bg-panel);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #444 #111;
+}
+
+.ss-members-body::-webkit-scrollbar       { width: 5px; }
+.ss-members-body::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+
+/* Footer strip */
+.ss-members-footer {
+  height: 36px;
+  background: var(--bg-panel);
+  border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  flex-shrink: 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.ss-members-count {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.35);
+}
+
+/* Member row */
+.ss-member-row {
+  display: flex;
+  align-items: center;
+  height: 60px;
+  padding: 0 28px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  transition: background 0.12s;
+  animation: ssRowIn 0.2s ease both;
+}
+
+.ss-member-row:last-child { border-bottom: none; }
+.ss-member-row:hover { background: rgba(255,255,255,0.03); }
+
+@keyframes ssRowIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.ss-member-cell {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ss-member-cell--name     { width: 200px; flex-shrink: 0; }
+.ss-member-cell--role     { width: 120px; flex-shrink: 0; }
+.ss-member-cell--dept     { flex: 1; color: rgba(255,255,255,0.65); font-size: 18px; }
+.ss-member-cell--callsign { width: 100px; flex-shrink: 0; color: rgba(255,255,255,0.55); }
+.ss-member-cell--joined   { width: 130px; flex-shrink: 0; color: rgba(255,255,255,0.45); font-size: 16px; }
+.ss-member-cell--action   { width: 120px; flex-shrink: 0; display: flex; gap: 6px; justify-content: flex-end; }
+
+/* Role badge */
+.ss-role-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ss-role-badge--owner     { background: rgba(220,178,7,0.2);    color: #dcb207; }
+.ss-role-badge--admin     { background: rgba(41,84,195,0.25);   color: #7eaaff; }
+.ss-role-badge--moderator { background: rgba(0,178,255,0.2);    color: #00b2ff; }
+.ss-role-badge--member    { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.45); }
+
+/* Row action buttons */
+.ss-row-btn {
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: none;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ss-row-btn--role {
+  background: rgba(41,84,195,0.3);
+  color: #7eaaff;
+  border: 1px solid rgba(41,84,195,0.5);
+}
+.ss-row-btn--role:hover { background: rgba(41,84,195,0.55); }
+
+.ss-row-btn--kick {
+  background: rgba(133,22,22,0.3);
+  color: #ff7c7c;
+  border: 1px solid rgba(133,22,22,0.55);
+}
+.ss-row-btn--kick:hover { background: rgba(133,22,22,0.55); }
+
+/* Owner cannot be kicked/changed (hide buttons) */
+.ss-row-btn--owner-lock { display: none; }
+
+/* Empty state */
+.ss-members-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  font-size: 20px;
+  color: rgba(255,255,255,0.2);
+  font-weight: 600;
+}
+
+/* ── Right: Config panel ────────────────────────────────────── */
+.ss-config {
+  position: absolute;
+  left: 960px;
+  top: 161px;
+  width: 882px;
+  /* no fixed height — content driven */
+}
+
+/* ── Logo upload area ───────────────────────────────────────── */
+.ss-logo-area {
+  position: absolute;
+  left: 79px;               /* 1039-960 = 79 */
+  top: 22px;
+  width: 286px;
+  height: 228px;
+  background: #d9d9d9;
+  border-radius: var(--radius-panel);
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s;
+}
+
+.ss-logo-area:hover { opacity: 0.9; }
+
+.ss-logo-file-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 3;
+}
+
+.ss-logo-preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.ss-logo-preview[src=""],
+.ss-logo-preview:not([src]) {
+  display: none;
+}
+
+.ss-logo-overlay {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.ss-logo-area.has-image .ss-logo-overlay {
+  display: none;
+}
+
+.ss-logo-icon {
+  font-size: 48px;
+  filter: grayscale(1);
+  opacity: 0.4;
+}
+
+.ss-logo-hint {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+  opacity: 0.6;
+}
+
+.ss-logo-sub {
+  font-size: 14px;
+  font-weight: 500;
+  color: #000;
+  opacity: 0.4;
+}
+
+.ss-logo-clear-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 4;
+  background: rgba(0,0,0,0.6);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  cursor: pointer;
+  display: none;
+}
+
+.ss-logo-area.has-image .ss-logo-clear-btn { display: block; }
+
+/* ── Form fields column (right of logo, and below) ──────────── */
+.ss-field-section {
+  position: absolute;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Stacking positions matching SVG coords (relative to ss-config top) */
+/* Server Name: y=527-89=438 → relative to ss-config top (161) = 527-161=366 */
+#field-section-name-wrap,
+.ss-field-section:nth-of-type(1) { top: 366px; }   /* y=527 relative */
+.ss-field-section:nth-of-type(2) { top: 463px; }   /* y=624 relative */
+.ss-field-section:nth-of-type(3) { top: 550px; }   /* y=711 relative */
+.ss-field-section:nth-of-type(4) { top: 735px; }   /* y=896 relative */
+.ss-field-section:nth-of-type(5) { top: 805px; }   /* y=966 relative */
+
+/* Use a simpler vertical flow since absolute within ss-config */
+.ss-config {
+  /* override to normal flow */
+}
+
+/* Simpler approach — make ss-config a normal flex column */
+.ss-config {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-top: 270px;      /* space for logo area */
+  padding-left: 0;
+  padding-right: 20px;
+}
+
+/* Reset field section absolute */
+.ss-field-section {
+  position: relative;
+  left: auto;
+  top: auto;
+  margin-bottom: 14px;
+}
+
+.ss-field-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding-left: 4px;
+}
+
+/* Field boxes */
+.ss-field-box {
+  height: 67px;
+  background: var(--bg-panel-header);
+  border-radius: var(--radius-btn);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  width: 468px;
+  transition: background 0.15s;
+}
+
+.ss-field-box:focus-within {
+  background: #4a4a4a;
+  outline: 2px solid rgba(41,84,195,0.55);
+}
+
+.ss-field-box--sm {
+  height: 57px;
+}
+
+.ss-field-box--row {
+  gap: 10px;
+}
+
+.ss-field-box--confirm {
+  width: 100%;
+  height: 57px;
+  background: #1a1a1a;
+  border: 1px solid rgba(133,22,22,0.5);
+  margin-bottom: 8px;
+}
+
+.ss-field-input {
+  background: transparent;
+  border: none;
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 20px;
+  font-weight: 600;
+  outline: none;
+  flex: 1;
+  width: 100%;
+}
+
+.ss-field-input::placeholder {
+  color: rgba(255,255,255,0.3);
+  font-weight: 400;
+}
+
+.ss-mono {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.1em;
+}
+
+.ss-textarea {
+  resize: none;
+  height: 52px;
+  padding-top: 6px;
+  font-size: 18px;
+  line-height: 1.5;
+  align-self: flex-start;
+}
+
+/* Inline buttons inside field box */
+.ss-inline-btn {
+  flex-shrink: 0;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: none;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--bg-blue);
+  color: #fff;
+  transition: background 0.15s;
+}
+
+.ss-inline-btn:hover { background: #3a6ae0; }
+
+.ss-inline-btn--alt {
+  background: var(--bg-panel-header);
+}
+.ss-inline-btn--alt:hover { background: #555; }
+
+/* ── Status messages ────────────────────────────────────────── */
+.ss-error-msg {
+  min-height: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ff6b6b;
+}
+
+.ss-success-msg {
+  min-height: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--status-green);
+}
+
+/* ── Save button ────────────────────────────────────────────── */
+.ss-save-btn {
+  height: 52px;
+  border-radius: var(--radius-btn);
+  border: none;
+  font-family: var(--font);
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  color: var(--text-white);
+}
+
+.ss-save-btn--blue       { background: var(--bg-blue); width: 200px; }
+.ss-save-btn--blue:hover { background: #3a6ae0; }
+.ss-save-btn--red        { background: #851616; }
+.ss-save-btn--red:hover  { background: #a01c1c; }
+.ss-save-btn--grey       { background: var(--bg-panel-header); }
+.ss-save-btn--grey:hover { background: #555; }
+
+.ss-save-btn.ss-loading {
+  opacity: 0.65;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Danger zone ────────────────────────────────────────────── */
+.ss-danger-zone {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.ss-danger-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.3);
+  flex-shrink: 0;
+}
+
+/* ── Modals ─────────────────────────────────────────────────── */
+.ss-modal-box {
+  left: 460px;
+  top: 360px;
+  width: 720px;
+  padding: 36px 40px 32px;
+}
+
+.ss-modal-box--wide {
+  width: 840px;
+  left: 400px;
+}
+
+.ss-modal-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-white);
+  margin-bottom: 10px;
+}
+
+.ss-modal-title--danger { color: #ff6b6b; }
+
+.ss-modal-desc {
+  font-size: 18px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
+
+.ss-modal-actions {
+  display: flex;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+/* Role selection grid */
+.ss-role-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.ss-role-btn {
+  height: 48px;
+  padding: 0 22px;
+  border-radius: var(--radius-btn);
+  border: 2px solid rgba(255,255,255,0.12);
+  background: transparent;
+  color: rgba(255,255,255,0.55);
+  font-family: var(--font);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.ss-role-btn:hover {
+  border-color: rgba(255,255,255,0.35);
+  color: #fff;
+}
+
+.ss-role-btn.selected {
+  border-color: var(--bg-blue);
+  background: rgba(41,84,195,0.25);
+  color: #7eaaff;
+}

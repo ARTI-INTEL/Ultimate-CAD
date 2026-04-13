@@ -1,0 +1,430 @@
+/* ============================================================
+   F&R CAD — fr-cad.css
+   All layout and visual rules specific to fr-cad.html.
+   Relies on shared design tokens and components in styles.css.
+   ============================================================ */
+
+.fr-navbar {
+  position: absolute;
+  left: 0; top: 0;
+  width: 1920px; height: 89px;
+  background: #711818;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+
+/* ── Navbar button positions ──────────────────────────────── */
+#fr-nav-clockout    { left: 20px;   width: 183px; }
+#fr-nav-home        { left: 217px;  width: 111px; }
+#fr-nav-map         { left: 340px;  width: 79px;  }
+#fr-nav-cad         { left: 433px;  width: 79px;  }
+#fr-nav-search      { left: 525px;  width: 119px; }
+#fr-nav-reports     { left: 658px;  width: 133px; }
+#fr-nav-callhistory { left: 804px;  width: 196px; }
+#fr-nav-notepad     { left: 1013px; width: 150px; }
+
+/* ── Status buttons ───────────────────────────────────────── */
+.fr-status-btn {
+  position: absolute;
+  top: 21px;
+  width: 79px;
+  height: 47px;
+  border-radius: var(--radius-btn);
+  border: none;
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 24px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.fr-status-btn:hover { opacity: 0.85; }
+
+#fr-status-available { left: 1431px; background: var(--status-green); }
+#fr-status-offduty   { left: 1523px; background: var(--status-red);   }
+#fr-status-onscene   { left: 1615px; background: var(--status-blue);  }
+#fr-status-arrived   { left: 1707px; background: var(--status-green); }
+#fr-status-busy      { left: 1799px; background: var(--status-yellow);}
+
+/* ── Panel: HOME ──────────────────────────────────────────── */
+.fr-welcome-text {
+  position: absolute;
+  left: 41px;
+  top: 44px;
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--text-white);
+  width: 617px;
+  line-height: 1.6;
+}
+
+/* ── Panel: MAP ───────────────────────────────────────────── */
+.fr-map-placeholder {
+  position: absolute;
+  left: 388px;
+  top: 0;
+  width: 1143px;
+  height: 991px;
+  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fr-map-inner {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.fr-map-icon     { font-size: 80px; }
+.fr-map-title    { font-size: 28px; font-weight: 700; margin-top: 16px; }
+.fr-map-subtitle { font-size: 18px; margin-top: 8px; }
+
+/* ── Panel: CAD — shared column positions ─────────────────── */
+/* These classes are also reused in the Call History header */
+.fr-col-callnum  { left: 17px;   }
+.fr-col-nature   { left: 131px;  }
+.fr-col-location { left: 503px;  }
+.fr-col-priority { left: 905px;  }
+.fr-col-unit     { left: 1236px; }
+
+.fr-calls-title {
+  position: absolute;
+  left: 86px;
+  top: 22px;
+}
+
+.fr-calls-hdr {
+  left: 86px;
+  top: 64px;
+  width: 1748px;
+  height: 41px;
+}
+
+#fr-calls-list {
+  left: 86px;
+  top: 105px;
+  width: 1748px;
+  min-height: 42px;
+  max-height: 130px;
+  overflow-y: auto;
+}
+
+#fr-btn-create-call {
+  left: 86px;
+  top: 162px;
+  width: 192px;
+  height: 44px;
+}
+
+/* ── Call row cells ───────────────────────────────────────── */
+.fr-cell {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+.fr-cell-callnum  { width: 80px;  }
+.fr-cell-nature   { flex: 1;      }
+.fr-cell-loc      { width: 300px; }
+.fr-cell-pri      { width: 120px; }
+.fr-cell-unit     { width: 100px; }
+
+.fr-close-call-btn {
+  background: var(--status-red);
+  border: none;
+  color: var(--text-white);
+  border-radius: 8px;
+  padding: 3px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.fr-close-call-btn:hover { opacity: 0.85; }
+
+/* ── Panel: SEARCH ────────────────────────────────────────── */
+.fr-search-section  { position: absolute; }
+.fr-search-ped-section { left: 71px;  top: 89px; }
+.fr-search-car-section { left: 731px; top: 89px; }
+
+.fr-search-label {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--text-white);
+  margin-bottom: 8px;
+}
+
+.fr-search-input-wrap {
+  width: 458px;
+  height: 66px;
+  background: var(--bg-panel);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.fr-search-input {
+  background: transparent;
+  border: none;
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 24px;
+  font-weight: 700;
+  outline: none;
+  padding: 0 20px;
+  width: 100%;
+}
+.fr-search-input::placeholder { color: rgba(255, 255, 255, 0.4); }
+
+/* PED results table */
+.fr-ped-results-hdr {
+  left: 14px;
+  top: 333px;
+  width: 644px;
+  height: 41px;
+}
+.fr-ped-col-fn { left: 23px;  }
+.fr-ped-col-ln { left: 344px; }
+
+#fr-ped-results {
+  left: 14px;
+  top: 374px;
+  width: 644px;
+  min-height: 42px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Car results table */
+.fr-car-results-hdr {
+  left: 673px;
+  top: 333px;
+  width: 811px;
+  height: 41px;
+}
+.fr-car-col-owner   { left: 19px;  }
+.fr-car-col-plate   { left: 322px; }
+.fr-car-col-vehicle { left: 489px; }
+.fr-car-col-color   { left: 729px; }
+
+#fr-car-results {
+  left: 673px;
+  top: 374px;
+  width: 811px;
+  min-height: 42px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* PED Detail modal box */
+.fr-ped-detail-box {
+  left: 86px;
+  top: 540px;
+  width: 1748px;
+  height: 357px;
+  padding: 16px;
+}
+
+.fr-ped-detail-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fr-detail-field {
+  background: #333;
+  border-radius: 10px;
+  padding: 8px 14px;
+  min-width: 160px;
+}
+
+.fr-detail-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 700;
+}
+
+.fr-detail-value {
+  font-size: 17px;
+  color: var(--text-white);
+  font-weight: 700;
+}
+
+.fr-licenses-section {
+  position: absolute;
+  left: 22px;
+  bottom: 12px;
+  width: 300px;
+}
+
+.fr-subsection-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.fr-licenses-hdr {
+  position: relative;
+  width: 300px;
+  height: 41px;
+  border-radius: 8px 8px 0 0;
+}
+.fr-lic-col { left: 14px; }
+
+.fr-licenses-body {
+  position: relative;
+  width: 300px;
+  min-height: 42px;
+  border-radius: 0 0 8px 8px;
+  padding: 10px 14px;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ── Panel: REPORTS ───────────────────────────────────────── */
+.fr-report-tabs {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  display: flex;
+  gap: 12px;
+}
+
+.fr-report-area {
+  position: absolute;
+  left: 86px;
+  top: 84px;
+  width: 1748px;
+  height: 880px;
+  background: var(--bg-panel);
+  border-radius: 15px;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.fr-report-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 12px;
+  display: block;
+}
+
+/* ── Panel: CALL HISTORY ──────────────────────────────────── */
+.fr-history-title {
+  position: absolute;
+  left: 102px;
+  top: 37px;
+}
+
+.fr-history-hdr {
+  left: 86px;
+  top: 90px;
+  width: 1748px;
+  height: 41px;
+}
+
+.fr-history-search-wrap {
+  position: absolute;
+  right: 0;
+  top: 5px;
+  width: 213px;
+  height: 30px;
+  background: #111;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.fr-history-search-input {
+  background: transparent;
+  border: none;
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 15px;
+  outline: none;
+  padding: 0 12px;
+  width: 100%;
+}
+.fr-history-search-input::placeholder { color: rgba(255, 255, 255, 0.35); }
+
+#fr-history-list {
+  left: 86px;
+  top: 131px;
+  width: 1748px;
+  min-height: 42px;
+  max-height: 820px;
+  overflow-y: auto;
+  border-radius: 0 0 15px 15px;
+}
+
+.fr-hist-cell {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-white);
+}
+.fr-hist-cell-callnum  { width: 80px;  }
+.fr-hist-cell-nature   { flex: 1;      }
+.fr-hist-cell-location { width: 300px; }
+.fr-hist-cell-priority { width: 120px; }
+
+/* ── Panel: NOTEPAD ───────────────────────────────────────── */
+.fr-notepad-title {
+  position: absolute;
+  left: 86px;
+  top: 16px;
+}
+
+/* ── Modal: CREATE CALL ───────────────────────────────────── */
+.fr-call-modal-box {
+  left: 86px;
+  top: 568px;
+  width: 1748px;
+  height: 492px;
+  padding: 15px;
+}
+
+.fr-call-modal-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+/* Individual field widths */
+.fr-fld-callid   { width: 129px; height: 57px; }
+.fr-fld-nature   { width: 185px; height: 57px; }
+.fr-fld-title    { width: 349px; height: 57px; }
+.fr-fld-location { width: 623px; height: 57px; }
+.fr-fld-select   { width: 185px; height: 57px; }
+
+.fr-fld-desc         { width: 100%; height: 332px; }
+.fr-fld-desc textarea { height: 290px; }
+
+.fr-callid-display {
+  color: var(--text-white);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+/* Select option background — prevents white flash in most browsers */
+.fld select option { background: var(--bg-panel); }
+
+.fr-call-modal-create-btn {
+  position: absolute;
+  left: 808px;
+  bottom: 12px;
+  width: 132px;
+  height: 44px;
+  font-size: 28px;
+}
+
+/* ── History row hover ────────────────────────────────────── */
+.fr-history-body { border-radius: 0 0 15px 15px; }

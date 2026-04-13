@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ultimate CAD — Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+<div class="page-wrapper" id="settings-root">
+
+  <!-- ======== NAVBAR ======== -->
+  <div class="st-navbar" id="st-navbar">
+    <span class="st-nav-title" id="st-nav-title">Welcome to Ultimate CAD, Settings</span>
+    <div class="st-nav-actions">
+      <button class="st-nav-btn st-nav-btn--dashboard" id="btn-dashboard">Dashboard</button>
+    </div>
+  </div>
+
+  <!-- ======== PANEL HEADER (tab bar) ======== -->
+  <div class="st-panel-header" id="st-panel-header">
+    <span class="st-panel-label">Account</span>
+    <span class="st-panel-label">Role</span>
+    <span class="st-panel-label">Servers Joined</span>
+    <span class="st-panel-label">Date Joined</span>
+    <span class="st-panel-label">Discord ID</span>
+  </div>
+
+  <!-- ======== PANEL BODY ======== -->
+  <div class="st-panel-body" id="st-panel-body">
+
+    <!-- ── Account Info row ── -->
+    <div class="st-info-row" id="st-info-row">
+      <span class="st-info-cell st-info-cell--name" id="cell-username">—</span>
+      <span class="st-info-cell st-info-cell--role"  id="cell-role">Member</span>
+      <span class="st-info-cell st-info-cell--servers" id="cell-server-count">—</span>
+      <span class="st-info-cell st-info-cell--date"  id="cell-join-date">—</span>
+      <span class="st-info-cell st-info-cell--discord" id="cell-discord-id">—</span>
+    </div>
+
+    <!-- ── Divider ── -->
+    <div class="st-divider"></div>
+
+    <!-- ── Two-column settings area ── -->
+    <div class="st-settings-grid">
+
+      <!-- LEFT: Account Settings -->
+      <div class="st-section" id="section-account">
+        <p class="st-section-title">Account Settings</p>
+
+        <div class="st-field-group">
+          <div class="st-field-block">
+            <label class="st-field-label" for="input-username">Username</label>
+            <div class="st-field-box">
+              <input class="st-field-input" id="input-username" placeholder="Your display name" autocomplete="off">
+            </div>
+          </div>
+
+          <div class="st-field-block">
+            <label class="st-field-label" for="input-discord-id">Discord ID</label>
+            <div class="st-field-box st-field-box--readonly">
+              <input class="st-field-input" id="input-discord-id" placeholder="—" readonly>
+            </div>
+          </div>
+
+          <div class="st-field-block">
+            <label class="st-field-label" for="input-join-date">Member Since</label>
+            <div class="st-field-box st-field-box--readonly">
+              <input class="st-field-input" id="input-join-date" placeholder="—" readonly>
+            </div>
+          </div>
+        </div>
+
+        <p class="st-error-msg" id="account-error"></p>
+        <p class="st-success-msg" id="account-success"></p>
+
+        <button class="st-save-btn st-save-btn--blue" id="btn-save-account">Save Changes</button>
+      </div>
+
+      <!-- RIGHT: Server Memberships -->
+      <div class="st-section" id="section-servers">
+        <p class="st-section-title">Server Memberships</p>
+
+        <div class="st-servers-table">
+          <div class="st-servers-hdr">
+            <span class="st-srv-col" style="--col-w:480px">Server Name</span>
+            <span class="st-srv-col" style="--col-w:200px">Members</span>
+            <span class="st-srv-col" style="--col-w:200px">Your Role</span>
+            <span class="st-srv-col" style="--col-w:240px">Joined</span>
+            <span class="st-srv-col" style="--col-w:160px">Action</span>
+          </div>
+          <div class="st-servers-body" id="servers-list">
+            <!-- rows injected by settings.js -->
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.st-settings-grid -->
+
+    <!-- ── Danger Zone ── -->
+    <div class="st-danger-zone" id="st-danger-zone">
+      <p class="st-danger-label">Danger Zone</p>
+      <button class="st-save-btn st-save-btn--red" id="btn-leave-all">Leave All Servers</button>
+      <button class="st-save-btn st-save-btn--red" id="btn-delete-account">Delete Account</button>
+    </div>
+
+  </div><!-- /.st-panel-body -->
+
+  <!-- ======== CONFIRM MODAL ======== -->
+  <div class="modal-overlay" id="modal-confirm">
+    <div class="modal-box st-confirm-box">
+      <button class="close-btn" id="btn-confirm-close">✕</button>
+      <p class="st-confirm-title" id="confirm-title">Are you sure?</p>
+      <p class="st-confirm-desc"  id="confirm-desc">This action cannot be undone.</p>
+      <div class="st-confirm-actions">
+        <button class="st-save-btn st-save-btn--red"  id="btn-confirm-yes">Confirm</button>
+        <button class="st-save-btn st-save-btn--grey" id="btn-confirm-no">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.page-wrapper -->
+
+<script src="js/settings.js"></script>
+</body>
+</html>

@@ -5,704 +5,284 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LEO CAD</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/leo.css">
 </head>
 <body>
 <div class="page-wrapper">
 
-  <!-- ============================================================
-       NAVBAR
-  ============================================================ -->
-  <div class="leo-navbar" style="position:absolute;left:0;top:0;width:1920px;height:89px;">
-    <button class="leo-btn" style="left:20px;width:183px;" onclick="window.location.href='server-page.html'">Clock-Out</button>
-    <button class="leo-btn active" id="btn-home"        style="left:217px;width:111px;"  onclick="showPanel('home')">Home</button>
-    <button class="leo-btn"        id="btn-map"         style="left:340px;width:79px;"   onclick="showPanel('map')">Map</button>
-    <button class="leo-btn"        id="btn-cad"         style="left:433px;width:79px;"   onclick="showPanel('cad')">CAD</button>
-    <button class="leo-btn"        id="btn-search"      style="left:525px;width:119px;"  onclick="showPanel('search')">Search</button>
-    <button class="leo-btn"        id="btn-reports"     style="left:658px;width:133px;"  onclick="showPanel('reports')">Reports</button>
-    <button class="leo-btn"        id="btn-callhistory" style="left:804px;width:196px;"  onclick="showPanel('callhistory')">Call History</button>
-    <button class="leo-btn"        id="btn-notepad"     style="left:1013px;width:150px;" onclick="showPanel('notepad')">Notepad</button>
-    <!-- Status buttons -->
-    <button style="position:absolute;left:1431px;top:21px;width:79px;height:47px;border-radius:15px;border:none;background:#00ff2f;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:500;cursor:pointer;" title="Available" onclick="setStatus('10-8',this)">10-8</button>
-    <button style="position:absolute;left:1523px;top:21px;width:79px;height:47px;border-radius:15px;border:none;background:#ff0004;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:500;cursor:pointer;" title="Off Duty"    onclick="setStatus('10-7',this)">10-7</button>
-    <button style="position:absolute;left:1615px;top:21px;width:79px;height:47px;border-radius:15px;border:none;background:#00b2ff;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:500;cursor:pointer;" title="On Scene"    onclick="setStatus('10-97',this)">10-97</button>
-    <button style="position:absolute;left:1707px;top:21px;width:79px;height:47px;border-radius:15px;border:none;background:#00ff2f;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:500;cursor:pointer;" title="Arrived"     onclick="setStatus('10-23',this)">10-23</button>
-    <button style="position:absolute;left:1799px;top:21px;width:79px;height:47px;border-radius:15px;border:none;background:#ffbb00;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:500;cursor:pointer;" title="Busy"         onclick="setStatus('10-6',this)">10-6</button>
+  <!-- ======== NAVBAR ======== -->
+  <div class="leo-navbar">
+    <button class="leo-btn" id="btn-clockout">Clock-Out</button>
+    <button class="leo-btn leo-btn--active" id="btn-home"        data-panel="home">Home</button>
+    <button class="leo-btn"                 id="btn-map"         data-panel="map">Map</button>
+    <button class="leo-btn"                 id="btn-cad"         data-panel="cad">CAD</button>
+    <button class="leo-btn"                 id="btn-search"      data-panel="search">Search</button>
+    <button class="leo-btn"                 id="btn-reports"     data-panel="reports">Reports</button>
+    <button class="leo-btn"                 id="btn-callhistory" data-panel="callhistory">Call History</button>
+    <button class="leo-btn"                 id="btn-notepad"     data-panel="notepad">Notepad</button>
+
+    <div class="leo-status-group">
+      <button class="leo-status-btn leo-status-btn--green"  id="status-108"  data-code="10-8"  title="Available">10-8</button>
+      <button class="leo-status-btn leo-status-btn--red"    id="status-107"  data-code="10-7"  title="Off Duty">10-7</button>
+      <button class="leo-status-btn leo-status-btn--blue"   id="status-1097" data-code="10-97" title="On Scene">10-97</button>
+      <button class="leo-status-btn leo-status-btn--green"  id="status-1023" data-code="10-23" title="Arrived">10-23</button>
+      <button class="leo-status-btn leo-status-btn--yellow" id="status-106"  data-code="10-6"  title="Busy">10-6</button>
+    </div>
   </div>
 
-  <!-- ============================================================
-       PANEL: HOME
-  ============================================================ -->
+  <!-- ======== PANEL: HOME ======== -->
   <div class="panel active" id="panel-home">
-    <p style="position:absolute;left:41px;top:44px;font-size:32px;font-weight:500;color:#fff;width:617px;line-height:1.6;">
+    <p class="leo-welcome-text">
       Welcome to the LEO CAD for the Law Enforcement Departments in this county.
     </p>
   </div>
 
-  <!-- ============================================================
-       PANEL: MAP
-  ============================================================ -->
+  <!-- ======== PANEL: MAP ======== -->
   <div class="panel" id="panel-map">
-    <div style="position:absolute;left:388px;top:0;width:1143px;height:991px;background:#0d1b3e;display:flex;align-items:center;justify-content:center;">
-      <div style="text-align:center;color:rgba(255,255,255,0.2);">
-        <div style="font-size:80px;">🗺️</div>
-        <p style="font-size:28px;font-weight:700;margin-top:16px;">Map View</p>
-        <p style="font-size:18px;margin-top:8px;">Integrate your map here</p>
+    <div class="leo-map-placeholder">
+      <div class="leo-map-inner">
+        <div class="leo-map-icon">🗺️</div>
+        <p class="leo-map-title">Map View</p>
+        <p class="leo-map-subtitle">Integrate your map here</p>
       </div>
     </div>
   </div>
 
-  <!-- ============================================================
-       PANEL: CAD  (Active Calls + BOLOs)
-  ============================================================ -->
+  <!-- ======== PANEL: CAD ======== -->
   <div class="panel" id="panel-cad">
 
-    <!-- ── Active Calls ── -->
-    <span style="position:absolute;left:86px;top:22px;font-size:32px;font-weight:700;color:#fff;">Active Calls</span>
-    <div class="tbl-hdr" style="left:86px;top:64px;width:1748px;height:41px;">
-      <span class="tbl-col" style="left:17px;">Call #</span>
-      <span class="tbl-col" style="left:131px;">Nature</span>
-      <span class="tbl-col" style="left:503px;">Location</span>
-      <span class="tbl-col" style="left:905px;">Priority</span>
-      <span class="tbl-col" style="left:1236px;">Unit</span>
+    <!-- Active Calls -->
+    <span class="leo-section-title" id="cad-calls-title">Active Calls</span>
+    <div class="tbl-hdr leo-calls-hdr">
+      <span class="tbl-col leo-col-callnum">Call #</span>
+      <span class="tbl-col leo-col-nature">Nature</span>
+      <span class="tbl-col leo-col-location">Location</span>
+      <span class="tbl-col leo-col-priority">Priority</span>
+      <span class="tbl-col leo-col-unit">Unit</span>
     </div>
-    <div class="tbl-body" id="leo-calls-list"
-         style="left:86px;top:105px;width:1748px;min-height:42px;max-height:100px;"></div>
-    <button class="act-btn" style="left:86px;top:160px;width:192px;height:44px;"
-            onclick="showModal('leo-call-modal')">Create Call</button>
+    <div class="tbl-body leo-calls-body" id="leo-calls-list"></div>
+    <button class="act-btn leo-cad-btn" id="btn-create-call">Create Call</button>
 
-    <!-- ── Active BOLOs ── -->
-    <span style="position:absolute;left:86px;top:222px;font-size:32px;font-weight:700;color:#fff;">Active BOLO's</span>
-    <div class="tbl-hdr" style="left:86px;top:270px;width:1748px;height:41px;">
-      <span class="tbl-col" style="left:25px;">Type</span>
-      <span class="tbl-col" style="left:272px;">Reason</span>
-      <span class="tbl-col" style="left:877px;">Description</span>
+    <!-- Active BOLOs -->
+    <span class="leo-section-title" id="cad-bolos-title">Active BOLO's</span>
+    <div class="tbl-hdr leo-bolos-hdr">
+      <span class="tbl-col leo-col-bolo-type">Type</span>
+      <span class="tbl-col leo-col-bolo-reason">Reason</span>
+      <span class="tbl-col leo-col-bolo-desc">Description</span>
     </div>
-    <div class="tbl-body" id="leo-bolos-list"
-         style="left:86px;top:311px;width:1748px;min-height:42px;max-height:100px;"></div>
-    <button class="act-btn" style="left:86px;top:368px;width:214px;height:44px;"
-            onclick="showModal('leo-bolo-modal')">Create BOLO</button>
+    <div class="tbl-body leo-bolos-body" id="leo-bolos-list"></div>
+    <button class="act-btn leo-cad-btn" id="btn-create-bolo">Create BOLO</button>
 
   </div>
 
-  <!-- ============================================================
-       PANEL: SEARCH
-  ============================================================ -->
+  <!-- ======== PANEL: SEARCH ======== -->
   <div class="panel" id="panel-search">
 
-    <!-- Search PED -->
-    <div style="position:absolute;left:71px;top:89px;">
-      <p style="font-size:48px;font-weight:700;color:#fff;margin-bottom:8px;">Search PED</p>
+    <!-- PED Search -->
+    <div class="leo-search-block" id="leo-ped-block">
+      <p class="leo-search-label">Search PED</p>
       <div class="search-input-box">
-        <input id="leo-ped-search" placeholder="Enter First Name or Last Name" oninput="leoSearchPed()">
+        <input id="leo-ped-search" autocomplete="off" placeholder="Enter First Name or Last Name">
       </div>
     </div>
 
-    <!-- Search Car -->
-    <div style="position:absolute;left:731px;top:89px;">
-      <p style="font-size:48px;font-weight:700;color:#fff;margin-bottom:8px;">Search Car</p>
+    <!-- Car Search -->
+    <div class="leo-search-block" id="leo-car-block">
+      <p class="leo-search-label">Search Car</p>
       <div class="search-input-box">
-        <input id="leo-car-search" placeholder="Enter License Plate or VIN" oninput="leoSearchCar()">
+        <input id="leo-car-search" autocomplete="off" placeholder="Enter License Plate or VIN">
       </div>
     </div>
 
-    <!-- Search Gun -->
-    <div style="position:absolute;left:1391px;top:89px;">
-      <p style="font-size:48px;font-weight:700;color:#fff;margin-bottom:8px;">Search Gun</p>
+    <!-- Gun Search -->
+    <div class="leo-search-block" id="leo-gun-block">
+      <p class="leo-search-label">Search Gun</p>
       <div class="search-input-box">
-        <input id="leo-gun-search" placeholder="Enter Serial Number" oninput="leoSearchGun()">
+        <input id="leo-gun-search" autocomplete="off" placeholder="Enter Serial Number">
       </div>
     </div>
 
-    <!-- PEDs Results Table -->
-    <div class="tbl-hdr" style="left:14px;top:333px;width:644px;height:41px;">
-      <span class="tbl-col" style="left:23px;">First Name</span>
-      <span class="tbl-col" style="left:344px;">Last Name</span>
+    <!-- PED results -->
+    <div class="tbl-hdr leo-ped-hdr">
+      <span class="tbl-col leo-col-ped-fn">First Name</span>
+      <span class="tbl-col leo-col-ped-ln">Last Name</span>
     </div>
-    <div class="tbl-body" id="leo-ped-results"
-         style="left:14px;top:374px;width:644px;min-height:42px;max-height:200px;"></div>
+    <div class="tbl-body leo-ped-body" id="leo-ped-results"></div>
 
-    <!-- Car Results Table -->
-    <div class="tbl-hdr" style="left:673px;top:333px;width:811px;height:41px;">
-      <span class="tbl-col" style="left:19px;">Owner</span>
-      <span class="tbl-col" style="left:322px;">Plate</span>
-      <span class="tbl-col" style="left:489px;">Vehicle</span>
-      <span class="tbl-col" style="left:729px;">Color</span>
+    <!-- Car results -->
+    <div class="tbl-hdr leo-car-hdr">
+      <span class="tbl-col leo-col-car-owner">Owner</span>
+      <span class="tbl-col leo-col-car-plate">Plate</span>
+      <span class="tbl-col leo-col-car-model">Vehicle</span>
+      <span class="tbl-col leo-col-car-color">Color</span>
     </div>
-    <div class="tbl-body" id="leo-car-results"
-         style="left:673px;top:374px;width:811px;min-height:42px;max-height:200px;"></div>
+    <div class="tbl-body leo-car-body" id="leo-car-results"></div>
 
-    <!-- Gun Results Table -->
-    <div class="tbl-hdr" style="left:1501px;top:333px;width:405px;height:41px;">
-      <span class="tbl-col" style="left:19px;">Owner</span>
-      <span class="tbl-col" style="left:209px;">Serial Number</span>
+    <!-- Gun results -->
+    <div class="tbl-hdr leo-gun-hdr">
+      <span class="tbl-col leo-col-gun-owner">Owner</span>
+      <span class="tbl-col leo-col-gun-serial">Serial Number</span>
     </div>
-    <div class="tbl-body" id="leo-gun-results"
-         style="left:1501px;top:374px;width:405px;min-height:42px;max-height:200px;"></div>
+    <div class="tbl-body leo-gun-body" id="leo-gun-results"></div>
 
-    <!-- PED Detail Popup -->
+    <!-- PED Detail popup -->
     <div class="modal-overlay" id="leo-ped-detail-modal">
-      <div class="modal-box" style="left:86px;top:540px;width:1748px;height:420px;padding:16px 20px;">
-        <button class="close-btn" onclick="closeModal('leo-ped-detail-modal')">✕</button>
-        <div id="leo-ped-detail-content" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
-        <!-- Licenses sub-table -->
-        <div style="margin-top:8px;">
-          <p style="font-size:14px;font-weight:700;color:rgba(255,255,255,0.55);margin-bottom:6px;">Licenses</p>
-          <div class="tbl-hdr" style="position:relative;width:300px;height:41px;border-radius:8px 8px 0 0;">
-            <span class="tbl-col" style="left:14px;">License Type</span>
-          </div>
-          <div id="leo-licenses-list" class="tbl-body" style="position:relative;width:300px;min-height:42px;border-radius:0 0 8px 8px;padding:10px 14px;font-size:16px;color:rgba(255,255,255,0.35);">
-            No licenses on record
+      <div class="modal-box leo-detail-modal-box">
+        <button class="close-btn" id="btn-close-ped-detail">✕</button>
+        <div class="leo-detail-fields" id="leo-ped-detail-content"></div>
+
+        <div class="leo-sub-table-wrap" id="leo-licenses-wrap">
+          <p class="leo-sub-table-label">Licenses</p>
+          <div class="tbl-hdr leo-sub-hdr leo-lic-hdr"><span class="tbl-col" style="left:14px">License Type</span></div>
+          <div class="tbl-body leo-sub-body" id="leo-licenses-list">
+            <div class="leo-sub-empty">No licenses on record</div>
           </div>
         </div>
-        <!-- Vehicles sub-table -->
-        <div style="position:absolute;left:360px;bottom:20px;width:811px;">
-          <p style="font-size:14px;font-weight:700;color:rgba(255,255,255,0.55);margin-bottom:6px;">Vehicles</p>
-          <div class="tbl-hdr" style="position:relative;width:811px;height:41px;border-radius:8px 8px 0 0;">
-            <span class="tbl-col" style="left:19px;">Owner</span>
-            <span class="tbl-col" style="left:200px;">Plate</span>
-            <span class="tbl-col" style="left:360px;">Vehicle</span>
-            <span class="tbl-col" style="left:600px;">Color</span>
+
+        <div class="leo-sub-table-wrap leo-sub-table-wrap--vehicles" id="leo-ped-veh-wrap">
+          <p class="leo-sub-table-label">Vehicles</p>
+          <div class="tbl-hdr leo-sub-hdr leo-veh-sub-hdr">
+            <span class="tbl-col" style="left:19px">Owner</span>
+            <span class="tbl-col" style="left:200px">Plate</span>
+            <span class="tbl-col" style="left:360px">Vehicle</span>
+            <span class="tbl-col" style="left:600px">Color</span>
           </div>
-          <div id="leo-ped-vehicles" class="tbl-body" style="position:relative;width:811px;min-height:42px;border-radius:0 0 8px 8px;max-height:100px;"></div>
+          <div class="tbl-body leo-sub-body leo-veh-sub-body" id="leo-ped-vehicles"></div>
         </div>
-        <!-- Firearms sub-table -->
-        <div style="position:absolute;right:20px;bottom:20px;width:405px;">
-          <p style="font-size:14px;font-weight:700;color:rgba(255,255,255,0.55);margin-bottom:6px;">Firearms</p>
-          <div class="tbl-hdr" style="position:relative;width:405px;height:41px;border-radius:8px 8px 0 0;">
-            <span class="tbl-col" style="left:19px;">Owner</span>
-            <span class="tbl-col" style="left:209px;">Serial #</span>
+
+        <div class="leo-sub-table-wrap leo-sub-table-wrap--firearms" id="leo-ped-fa-wrap">
+          <p class="leo-sub-table-label">Firearms</p>
+          <div class="tbl-hdr leo-sub-hdr leo-fa-sub-hdr">
+            <span class="tbl-col" style="left:19px">Owner</span>
+            <span class="tbl-col" style="left:209px">Serial #</span>
           </div>
-          <div id="leo-ped-firearms" class="tbl-body" style="position:relative;width:405px;min-height:42px;border-radius:0 0 8px 8px;max-height:100px;"></div>
+          <div class="tbl-body leo-sub-body leo-fa-sub-body" id="leo-ped-firearms"></div>
         </div>
       </div>
     </div>
 
-    <!-- Vehicle Detail Popup -->
+    <!-- Vehicle Detail popup -->
     <div class="modal-overlay" id="leo-veh-detail-modal">
-      <div class="modal-box" style="left:86px;top:540px;width:1748px;height:160px;padding:16px 20px;">
-        <button class="close-btn" onclick="closeModal('leo-veh-detail-modal')">✕</button>
-        <div id="leo-veh-detail-content" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+      <div class="modal-box leo-veh-detail-box">
+        <button class="close-btn" id="btn-close-veh-detail">✕</button>
+        <div class="leo-detail-fields" id="leo-veh-detail-content"></div>
       </div>
     </div>
 
-    <!-- Gun Detail Popup -->
+    <!-- Gun Detail popup -->
     <div class="modal-overlay" id="leo-gun-detail-modal">
-      <div class="modal-box" style="left:286px;top:540px;width:1348px;height:92px;padding:16px 20px;">
-        <button class="close-btn" onclick="closeModal('leo-gun-detail-modal')">✕</button>
-        <div id="leo-gun-detail-content" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+      <div class="modal-box leo-gun-detail-box">
+        <button class="close-btn" id="btn-close-gun-detail">✕</button>
+        <div class="leo-detail-fields" id="leo-gun-detail-content"></div>
       </div>
     </div>
 
   </div>
 
-  <!-- ============================================================
-       PANEL: REPORTS
-  ============================================================ -->
+  <!-- ======== PANEL: REPORTS ======== -->
   <div class="panel" id="panel-reports">
 
-    <div style="position:absolute;left:12px;top:19px;display:flex;gap:10px;flex-wrap:wrap;">
-      <button class="report-tab active" id="rtab-warning"  onclick="leoShowReport('warning',this)">Written Warning</button>
-      <button class="report-tab"        id="rtab-citation" onclick="leoShowReport('citation',this)">Citation</button>
-      <button class="report-tab"        id="rtab-arrest"   onclick="leoShowReport('arrest',this)">Arrest</button>
-      <button class="report-tab"        id="rtab-incident" onclick="leoShowReport('incident',this)">Incident Report</button>
-      <button class="report-tab"        id="rtab-warrant"  onclick="leoShowReport('warrant',this)">Warrant</button>
+    <div class="leo-report-tabs">
+      <button class="report-tab active" id="rtab-warning"  data-report="warning">Written Warning</button>
+      <button class="report-tab"        id="rtab-citation" data-report="citation">Citation</button>
+      <button class="report-tab"        id="rtab-arrest"   data-report="arrest">Arrest</button>
+      <button class="report-tab"        id="rtab-incident" data-report="incident">Incident Report</button>
+      <button class="report-tab"        id="rtab-warrant"  data-report="warrant">Warrant</button>
     </div>
 
-    <div id="leo-report-area"
-         style="position:absolute;left:86px;top:84px;width:1748px;height:880px;
-                background:#222;border-radius:15px;overflow-y:auto;padding:20px 24px;">
-    </div>
+    <div class="leo-report-area" id="leo-report-area"></div>
 
   </div>
 
-  <!-- ============================================================
-       PANEL: CALL HISTORY
-  ============================================================ -->
+  <!-- ======== PANEL: CALL HISTORY ======== -->
   <div class="panel" id="panel-callhistory">
-    <span style="position:absolute;left:102px;top:37px;font-size:32px;font-weight:700;color:#fff;">Past Calls</span>
-    <div class="tbl-hdr" style="left:86px;top:90px;width:1748px;height:41px;">
-      <span class="tbl-col" style="left:17px;">Call #</span>
-      <span class="tbl-col" style="left:131px;">Nature</span>
-      <span class="tbl-col" style="left:503px;">Location</span>
-      <span class="tbl-col" style="left:905px;">Priority</span>
-      <span class="tbl-col" style="left:1236px;">Unit</span>
-      <div style="position:absolute;right:0;top:5px;width:213px;height:30px;background:#111;border-radius:10px;display:flex;align-items:center;">
-        <input style="background:transparent;border:none;color:#fff;font-family:'Inter',sans-serif;font-size:15px;outline:none;padding:0 12px;width:100%;"
-               placeholder="Search..." id="leo-hist-search" oninput="leoFilterHistory()">
+    <span class="leo-section-title" id="history-title">Past Calls</span>
+    <div class="tbl-hdr leo-history-hdr">
+      <span class="tbl-col leo-col-callnum">Call #</span>
+      <span class="tbl-col leo-col-nature">Nature</span>
+      <span class="tbl-col leo-col-location">Location</span>
+      <span class="tbl-col leo-col-priority">Priority</span>
+      <span class="tbl-col leo-col-unit">Unit</span>
+      <div class="leo-hist-search-wrap">
+        <input class="leo-hist-search-input" id="leo-hist-search" autocomplete="off" placeholder="Search...">
       </div>
     </div>
-    <div class="tbl-body" id="leo-history-list"
-         style="left:86px;top:131px;width:1748px;min-height:42px;max-height:820px;border-radius:0 0 15px 15px;"></div>
+    <div class="tbl-body leo-history-body" id="leo-history-list"></div>
   </div>
 
-  <!-- ============================================================
-       PANEL: NOTEPAD
-  ============================================================ -->
+  <!-- ======== PANEL: NOTEPAD ======== -->
   <div class="panel" id="panel-notepad">
-    <p style="position:absolute;left:86px;top:16px;font-size:32px;font-weight:700;color:#fff;">Notepad</p>
-    <textarea id="leo-notepad" class="cad-notepad" placeholder="Type your notes here..."></textarea>
+    <p class="leo-section-title" id="notepad-title">Notepad</p>
+    <textarea class="cad-notepad" id="leo-notepad" placeholder="Type your notes here..."></textarea>
   </div>
 
-
-  <!-- ============================================================
-       MODAL: CREATE CALL
-  ============================================================ -->
+  <!-- ======== MODAL: CREATE CALL ======== -->
   <div class="modal-overlay" id="leo-call-modal">
-    <div class="modal-box" style="left:86px;top:568px;width:1748px;height:492px;padding:15px 18px;">
-      <button class="close-btn" onclick="closeModal('leo-call-modal')">✕</button>
-
-      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-        <div class="fld" style="width:129px;height:57px;">
+    <div class="modal-box leo-modal-box">
+      <button class="close-btn" id="btn-close-call-modal">✕</button>
+      <div class="leo-modal-row">
+        <div class="fld leo-fld-callid">
           <label>CALL ID</label>
-          <span style="color:#fff;font-size:17px;font-weight:700;" id="leo-callid-display">—</span>
+          <span class="leo-callid-display" id="leo-callid-display">—</span>
         </div>
-        <div class="fld" style="width:185px;height:57px;">
+        <div class="fld leo-fld-nature">
           <label>Nature Of Call</label>
-          <input id="lc-nature" placeholder="e.g. Traffic Stop">
+          <input id="lc-nature" autocomplete="off" placeholder="e.g. Traffic Stop">
         </div>
-        <div class="fld" style="width:349px;height:57px;">
+        <div class="fld leo-fld-title">
           <label>Call Title</label>
-          <input id="lc-title" placeholder="Call Title">
+          <input id="lc-title" autocomplete="off" placeholder="Call Title">
         </div>
-        <div class="fld" style="width:623px;height:57px;">
+        <div class="fld leo-fld-location">
           <label>Location of Call</label>
-          <input id="lc-location" placeholder="Location">
+          <input id="lc-location" autocomplete="off" placeholder="Location">
         </div>
-        <div class="fld" style="width:185px;height:57px;">
+        <div class="fld leo-fld-priority">
           <label>Priority</label>
           <select id="lc-priority">
-            <option style="background:#222">Low</option>
-            <option style="background:#222">Medium</option>
-            <option style="background:#222">High</option>
-            <option style="background:#222">Critical</option>
+            <option>Low</option><option>Medium</option><option>High</option><option>Critical</option>
           </select>
         </div>
-        <div class="fld" style="width:185px;height:57px;">
+        <div class="fld leo-fld-status">
           <label>Status</label>
           <select id="lc-status">
-            <option style="background:#222">ACTIVE</option>
-            <option style="background:#222">CLOSED</option>
+            <option>ACTIVE</option><option>CLOSED</option>
           </select>
         </div>
       </div>
-
-      <div class="fld" style="width:100%;height:332px;">
+      <div class="fld leo-fld-desc">
         <label>Description</label>
-        <textarea id="lc-desc" style="height:290px;" placeholder="Enter call description..."></textarea>
+        <textarea id="lc-desc" class="leo-modal-textarea" placeholder="Enter call description..."></textarea>
       </div>
-
-      <button class="act-btn act-btn-blue"
-              style="position:absolute;left:808px;bottom:12px;width:132px;height:44px;font-size:28px;"
-              onclick="leoCreateCall()">Create</button>
+      <button class="act-btn act-btn-blue leo-modal-submit" id="btn-submit-call">Create</button>
     </div>
   </div>
 
-  <!-- ============================================================
-       MODAL: CREATE BOLO
-  ============================================================ -->
+  <!-- ======== MODAL: CREATE BOLO ======== -->
   <div class="modal-overlay" id="leo-bolo-modal">
-    <div class="modal-box" style="left:86px;top:568px;width:1748px;height:492px;padding:15px 18px;">
-      <button class="close-btn" onclick="closeModal('leo-bolo-modal')">✕</button>
-
-      <div style="display:flex;gap:8px;margin-bottom:8px;">
-        <div class="fld" style="width:349px;height:57px;">
+    <div class="modal-box leo-modal-box">
+      <button class="close-btn" id="btn-close-bolo-modal">✕</button>
+      <div class="leo-modal-row">
+        <div class="fld leo-fld-bolo-type">
           <label>Type (Person/Vehicle)</label>
           <select id="lb-type">
-            <option style="background:#222">Person</option>
-            <option style="background:#222">Vehicle</option>
+            <option>Person</option><option>Vehicle</option>
           </select>
         </div>
-        <div class="fld" style="width:1349px;height:57px;">
+        <div class="fld leo-fld-bolo-loc">
           <label>Last Known Location</label>
-          <input id="lb-location" placeholder="Last Known Location">
+          <input id="lb-location" autocomplete="off" placeholder="Last Known Location">
         </div>
       </div>
-
-      <div class="fld" style="width:100%;height:332px;">
+      <div class="fld leo-fld-desc">
         <label>Description</label>
-        <textarea id="lb-desc" style="height:290px;" placeholder="Enter BOLO description..."></textarea>
+        <textarea id="lb-desc" class="leo-modal-textarea" placeholder="Enter BOLO description..."></textarea>
       </div>
-
-      <button class="act-btn act-btn-blue"
-              style="position:absolute;left:808px;bottom:12px;width:132px;height:44px;font-size:28px;"
-              onclick="leoCreateBolo()">Create</button>
+      <button class="act-btn act-btn-blue leo-modal-submit" id="btn-submit-bolo">Create</button>
     </div>
   </div>
 
-</div><!-- end page-wrapper -->
-<script src="js/scale.js"></script>
-<script>
-
-// ═══════════════════════════════════════════════════════════
-//  PANEL SWITCHING
-// ═══════════════════════════════════════════════════════════
-const PANELS = ['home','map','cad','search','reports','callhistory','notepad'];
-
-function showPanel(id) {
-  PANELS.forEach(p => {
-    document.getElementById('panel-' + p).classList.remove('active');
-    const btn = document.getElementById('btn-' + p);
-    if (btn) btn.classList.remove('active');
-  });
-  document.getElementById('panel-' + id).classList.add('active');
-  const btn = document.getElementById('btn-' + id);
-  if (btn) btn.classList.add('active');
-}
-
-// ═══════════════════════════════════════════════════════════
-//  MODALS
-// ═══════════════════════════════════════════════════════════
-function showModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-// ═══════════════════════════════════════════════════════════
-//  STATUS
-// ═══════════════════════════════════════════════════════════
-function setStatus(code, btn) {
-  const orig = btn.style.outline;
-  btn.style.outline = '3px solid #fff';
-  setTimeout(() => btn.style.outline = orig, 600);
-}
-
-// ═══════════════════════════════════════════════════════════
-//  DATA
-// ═══════════════════════════════════════════════════════════
-let leoCalls = [], leoBolos = [], leoNextId = 1001;
-
-const MOCK_PEDS = [
-  { fn:'John', ln:'Smith', dob:'01/01/1990', age:35, gender:'Male', occ:'Mechanic', addr:'123 Main St', skin:'Light', hair:'Brown', eye:'Blue', height:'6\'0"', weight:'180 lbs' },
-  { fn:'Jane', ln:'Doe',   dob:'03/15/1985', age:40, gender:'Female', occ:'Nurse', addr:'456 Oak Ave', skin:'Medium', hair:'Black', eye:'Green', height:'5\'4"', weight:'130 lbs' },
-];
-const MOCK_CARS = [
-  { owner:'John Smith', plate:'ABC123', vehicle:'Toyota Camry', color:'White',  vin:'1HGBH41JXMN109186', reg:'12/2025', ins:'Active',   insExp:'06/2025' },
-  { owner:'Jane Doe',   plate:'XYZ789', vehicle:'Honda Civic',  color:'Silver', vin:'2HGFG3B50CH100001', reg:'06/2026', ins:'Expired',  insExp:'01/2024' },
-];
-const MOCK_GUNS = [
-  { owner:'John Smith', serial:'GUN-00123', name:'Glock 19', type:'Semi-Auto' },
-  { owner:'John Smith', serial:'GUN-00456', name:'AR-15',    type:'Semi-Auto' },
-];
-const HISTORY = [
-  { id:1001, nature:'Traffic Stop',         location:'Main St & 1st Ave',    priority:'Low',      unit:'L-1' },
-  { id:1002, nature:'10-50 Accident',       location:'Hwy 101 Mile 45',      priority:'High',     unit:'L-3' },
-  { id:1003, nature:'Domestic Disturbance', location:'789 Oak Drive',        priority:'Medium',   unit:'L-2' },
-  { id:1004, nature:'Robbery in Progress',  location:'Downtown Bank',        priority:'Critical', unit:'L-5' },
-  { id:1005, nature:'Suspicious Person',    location:'Grove St Parking Lot', priority:'Low',      unit:'L-4' },
-];
-
-// ═══════════════════════════════════════════════════════════
-//  CAD: CALLS
-// ═══════════════════════════════════════════════════════════
-function leoCreateCall() {
-  leoCalls.push({
-    id:       leoNextId++,
-    nature:   document.getElementById('lc-nature').value   || 'Unknown',
-    title:    document.getElementById('lc-title').value,
-    location: document.getElementById('lc-location').value || 'Unknown',
-    priority: document.getElementById('lc-priority').value,
-    status:   document.getElementById('lc-status').value,
-    desc:     document.getElementById('lc-desc').value,
-  });
-  renderLeoCalls();
-  closeModal('leo-call-modal');
-  ['lc-nature','lc-title','lc-location','lc-desc'].forEach(id => document.getElementById(id).value = '');
-}
-
-function renderLeoCalls() {
-  const el = document.getElementById('leo-calls-list');
-  if (!leoCalls.length) { el.innerHTML = '<div style="height:42px;"></div>'; return; }
-  el.innerHTML = leoCalls.map((c, i) => `
-    <div class="tbl-row">
-      <span style="font-size:20px;font-weight:700;color:#fff;width:80px;">${c.id}</span>
-      <span style="font-size:20px;font-weight:700;color:#fff;flex:1;">${c.nature}</span>
-      <span style="font-size:20px;font-weight:700;color:#fff;width:300px;">${c.location}</span>
-      <span style="font-size:20px;font-weight:700;color:${pc(c.priority)};width:120px;">${c.priority}</span>
-      <span style="font-size:20px;font-weight:700;color:#fff;width:100px;">—</span>
-      <button onclick="leoCloseCall(${i})"
-        style="background:#ff0004;border:none;color:#fff;border-radius:8px;
-               padding:3px 10px;cursor:pointer;font-size:13px;font-weight:700;margin-left:auto;">
-        CODE 4
-      </button>
-    </div>`).join('');
-}
-
-function leoCloseCall(i) { leoCalls.splice(i, 1); renderLeoCalls(); }
-
-// ═══════════════════════════════════════════════════════════
-//  CAD: BOLOs
-// ═══════════════════════════════════════════════════════════
-function leoCreateBolo() {
-  leoBolos.push({
-    type:     document.getElementById('lb-type').value,
-    location: document.getElementById('lb-location').value,
-    desc:     document.getElementById('lb-desc').value,
-  });
-  renderLeoBolos();
-  closeModal('leo-bolo-modal');
-  document.getElementById('lb-location').value = '';
-  document.getElementById('lb-desc').value = '';
-}
-
-function renderLeoBolos() {
-  const el = document.getElementById('leo-bolos-list');
-  if (!leoBolos.length) { el.innerHTML = '<div style="height:42px;"></div>'; return; }
-  el.innerHTML = leoBolos.map((b, i) => `
-    <div class="tbl-row">
-      <span style="font-size:20px;font-weight:700;color:#fff;width:200px;">${b.type}</span>
-      <span style="font-size:20px;font-weight:700;color:#fff;flex:1;">${b.desc.substring(0,80)}${b.desc.length>80?'...':''}</span>
-      <button onclick="leoRemoveBolo(${i})"
-        style="background:#ff0004;border:none;color:#fff;border-radius:8px;
-               padding:3px 10px;cursor:pointer;font-size:13px;font-weight:700;">
-        Remove
-      </button>
-    </div>`).join('');
-}
-
-function leoRemoveBolo(i) { leoBolos.splice(i, 1); renderLeoBolos(); }
-
-// ═══════════════════════════════════════════════════════════
-//  SEARCH
-// ═══════════════════════════════════════════════════════════
-function leoSearchPed() {
-  const q = document.getElementById('leo-ped-search').value.toLowerCase().trim();
-  const r = q.length < 2 ? [] : MOCK_PEDS.filter(p =>
-    p.fn.toLowerCase().includes(q) || p.ln.toLowerCase().includes(q));
-  const el = document.getElementById('leo-ped-results');
-  el.innerHTML = r.length
-    ? r.map(p => `
-        <div class="tbl-row" onclick="leoShowPedDetail(${MOCK_PEDS.indexOf(p)})">
-          <span style="font-size:19px;color:#fff;flex:1;">${p.fn}</span>
-          <span style="font-size:19px;color:#fff;">${p.ln}</span>
-        </div>`).join('')
-    : '<div style="height:42px;"></div>';
-}
-
-function leoSearchCar() {
-  const q = document.getElementById('leo-car-search').value.toLowerCase().trim();
-  const r = q.length < 2 ? [] : MOCK_CARS.filter(c =>
-    c.plate.toLowerCase().includes(q) || c.vin.toLowerCase().includes(q));
-  const el = document.getElementById('leo-car-results');
-  el.innerHTML = r.length
-    ? r.map(c => `
-        <div class="tbl-row" onclick="leoShowVehDetail(${MOCK_CARS.indexOf(c)})">
-          <span style="font-size:19px;color:#fff;width:180px;">${c.owner}</span>
-          <span style="font-size:19px;color:#fff;width:100px;">${c.plate}</span>
-          <span style="font-size:19px;color:#fff;flex:1;">${c.vehicle}</span>
-          <span style="font-size:19px;color:#fff;">${c.color}</span>
-        </div>`).join('')
-    : '<div style="height:42px;"></div>';
-}
-
-function leoSearchGun() {
-  const q = document.getElementById('leo-gun-search').value.toLowerCase().trim();
-  const r = q.length < 2 ? [] : MOCK_GUNS.filter(g =>
-    g.serial.toLowerCase().includes(q));
-  const el = document.getElementById('leo-gun-results');
-  el.innerHTML = r.length
-    ? r.map(g => `
-        <div class="tbl-row" onclick="leoShowGunDetail(${MOCK_GUNS.indexOf(g)})">
-          <span style="font-size:19px;color:#fff;flex:1;">${g.owner}</span>
-          <span style="font-size:19px;color:#fff;">${g.serial}</span>
-        </div>`).join('')
-    : '<div style="height:42px;"></div>';
-}
-
-function leoShowPedDetail(i) {
-  const p = MOCK_PEDS[i];
-  const fields = [
-    ['First Name',p.fn],['Last Name',p.ln],['D.O.B',p.dob],
-    ['AGE',p.age],['Gender',p.gender],['Occupation',p.occ],
-    ['Height',p.height],['Weight',p.weight],['Skin Tone',p.skin],
-    ['Hair Tone',p.hair],['Eye Color',p.eye],['Address',p.addr],
-  ];
-  document.getElementById('leo-ped-detail-content').innerHTML =
-    fields.map(([l,v]) => `
-      <div style="background:#333;border-radius:10px;padding:8px 14px;min-width:160px;">
-        <div style="font-size:11px;color:rgba(255,255,255,0.55);font-weight:700;">${l}</div>
-        <div style="font-size:17px;color:#fff;font-weight:700;">${v}</div>
-      </div>`).join('');
-
-  const cars = MOCK_CARS.filter(c => c.owner === p.fn + ' ' + p.ln);
-  document.getElementById('leo-ped-vehicles').innerHTML = cars.length
-    ? cars.map(c => `
-        <div class="tbl-row">
-          <span style="font-size:17px;color:#fff;width:180px;">${c.owner}</span>
-          <span style="font-size:17px;color:#fff;width:100px;">${c.plate}</span>
-          <span style="font-size:17px;color:#fff;flex:1;">${c.vehicle}</span>
-          <span style="font-size:17px;color:#fff;">${c.color}</span>
-        </div>`).join('')
-    : '<div style="padding:8px 14px;font-size:15px;color:rgba(255,255,255,0.3);">No vehicles registered</div>';
-
-  const guns = MOCK_GUNS.filter(g => g.owner === p.fn + ' ' + p.ln);
-  document.getElementById('leo-ped-firearms').innerHTML = guns.length
-    ? guns.map(g => `
-        <div class="tbl-row">
-          <span style="font-size:17px;color:#fff;flex:1;">${g.owner}</span>
-          <span style="font-size:17px;color:#fff;">${g.serial}</span>
-        </div>`).join('')
-    : '<div style="padding:8px 14px;font-size:15px;color:rgba(255,255,255,0.3);">No firearms registered</div>';
-
-  showModal('leo-ped-detail-modal');
-}
-
-function leoShowVehDetail(i) {
-  const c = MOCK_CARS[i];
-  const fields = [
-    ['Brand Model',c.vehicle],['Color',c.color],['Plate',c.plate],
-    ['VIN',c.vin],['Reg Expiry',c.reg],['Owner',c.owner],
-    ['Insurance Status',c.ins],['Insurance Expiry',c.insExp],
-  ];
-  document.getElementById('leo-veh-detail-content').innerHTML =
-    fields.map(([l,v]) => `
-      <div style="background:#333;border-radius:10px;padding:8px 14px;min-width:140px;">
-        <div style="font-size:11px;color:rgba(255,255,255,0.55);font-weight:700;">${l}</div>
-        <div style="font-size:17px;color:${l==='Insurance Status'&&v==='Expired'?'#ff0004':'#fff'};font-weight:700;">${v}</div>
-      </div>`).join('');
-  showModal('leo-veh-detail-modal');
-}
-
-function leoShowGunDetail(i) {
-  const g = MOCK_GUNS[i];
-  const fields = [
-    ['Gun Type (Auto, Semi, etc)',g.type],['Gun Name',g.name],
-    ['Serial Number',g.serial],['Owner',g.owner],
-  ];
-  document.getElementById('leo-gun-detail-content').innerHTML =
-    fields.map(([l,v]) => `
-      <div style="background:#333;border-radius:10px;padding:8px 14px;min-width:180px;">
-        <div style="font-size:11px;color:rgba(255,255,255,0.55);font-weight:700;">${l}</div>
-        <div style="font-size:17px;color:#fff;font-weight:700;">${v}</div>
-      </div>`).join('');
-  showModal('leo-gun-detail-modal');
-}
-
-// ═══════════════════════════════════════════════════════════
-//  REPORTS
-// ═══════════════════════════════════════════════════════════
-function leoShowReport(type, btn) {
-  document.querySelectorAll('.report-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-
-  const area = document.getElementById('leo-report-area');
-
-  const F = (label, w, id) => `
-    <div style="background:#333;border-radius:10px;padding:6px 12px;width:${w}px;flex-shrink:0;">
-      <div style="font-size:11px;color:rgba(255,255,255,0.55);font-weight:700;">${label}</div>
-      <input id="${id}" style="background:transparent;border:none;color:#fff;font-family:'Inter',sans-serif;
-             font-size:16px;font-weight:700;outline:none;width:100%;margin-top:2px;" placeholder="${label}">
-    </div>`;
-  const row = (...flds) => `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">${flds.join('')}</div>`;
-
-  const suspectInfo = `
-    <p style="font-size:18px;font-weight:700;color:rgba(255,255,255,0.6);margin-bottom:10px;">Suspect Information</p>
-    ${row(F('First Name',350,'r-fn'),F('Last Name',350,'r-ln'),F('D.O.B',185,'r-dob'),F('AGE',185,'r-age'),F('Gender',185,'r-gen'),F('Occupation',395,'r-occ'))}
-    ${row(F('Height',350,'r-h'),F('Weight',350,'r-w'),F('Skin Tone',185,'r-skin'),F('Hair Tone',185,'r-hair'),F('Eye Color',185,'r-eye'),F('Address',395,'r-addr'))}`;
-
-  const vehInfo = `
-    <p style="font-size:18px;font-weight:700;color:rgba(255,255,255,0.6);margin:14px 0 10px;">Vehicle Information <span style="font-size:14px;opacity:0.6;">(Optional)</span></p>
-    ${row(F('Brand Model',350,'r-vbrand'),F('Color',350,'r-vcolor'),F('Plate',185,'r-vplate'),F('VIN',185,'r-vvin'),F('Reg Expiry',185,'r-vreg'),F('Owner',395,'r-vowner'))}
-    ${row(F('Insurance Status',350,'r-vins'),F('Insurance Expiry',350,'r-vinsexp'))}`;
-
-  const callInfo = `
-    <p style="font-size:18px;font-weight:700;color:rgba(255,255,255,0.6);margin:14px 0 10px;">Call Information</p>
-    ${row(F('CALL ID',129,'r-cid'),F('Nature Of Call',184,'r-cnat'),F('Call Title',348,'r-ctitle'),F('Location of Call',620,'r-cloc'),F('Priority',185,'r-cprio'),F('Status',184,'r-cstat'))}`;
-
-  const descBox = (placeholder='Description...', h=165) => `
-    <textarea style="width:100%;height:${h}px;background:#333;border:none;border-radius:12px;
-      color:#fff;font-family:'Inter',sans-serif;font-size:17px;padding:12px;outline:none;resize:none;margin-top:8px;"
-      placeholder="${placeholder}"></textarea>`;
-
-  const submitBtn = (label='Submit', type) => `
-    <button onclick="leoSubmitReport('${type}')"
-      style="margin-top:14px;width:200px;height:44px;background:#2954c3;border:none;border-radius:15px;
-             color:#fff;font-family:'Inter',sans-serif;font-size:22px;font-weight:700;cursor:pointer;">
-      ${label}
-    </button>`;
-
-  const templates = {
-    warning: `
-      ${suspectInfo}${callInfo}
-      <p style="font-size:18px;font-weight:700;color:rgba(255,255,255,0.6);margin:14px 0 10px;">Warning Information</p>
-      ${row(F('Reason of Written Warning',620,'r-wwreason'))}
-      ${submitBtn('Submit','Written Warning')}`,
-
-    citation: `
-      ${suspectInfo}${vehInfo}${callInfo}
-      <p style="font-size:18px;font-weight:700;color:rgba(255,255,255,0.6);margin:14px 0 10px;">Citation Information</p>
-      ${row(F('Charges',348,'r-charges'))}
-      ${descBox('Description...')}
-      ${submitBtn('Submit','Citation')}`,
-
-    arrest: `
-      ${suspectInfo}${vehInfo}
-      ${row(F('Car Impounded?',403,'r-impound'))}
-      ${callInfo}
-      <p style="font-size:18px;font-weight:700;color:rgba(255,255,255,0.6);margin:14px 0 10px;">Arrest Information</p>
-      ${row(F('Charges',348,'r-charges'))}
-      ${descBox('Description...')}
-      ${submitBtn('Submit','Arrest')}`,
-
-    incident: `
-      ${suspectInfo}${vehInfo}${callInfo}
-      ${row(F('Units',1705,'r-units'))}
-      ${descBox('Description...',180)}
-      ${submitBtn('Submit','Incident Report')}`,
-
-    warrant: `
-      ${suspectInfo}${vehInfo}
-      <p style="font-size:18px;font-weight:700;color:rgba(255,255,255,0.6);margin:14px 0 10px;">Warrant Information</p>
-      ${row(F('Charges',348,'r-wcharges'),F('Type',620,'r-wtype'),F('Address',706,'r-waddr'))}
-      ${descBox('Description...')}
-      ${submitBtn('Submit','Warrant')}`,
-  };
-
-  area.innerHTML = templates[type] || '';
-}
-
-function leoSubmitReport(type) {
-  alert(type + ' submitted successfully!');
-}
-
-// ═══════════════════════════════════════════════════════════
-//  CALL HISTORY
-// ═══════════════════════════════════════════════════════════
-let histFiltered = [...HISTORY];
-
-function leoFilterHistory() {
-  const q = document.getElementById('leo-hist-search').value.toLowerCase();
-  histFiltered = HISTORY.filter(c =>
-    String(c.id).includes(q) || c.nature.toLowerCase().includes(q) || c.location.toLowerCase().includes(q));
-  leoRenderHistory(histFiltered);
-}
-
-function leoRenderHistory(list) {
-  const el = document.getElementById('leo-history-list');
-  if (!list.length) {
-    el.innerHTML = '<div style="padding:20px;text-align:center;color:rgba(255,255,255,0.3);font-size:20px;">No calls found</div>';
-    return;
-  }
-  el.innerHTML = list.map(c => `
-    <div class="tbl-row">
-      <span style="font-size:20px;font-weight:700;color:#fff;width:80px;">${c.id}</span>
-      <span style="font-size:20px;font-weight:700;color:#fff;flex:1;">${c.nature}</span>
-      <span style="font-size:20px;font-weight:700;color:#fff;width:350px;">${c.location}</span>
-      <span style="font-size:20px;font-weight:700;color:${pc(c.priority)};width:120px;">${c.priority}</span>
-      <span style="font-size:20px;font-weight:700;color:#fff;">${c.unit}</span>
-    </div>`).join('');
-}
-
-// ═══════════════════════════════════════════════════════════
-//  UTILITY
-// ═══════════════════════════════════════════════════════════
-function pc(p) {
-  return { Low:'#00ff2f', Medium:'#ffbb00', High:'#ff8800', Critical:'#ff0004' }[p] || '#fff';
-}
-
-// ─── Init ──────────────────────────────────────────────────
-renderLeoCalls();
-renderLeoBolos();
-leoRenderHistory(HISTORY);
-leoShowReport('warning', document.getElementById('rtab-warning'));
-
-</script>
+</div><!-- /.page-wrapper -->
+<script src="js/leo.js"></script>
 </body>
 </html>

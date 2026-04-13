@@ -5,254 +5,202 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DOT CAD</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/dot.css">
 </head>
 <body class="dot-theme">
 <div class="page-wrapper">
 
   <!-- ======== NAVBAR ======== -->
-  <div class="dot-navbar" style="position:absolute;left:0;top:0;width:1920px;height:89px;">
-    <button class="dot-btn" style="left:20px;width:183px;" onclick="window.location.href='server-page.html'">Clock-Out</button>
-    <button class="dot-btn active" id="btn-home" style="left:217px;width:111px;" onclick="showPanel('home')">Home</button>
-    <button class="dot-btn" id="btn-map" style="left:340px;width:79px;" onclick="showPanel('map')">Map</button>
-    <button class="dot-btn" id="btn-cad" style="left:433px;width:79px;" onclick="showPanel('cad')">CAD</button>
-    <button class="dot-btn" id="btn-search" style="left:525px;width:119px;" onclick="showPanel('search')">Search</button>
-    <button class="dot-btn" id="btn-reports" style="left:658px;width:133px;" onclick="showPanel('reports')">Reports</button>
-    <button class="dot-btn" id="btn-callhistory" style="left:804px;width:196px;" onclick="showPanel('callhistory')">Call History</button>
-    <button class="dot-btn" id="btn-notepad" style="left:1013px;width:150px;" onclick="showPanel('notepad')">Notepad</button>
-    <button style="position:absolute;left:1431px;top:21px;width:79px;height:47px;border-radius:15px;border:none;background:#00ff2f;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:500;cursor:pointer;">10-8</button>
-    <button style="position:absolute;left:1523px;top:21px;width:79px;height:47px;border-radius:15px;border:none;background:#ff0004;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:500;cursor:pointer;">10-7</button>
-    <button style="position:absolute;left:1615px;top:21px;width:79px;height:47px;border-radius:15px;border:none;background:#00b2ff;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:500;cursor:pointer;">10-97</button>
-    <button style="position:absolute;left:1707px;top:21px;width:79px;height:47px;border-radius:15px;border:none;background:#00ff2f;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:500;cursor:pointer;">10-23</button>
-    <button style="position:absolute;left:1799px;top:21px;width:79px;height:47px;border-radius:15px;border:none;background:#ffbb00;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:500;cursor:pointer;">10-6</button>
+  <div class="dot-navbar">
+    <button class="dot-btn" id="dot-nav-clockout">Clock-Out</button>
+    <button class="dot-btn" id="dot-nav-home">Home</button>
+    <button class="dot-btn" id="dot-nav-map">Map</button>
+    <button class="dot-btn" id="dot-nav-cad">CAD</button>
+    <button class="dot-btn" id="dot-nav-search">Search</button>
+    <button class="dot-btn" id="dot-nav-reports">Reports</button>
+    <button class="dot-btn" id="dot-nav-callhistory">Call History</button>
+    <button class="dot-btn" id="dot-nav-notepad">Notepad</button>
+    <button class="dot-status-btn dot-status-green"  id="dot-status-available">10-8</button>
+    <button class="dot-status-btn dot-status-red"    id="dot-status-offduty">10-7</button>
+    <button class="dot-status-btn dot-status-blue"   id="dot-status-onscene">10-97</button>
+    <button class="dot-status-btn dot-status-green"  id="dot-status-arrived">10-23</button>
+    <button class="dot-status-btn dot-status-yellow" id="dot-status-busy">10-6</button>
   </div>
 
   <!-- ======== PANEL: HOME ======== -->
-  <div class="panel active" id="panel-home">
-    <p style="position:absolute;left:41px;top:44px;font-size:32px;font-weight:500;color:#fff;width:617px;line-height:1.6;">
-      Welcome to the DOT CAD for this county.
-    </p>
+  <div class="panel" id="panel-home">
+    <p class="dot-welcome-text">Welcome to the DOT CAD for this county.</p>
   </div>
 
   <!-- ======== PANEL: MAP ======== -->
   <div class="panel" id="panel-map">
-    <div style="position:absolute;left:388px;top:0;width:1143px;height:991px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;">
-      <div style="text-align:center;color:rgba(255,255,255,0.2);">
-        <div style="font-size:80px;">🗺️</div>
-        <p style="font-size:28px;font-weight:700;margin-top:16px;">Map View</p>
-        <p style="font-size:18px;margin-top:8px;">Integrate your map here</p>
+    <div class="dot-map-placeholder">
+      <div class="dot-map-inner">
+        <div class="dot-map-icon">🗺️</div>
+        <p class="dot-map-title">Map View</p>
+        <p class="dot-map-subtitle">Integrate your map here</p>
       </div>
     </div>
   </div>
 
   <!-- ======== PANEL: CAD ======== -->
   <div class="panel" id="panel-cad">
-    <span style="position:absolute;left:86px;top:22px;font-size:32px;font-weight:700;color:#fff;">Active Calls</span>
-    <div class="tbl-hdr" style="left:86px;top:64px;width:1748px;height:41px;">
-      <span class="tbl-col" style="left:17px;">Call #</span>
-      <span class="tbl-col" style="left:131px;">Nature</span>
-      <span class="tbl-col" style="left:503px;">Location</span>
-      <span class="tbl-col" style="left:905px;">Priority</span>
-      <span class="tbl-col" style="left:1236px;">Unit</span>
+    <span class="section-title dot-calls-title">Active Calls</span>
+
+    <div class="tbl-hdr dot-calls-hdr">
+      <span class="tbl-col dot-col-callnum">Call #</span>
+      <span class="tbl-col dot-col-nature">Nature</span>
+      <span class="tbl-col dot-col-location">Location</span>
+      <span class="tbl-col dot-col-priority">Priority</span>
+      <span class="tbl-col dot-col-unit">Unit</span>
     </div>
-    <div class="tbl-body" id="dot-calls-list" style="left:86px;top:105px;width:1748px;min-height:42px;max-height:130px;overflow-y:auto;"></div>
-    <button class="act-btn" style="left:86px;top:162px;width:192px;height:44px;" onclick="showModal('dot-call-modal')">Create Call</button>
+    <div class="tbl-body" id="dot-calls-list"></div>
+
+    <button class="act-btn" id="dot-btn-create-call">Create Call</button>
   </div>
 
   <!-- ======== PANEL: SEARCH ======== -->
   <div class="panel" id="panel-search">
-    <div style="position:absolute;left:71px;top:89px;">
-      <p style="font-size:48px;font-weight:700;color:#fff;margin-bottom:8px;">Search PED</p>
-      <div style="width:458px;height:66px;background:#222;border-radius:15px;display:flex;align-items:center;">
-        <input style="background:transparent;border:none;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:700;outline:none;padding:0 20px;width:100%;" placeholder="Enter First Name or Last Name" id="dot-ped-search" oninput="dotSearchPed()">
-      </div>
-    </div>
-    <div style="position:absolute;left:731px;top:89px;">
-      <p style="font-size:48px;font-weight:700;color:#fff;margin-bottom:8px;">Search Car</p>
-      <div style="width:458px;height:66px;background:#222;border-radius:15px;display:flex;align-items:center;">
-        <input style="background:transparent;border:none;color:#fff;font-family:'Inter',sans-serif;font-size:24px;font-weight:700;outline:none;padding:0 20px;width:100%;" placeholder="Enter License Plate or VIN" id="dot-car-search" oninput="dotSearchCar()">
-      </div>
-    </div>
-    <div class="tbl-hdr" style="left:14px;top:333px;width:644px;height:41px;">
-      <span class="tbl-col" style="left:23px;">First Name</span>
-      <span class="tbl-col" style="left:344px;">Last Name</span>
-    </div>
-    <div class="tbl-body" id="dot-ped-results" style="left:14px;top:374px;width:644px;min-height:42px;max-height:200px;overflow-y:auto;"></div>
-    <div class="tbl-hdr" style="left:673px;top:333px;width:811px;height:41px;">
-      <span class="tbl-col" style="left:19px;">Owner</span>
-      <span class="tbl-col" style="left:322px;">Plate</span>
-      <span class="tbl-col" style="left:489px;">Vehicle</span>
-      <span class="tbl-col" style="left:729px;">Color</span>
-    </div>
-    <div class="tbl-body" id="dot-car-results" style="left:673px;top:374px;width:811px;min-height:42px;max-height:200px;overflow-y:auto;"></div>
 
-    <div class="modal-overlay" id="dot-ped-detail">
-      <div class="modal-box" style="left:86px;top:540px;width:1748px;height:357px;padding:16px;">
-        <button class="close-btn" onclick="closeModal('dot-ped-detail')">✕</button>
-        <div id="dot-ped-detail-content" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+    <div class="dot-search-section dot-search-ped-section">
+      <p class="dot-search-label">Search PED</p>
+      <div class="dot-search-input-wrap">
+        <input
+          class="dot-search-input"
+          id="dot-ped-search"
+          placeholder="Enter First Name or Last Name"
+          autocomplete="off"
+        >
       </div>
     </div>
+
+    <div class="dot-search-section dot-search-car-section">
+      <p class="dot-search-label">Search Car</p>
+      <div class="dot-search-input-wrap">
+        <input
+          class="dot-search-input"
+          id="dot-car-search"
+          placeholder="Enter License Plate or VIN"
+          autocomplete="off"
+        >
+      </div>
+    </div>
+
+    <!-- PED results -->
+    <div class="tbl-hdr dot-ped-results-hdr">
+      <span class="tbl-col dot-ped-col-fn">First Name</span>
+      <span class="tbl-col dot-ped-col-ln">Last Name</span>
+    </div>
+    <div class="tbl-body" id="dot-ped-results"></div>
+
+    <!-- Car results -->
+    <div class="tbl-hdr dot-car-results-hdr">
+      <span class="tbl-col dot-car-col-owner">Owner</span>
+      <span class="tbl-col dot-car-col-plate">Plate</span>
+      <span class="tbl-col dot-car-col-vehicle">Vehicle</span>
+      <span class="tbl-col dot-car-col-color">Color</span>
+    </div>
+    <div class="tbl-body" id="dot-car-results"></div>
+
+    <!-- PED Detail popup -->
+    <div class="modal-overlay" id="dot-ped-detail">
+      <div class="modal-box dot-ped-detail-box">
+        <button class="close-btn" id="dot-ped-detail-close">✕</button>
+        <div class="dot-ped-detail-fields" id="dot-ped-detail-content"></div>
+      </div>
+    </div>
+
   </div>
 
   <!-- ======== PANEL: REPORTS ======== -->
   <div class="panel" id="panel-reports">
-    <div style="position:absolute;left:20px;top:20px;display:flex;gap:12px;">
-      <button class="report-tab active" id="rtab-incident" onclick="dotShowReport('incident', this)">Incident Report</button>
-      <button class="report-tab" id="rtab-tow" onclick="dotShowReport('tow', this)">Tow Report</button>
+    <div class="dot-report-tabs">
+      <button class="report-tab" id="dot-rtab-incident" data-report="incident">Incident Report</button>
+      <button class="report-tab" id="dot-rtab-tow"      data-report="tow">Tow Report</button>
     </div>
-    <div id="dot-report-area" style="position:absolute;left:86px;top:84px;width:1748px;height:880px;background:#222;border-radius:15px;overflow-y:auto;padding:20px;"></div>
+    <div class="dot-report-area" id="dot-report-area"></div>
   </div>
 
   <!-- ======== PANEL: CALL HISTORY ======== -->
   <div class="panel" id="panel-callhistory">
-    <span style="position:absolute;left:102px;top:37px;font-size:32px;font-weight:700;color:#fff;">Past Calls</span>
-    <div class="tbl-hdr" style="left:86px;top:90px;width:1748px;height:41px;">
-      <span class="tbl-col" style="left:17px;">Call #</span>
-      <span class="tbl-col" style="left:131px;">Nature</span>
-      <span class="tbl-col" style="left:503px;">Location</span>
-      <span class="tbl-col" style="left:905px;">Priority</span>
-      <span class="tbl-col" style="left:1236px;">Unit</span>
-      <div style="position:absolute;right:0;top:5px;width:213px;height:30px;background:#111;border-radius:10px;display:flex;align-items:center;">
-        <input style="background:transparent;border:none;color:#fff;font-family:'Inter',sans-serif;font-size:15px;outline:none;padding:0 12px;width:100%;" placeholder="Search..." id="dot-hist-search" oninput="dotFilterHistory()">
+    <span class="section-title dot-history-title">Past Calls</span>
+
+    <div class="tbl-hdr dot-history-hdr">
+      <span class="tbl-col dot-col-callnum">Call #</span>
+      <span class="tbl-col dot-col-nature">Nature</span>
+      <span class="tbl-col dot-col-location">Location</span>
+      <span class="tbl-col dot-col-priority">Priority</span>
+      <span class="tbl-col dot-col-unit">Unit</span>
+      <div class="dot-history-search-wrap">
+        <input
+          class="dot-history-search-input"
+          id="dot-hist-search"
+          placeholder="Search..."
+          autocomplete="off"
+        >
       </div>
     </div>
-    <div class="tbl-body" id="dot-history-list" style="left:86px;top:131px;width:1748px;min-height:42px;max-height:820px;overflow-y:auto;border-radius:0 0 15px 15px;"></div>
+    <div class="tbl-body dot-history-body" id="dot-history-list"></div>
   </div>
 
   <!-- ======== PANEL: NOTEPAD ======== -->
   <div class="panel" id="panel-notepad">
-    <p style="position:absolute;left:86px;top:16px;font-size:32px;font-weight:700;color:#fff;">Notepad</p>
+    <p class="section-title dot-notepad-title">Notepad</p>
     <textarea id="dot-notepad" class="cad-notepad" placeholder="Type your notes here..."></textarea>
   </div>
 
   <!-- ======== MODAL: CREATE CALL ======== -->
   <div class="modal-overlay" id="dot-call-modal">
-    <div class="modal-box" style="left:86px;top:568px;width:1748px;height:492px;padding:15px;">
-      <button class="close-btn" onclick="closeModal('dot-call-modal')">✕</button>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-        <div class="fld" style="width:129px;height:57px;"><label>CALL ID</label><span style="color:#fff;font-size:17px;font-weight:700;" id="dot-callid-display">—</span></div>
-        <div class="fld" style="width:185px;height:57px;"><label>Nature Of Call</label><input id="dot-call-nature" placeholder="e.g. Road Hazard"></div>
-        <div class="fld" style="width:349px;height:57px;"><label>Call Title</label><input id="dot-call-title" placeholder="Call Title"></div>
-        <div class="fld" style="width:623px;height:57px;"><label>Location of Call</label><input id="dot-call-location" placeholder="Location"></div>
-        <div class="fld" style="width:185px;height:57px;"><label>Priority</label><select id="dot-call-priority"><option style="background:#222">Low</option><option style="background:#222">Medium</option><option style="background:#222">High</option><option style="background:#222">Critical</option></select></div>
-        <div class="fld" style="width:185px;height:57px;"><label>Status</label><select id="dot-call-status"><option style="background:#222">ACTIVE</option><option style="background:#222">CLOSED</option></select></div>
+    <div class="modal-box dot-call-modal-box">
+      <button class="close-btn" id="dot-call-modal-close">✕</button>
+
+      <div class="dot-call-modal-fields">
+        <div class="fld dot-fld-callid">
+          <label>CALL ID</label>
+          <span class="dot-callid-display" id="dot-callid-display">—</span>
+        </div>
+        <div class="fld dot-fld-nature">
+          <label>Nature Of Call</label>
+          <input id="dot-call-nature" placeholder="e.g. Road Hazard" autocomplete="off">
+        </div>
+        <div class="fld dot-fld-title">
+          <label>Call Title</label>
+          <input id="dot-call-title" placeholder="Call Title" autocomplete="off">
+        </div>
+        <div class="fld dot-fld-location">
+          <label>Location of Call</label>
+          <input id="dot-call-location" placeholder="Location" autocomplete="off">
+        </div>
+        <div class="fld dot-fld-select">
+          <label>Priority</label>
+          <select id="dot-call-priority">
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+            <option>Critical</option>
+          </select>
+        </div>
+        <div class="fld dot-fld-select">
+          <label>Status</label>
+          <select id="dot-call-status">
+            <option>ACTIVE</option>
+            <option>CLOSED</option>
+          </select>
+        </div>
       </div>
-      <div class="fld" style="width:100%;height:332px;"><label>Description</label><textarea id="dot-call-desc" style="height:290px;" placeholder="Enter call description..."></textarea></div>
-      <button class="act-btn act-btn-amber" style="position:absolute;left:808px;bottom:12px;width:132px;height:44px;font-size:28px;" onclick="dotCreateCall()">Create</button>
+
+      <div class="fld dot-fld-desc">
+        <label>Description</label>
+        <textarea id="dot-call-desc" placeholder="Enter call description..."></textarea>
+      </div>
+
+      <button class="act-btn act-btn-amber dot-call-modal-create-btn" id="dot-call-modal-create">Create</button>
     </div>
   </div>
 
-</div>
-<script src="js/scale.js"></script>
-<script>
-const panels = ['home','map','cad','search','reports','callhistory','notepad'];
-function showPanel(id) {
-  panels.forEach(p => {
-    document.getElementById('panel-'+p).classList.remove('active');
-    const btn = document.getElementById('btn-'+p);
-    if (btn) btn.classList.remove('active');
-  });
-  document.getElementById('panel-'+id).classList.add('active');
-  const btn = document.getElementById('btn-'+id);
-  if (btn) btn.classList.add('active');
-}
+</div><!-- /.page-wrapper -->
 
-function showModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-let dotCalls = [], dotCallId = 4001;
-const dotHistory = [
-  {id:4001,nature:'Road Hazard',location:'Hwy 101 Mile 22',priority:'Medium',unit:'D-1'},
-  {id:4002,nature:'Pothole Report',location:'Main St near 5th',priority:'Low',unit:'D-3'},
-  {id:4003,nature:'Vehicle Breakdown',location:'Interstate 5',priority:'Medium',unit:'D-2'},
-];
-const mockPeds=[{fn:'John',ln:'Smith',dob:'01/01/1990',age:35,gender:'Male',occ:'Mechanic',addr:'123 Main St',skin:'Light',hair:'Brown',eye:'Blue',height:'6ft',weight:'180lbs'}];
-const mockCars=[{owner:'John Smith',plate:'ABC123',vehicle:'Toyota Camry',color:'White',vin:'1HGBH41',reg:'12/2025',ins:'Active',insExp:'06/2025'}];
-
-function dotCreateCall() {
-  dotCalls.push({id: dotCallId++, nature: document.getElementById('dot-call-nature').value||'Unknown', location: document.getElementById('dot-call-location').value||'Unknown', priority: document.getElementById('dot-call-priority').value});
-  renderDotCalls();
-  closeModal('dot-call-modal');
-  ['dot-call-nature','dot-call-title','dot-call-location','dot-call-desc'].forEach(id=>document.getElementById(id).value='');
-}
-function renderDotCalls() {
-  const el = document.getElementById('dot-calls-list');
-  if (!dotCalls.length) { el.innerHTML='<div style="height:42px;"></div>'; return; }
-  el.innerHTML = dotCalls.map((c,i)=>`
-    <div class="tbl-row">
-      <span style="font-size:20px;font-weight:700;color:#fff;width:80px;">${c.id}</span>
-      <span style="font-size:20px;font-weight:700;color:#fff;flex:1;">${c.nature}</span>
-      <span style="font-size:20px;font-weight:700;color:#fff;width:300px;">${c.location}</span>
-      <span style="font-size:20px;font-weight:700;color:${pc(c.priority)};width:120px;">${c.priority}</span>
-      <span style="font-size:20px;font-weight:700;color:#fff;width:100px;">—</span>
-      <button onclick="dotCloseCall(${i})" style="background:#ff0004;border:none;color:#fff;border-radius:8px;padding:3px 10px;cursor:pointer;font-size:13px;font-weight:700;margin-left:auto;">CODE 4</button>
-    </div>`).join('');
-}
-function dotCloseCall(i) { dotCalls.splice(i,1); renderDotCalls(); }
-
-function dotSearchPed(){
-  const q=document.getElementById('dot-ped-search').value.toLowerCase();
-  const r=q.length<2?[]:mockPeds.filter(p=>p.fn.toLowerCase().includes(q)||p.ln.toLowerCase().includes(q));
-  document.getElementById('dot-ped-results').innerHTML=r.length?r.map((p,i)=>`<div class="tbl-row" onclick="dotShowPed(${i})"><span style="font-size:19px;color:#fff;flex:1;">${p.fn}</span><span style="font-size:19px;color:#fff;">${p.ln}</span></div>`).join(''):'<div style="height:42px;"></div>';
-}
-function dotSearchCar(){
-  const q=document.getElementById('dot-car-search').value.toLowerCase();
-  const r=q.length<2?[]:mockCars.filter(c=>c.plate.toLowerCase().includes(q));
-  document.getElementById('dot-car-results').innerHTML=r.length?r.map(c=>`<div class="tbl-row"><span style="font-size:19px;color:#fff;width:180px;">${c.owner}</span><span style="font-size:19px;color:#fff;width:100px;">${c.plate}</span><span style="font-size:19px;color:#fff;flex:1;">${c.vehicle}</span><span style="font-size:19px;color:#fff;">${c.color}</span></div>`).join(''):'<div style="height:42px;"></div>';
-}
-function dotShowPed(i){
-  const p=mockPeds[i];
-  const flds=[['First Name',p.fn],['Last Name',p.ln],['D.O.B',p.dob],['AGE',p.age],['Gender',p.gender],['Occupation',p.occ],['Height',p.height],['Weight',p.weight],['Skin Tone',p.skin],['Hair Tone',p.hair],['Eye Color',p.eye],['Address',p.addr]];
-  document.getElementById('dot-ped-detail-content').innerHTML=flds.map(([l,v])=>`<div style="background:#333;border-radius:10px;padding:8px 14px;min-width:160px;"><div style="font-size:11px;color:rgba(255,255,255,0.55);font-weight:700;">${l}</div><div style="font-size:17px;color:#fff;font-weight:700;">${v}</div></div>`).join('');
-  showModal('dot-ped-detail');
-}
-
-function dotShowReport(type, btn) {
-  document.querySelectorAll('.report-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  const area = document.getElementById('dot-report-area');
-  const callFields = fldRow([['CALL ID',129,'dot-rc-id'],['OSC',184,'dot-rc-osc'],['Call Title',348,'dot-rc-title'],['Location of Call',620,'dot-rc-loc'],['Priority',185,'dot-rc-prio'],['Status',184,'dot-rc-stat']]);
-  const unitsField = `<div style="margin:8px 0;"><p style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.55);margin-bottom:4px;">Units</p><div style="background:#333;border-radius:10px;height:56px;padding:0 12px;display:flex;align-items:center;"><input style="background:transparent;border:none;color:#fff;font-family:'Inter',sans-serif;font-size:17px;font-weight:700;outline:none;width:100%;" placeholder="Unit callsigns..."></div></div>`;
-
-  if (type === 'incident') {
-    area.innerHTML = `
-      <p style="font-size:18px;font-weight:700;color:rgba(255,255,255,0.6);margin-bottom:12px;">Call Information</p>
-      ${callFields}${unitsField}
-      <p style="font-size:18px;font-weight:700;color:rgba(255,255,255,0.6);margin:12px 0 8px;">Details</p>
-      <textarea style="width:100%;height:200px;background:#333;border:none;border-radius:12px;color:#fff;font-family:'Inter',sans-serif;font-size:17px;padding:12px;outline:none;resize:none;" placeholder="Incident details..."></textarea>
-      <button class="act-btn act-btn-amber" style="position:relative;margin-top:12px;width:200px;height:44px;font-size:24px;" onclick="alert('Incident Report submitted!')">Submit</button>`;
-  } else if (type === 'tow') {
-    area.innerHTML = `
-      <p style="font-size:18px;font-weight:700;color:rgba(255,255,255,0.6);margin-bottom:12px;">Call Information</p>
-      ${callFields}${unitsField}
-      <p style="font-size:18px;font-weight:700;color:rgba(255,255,255,0.6);margin:12px 0 8px;">Vehicle Information</p>
-      ${fldRow([['Brand Model',349,'tow-brand'],['Color',348,'tow-color'],['Plate',185,'tow-plate'],['VIN',185,'tow-vin'],['Reg Expiry',185,'tow-reg'],['Owner',393,'tow-owner']])}
-      ${fldRow([['Insurance Status',349,'tow-ins'],['Insurance Expiry',348,'tow-insexp']])}
-      <button class="act-btn act-btn-amber" style="position:relative;margin-top:12px;width:200px;height:44px;font-size:24px;" onclick="alert('Tow Report submitted!')">Submit</button>`;
-  }
-}
-
-function fldRow(flds) {
-  return `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">${flds.map(([l,w,id])=>`<div style="background:#333;border-radius:10px;padding:6px 12px;width:${w}px;flex-shrink:0;"><div style="font-size:11px;color:rgba(255,255,255,0.55);font-weight:700;">${l}</div><input id="${id}" style="background:transparent;border:none;color:#fff;font-family:'Inter',sans-serif;font-size:16px;font-weight:700;outline:none;width:100%;margin-top:2px;" placeholder="${l}"></div>`).join('')}</div>`;
-}
-
-function dotFilterHistory(){
-  const q=document.getElementById('dot-hist-search').value.toLowerCase();
-  dotRenderHistory(dotHistory.filter(c=>String(c.id).includes(q)||c.nature.toLowerCase().includes(q)));
-}
-function dotRenderHistory(list){
-  document.getElementById('dot-history-list').innerHTML=list.map(c=>`
-    <div class="tbl-row">
-      <span style="font-size:20px;font-weight:700;color:#fff;width:80px;">${c.id}</span>
-      <span style="font-size:20px;font-weight:700;color:#fff;flex:1;">${c.nature}</span>
-      <span style="font-size:20px;font-weight:700;color:#fff;width:300px;">${c.location}</span>
-      <span style="font-size:20px;font-weight:700;color:${pc(c.priority)};width:120px;">${c.priority}</span>
-      <span style="font-size:20px;font-weight:700;color:#fff;">${c.unit}</span>
-    </div>`).join('');
-}
-
-function pc(p){return{Low:'#00ff2f',Medium:'#ffbb00',High:'#ff8800',Critical:'#ff0004'}[p]||'#fff';}
-
-renderDotCalls(); dotRenderHistory(dotHistory); dotShowReport('incident', document.getElementById('rtab-incident'));
-</script>
+<script src="js/dot.js"></script>
 </body>
 </html>

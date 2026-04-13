@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ultimate CAD — Server Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/server-settings.css">
+</head>
+<body>
+<div class="page-wrapper" id="ss-root">
+
+  <!-- ======== NAVBAR ======== -->
+  <div class="ss-navbar" id="ss-navbar">
+    <span class="ss-nav-title" id="ss-nav-title">Welcome to Ultimate CAD, Server Settings</span>
+    <div class="ss-nav-actions">
+      <button class="ss-nav-btn ss-nav-btn--back" id="btn-back">Server Page</button>
+      <button class="ss-nav-btn ss-nav-btn--dashboard" id="btn-dashboard">Dashboard</button>
+    </div>
+  </div>
+
+  <!-- ======== LEFT: MEMBER LIST PANEL ======== -->
+  <div class="ss-members-panel" id="ss-members-panel">
+
+    <!-- Panel Header -->
+    <div class="ss-members-hdr">
+      <span class="ss-mhdr-col ss-mhdr-col--name">Member</span>
+      <span class="ss-mhdr-col ss-mhdr-col--role">Role</span>
+      <span class="ss-mhdr-col ss-mhdr-col--dept">Department</span>
+      <span class="ss-mhdr-col ss-mhdr-col--callsign">Callsign</span>
+      <span class="ss-mhdr-col ss-mhdr-col--joined">Date Joined</span>
+      <span class="ss-mhdr-col ss-mhdr-col--action">Action</span>
+    </div>
+
+    <!-- Panel Body -->
+    <div class="ss-members-body" id="ss-members-body">
+      <!-- rows injected by server-settings.js -->
+    </div>
+
+    <!-- Member count footer -->
+    <div class="ss-members-footer">
+      <span class="ss-members-count" id="ss-member-count">0 members</span>
+    </div>
+
+  </div>
+
+  <!-- ======== RIGHT: SERVER CONFIG ======== -->
+  <div class="ss-config" id="ss-config">
+
+    <!-- Server Logo Upload -->
+    <div class="ss-logo-area" id="ss-logo-area">
+      <input class="ss-logo-file-input" type="file" id="logo-file-input" accept="image/*">
+      <img class="ss-logo-preview" id="logo-preview" alt="Server Logo">
+      <div class="ss-logo-overlay" id="logo-overlay">
+        <span class="ss-logo-icon">🖼️</span>
+        <p class="ss-logo-hint">Server Logo</p>
+        <p class="ss-logo-sub">Click to upload</p>
+      </div>
+      <button class="ss-logo-clear-btn" id="btn-logo-clear">✕ Remove</button>
+    </div>
+
+    <!-- Server Name -->
+    <div class="ss-field-section">
+      <label class="ss-field-label" for="input-server-name">Server Name</label>
+      <div class="ss-field-box ss-field-box--lg">
+        <input class="ss-field-input" id="input-server-name"
+               placeholder="My Roleplay Server" autocomplete="off">
+      </div>
+    </div>
+
+    <!-- Join Code -->
+    <div class="ss-field-section">
+      <label class="ss-field-label" for="input-join-code">Join Code</label>
+      <div class="ss-field-box ss-field-box--lg ss-field-box--row">
+        <input class="ss-field-input ss-mono" id="input-join-code"
+               placeholder="XXXXXXXX" maxlength="12" autocomplete="off">
+        <button class="ss-inline-btn" id="btn-copy-code">Copy</button>
+        <button class="ss-inline-btn ss-inline-btn--alt" id="btn-regen-code">Regen</button>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="ss-field-section">
+      <label class="ss-field-label" for="input-server-desc">Description</label>
+      <div class="ss-field-box ss-field-box--sm">
+        <textarea class="ss-field-input ss-textarea"
+                  id="input-server-desc"
+                  placeholder="Short description of your server..."></textarea>
+      </div>
+    </div>
+
+    <!-- Discord Server ID -->
+    <div class="ss-field-section">
+      <label class="ss-field-label" for="input-discord-id">Discord Server ID</label>
+      <div class="ss-field-box ss-field-box--sm">
+        <input class="ss-field-input ss-mono" id="input-discord-id"
+               placeholder="Discord guild ID" autocomplete="off">
+      </div>
+    </div>
+
+    <!-- Icon URL -->
+    <div class="ss-field-section">
+      <label class="ss-field-label" for="input-icon-url">Icon URL</label>
+      <div class="ss-field-box ss-field-box--sm">
+        <input class="ss-field-input" id="input-icon-url"
+               placeholder="https://..." autocomplete="off">
+      </div>
+    </div>
+
+    <!-- Status messages -->
+    <p class="ss-error-msg"   id="ss-error"></p>
+    <p class="ss-success-msg" id="ss-success"></p>
+
+    <!-- Save -->
+    <button class="ss-save-btn ss-save-btn--blue" id="btn-save-settings">Save Settings</button>
+
+    <!-- Danger Zone -->
+    <div class="ss-danger-zone">
+      <p class="ss-danger-label">Danger Zone</p>
+      <button class="ss-save-btn ss-save-btn--red" id="btn-delete-server">Delete Server</button>
+    </div>
+
+  </div><!-- /.ss-config -->
+
+  <!-- ======== MODAL: KICK MEMBER ======== -->
+  <div class="modal-overlay" id="modal-kick">
+    <div class="modal-box ss-modal-box">
+      <button class="close-btn" id="btn-kick-close">✕</button>
+      <p class="ss-modal-title"  id="kick-title">Kick member?</p>
+      <p class="ss-modal-desc"   id="kick-desc">This member will be removed from the server.</p>
+      <div class="ss-modal-actions">
+        <button class="ss-save-btn ss-save-btn--red"  id="btn-kick-confirm">Kick</button>
+        <button class="ss-save-btn ss-save-btn--grey" id="btn-kick-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== MODAL: CHANGE ROLE ======== -->
+  <div class="modal-overlay" id="modal-role">
+    <div class="modal-box ss-modal-box">
+      <button class="close-btn" id="btn-role-close">✕</button>
+      <p class="ss-modal-title" id="role-title">Change Role</p>
+      <p class="ss-modal-desc"  id="role-desc">Select a new role for this member.</p>
+      <div class="ss-role-grid" id="role-grid">
+        <button class="ss-role-btn" data-role="Owner">Owner</button>
+        <button class="ss-role-btn" data-role="Admin">Admin</button>
+        <button class="ss-role-btn" data-role="Moderator">Moderator</button>
+        <button class="ss-role-btn" data-role="Member">Member</button>
+      </div>
+      <div class="ss-modal-actions">
+        <button class="ss-save-btn ss-save-btn--blue" id="btn-role-confirm">Confirm</button>
+        <button class="ss-save-btn ss-save-btn--grey" id="btn-role-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== MODAL: DELETE SERVER ======== -->
+  <div class="modal-overlay" id="modal-delete">
+    <div class="modal-box ss-modal-box ss-modal-box--wide">
+      <button class="close-btn" id="btn-delete-close">✕</button>
+      <p class="ss-modal-title ss-modal-title--danger">Delete this server?</p>
+      <p class="ss-modal-desc">
+        All data, members, calls, BOLOs, and reports will be permanently deleted.
+        Type the server name to confirm.
+      </p>
+      <div class="ss-field-box ss-field-box--confirm">
+        <input class="ss-field-input" id="input-confirm-name"
+               placeholder="Type server name here..." autocomplete="off">
+      </div>
+      <p class="ss-error-msg" id="delete-error"></p>
+      <div class="ss-modal-actions">
+        <button class="ss-save-btn ss-save-btn--red"  id="btn-delete-confirm">Delete Forever</button>
+        <button class="ss-save-btn ss-save-btn--grey" id="btn-delete-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.page-wrapper -->
+
+<script src="js/server-settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,490 @@
+/* ============================================================
+   DISPATCHER CAD — dispatcher.css
+   Fixed 1920×1080 canvas, zoom-scaling pattern.
+   All layout and visual rules for dispatcher-cad.html.
+   ============================================================ */
+
+/* ── Navbar ─────────────────────────────────────────────────── */
+.d-navbar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 89px;
+  background: #222;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+/* Nav tab buttons */
+.d-btn {
+  position: relative;
+  height: 47px;
+  border-radius: var(--radius-btn);
+  border: none;
+  background: var(--bg-panel-header);
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 24px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  white-space: nowrap;
+  padding: 0 16px;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.d-btn:hover         { background: #555; }
+.d-btn--active       { background: #555; outline: 2px solid var(--text-white); }
+
+/* Clock-Out gets a fixed wider look */
+#btn-clockout { min-width: 183px; }
+
+/* Individual nav button widths from design */
+#btn-home        { min-width: 111px; }
+#btn-map         { min-width: 79px; }
+#btn-cad         { min-width: 79px; }
+#btn-search      { min-width: 119px; }
+#btn-reports     { min-width: 133px; }
+#btn-callhistory { min-width: 196px; }
+#btn-notepad     { min-width: 150px; }
+
+/* Status button cluster — pushed to the right */
+.d-status-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+}
+
+.d-status-btn {
+  width: 79px;
+  height: 47px;
+  border-radius: var(--radius-btn);
+  border: none;
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 24px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+.d-status-btn:hover { filter: brightness(1.15); }
+.d-status-btn--active-glow {
+  outline: 3px solid #fff;
+  filter: brightness(1.2);
+}
+
+.d-status-btn--green  { background: var(--status-green);  }
+.d-status-btn--red    { background: var(--status-red);    }
+.d-status-btn--blue   { background: var(--status-blue);   }
+.d-status-btn--yellow { background: var(--status-yellow); }
+
+/* ── Panel containers ────────────────────────────────────────── */
+/* .panel / .panel.active inherited from styles.css */
+
+/* ── Section titles ──────────────────────────────────────────── */
+.d-section-title {
+  position: absolute;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+/* ── HOME panel ──────────────────────────────────────────────── */
+.d-welcome-text {
+  position: absolute;
+  left: 41px;
+  top: 44px;
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--text-white);
+  width: 617px;
+  line-height: 1.6;
+}
+
+.d-welcome-list {
+  position: absolute;
+  left: 89px;
+  top: 190px;
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--text-white);
+  line-height: 1.8;
+}
+
+/* ── MAP panel ───────────────────────────────────────────────── */
+.d-map-placeholder {
+  position: absolute;
+  left: 388px;
+  top: 0;
+  width: 1143px;
+  height: 991px;
+  background: #1a1a2e;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.d-map-inner { text-align: center; color: rgba(255,255,255,0.2); }
+.d-map-icon  { font-size: 80px; }
+.d-map-title { font-size: 28px; font-weight: 700; margin-top: 16px; color: rgba(255,255,255,0.2); }
+.d-map-subtitle { font-size: 18px; margin-top: 8px; color: rgba(255,255,255,0.2); }
+
+/* ── CAD panel ───────────────────────────────────────────────── */
+#cad-calls-title  { left: 86px; top: 22px; }
+#cad-bolos-title  { left: 86px; top: 222px; }
+#cad-units-title  { left: 86px; top: 455px; }
+
+/* Table headers */
+.d-calls-hdr {
+  position: absolute;
+  left: 86px; top: 64px;
+  width: 1748px; height: 41px;
+}
+.d-bolos-hdr {
+  position: absolute;
+  left: 86px; top: 270px;
+  width: 1748px; height: 41px;
+}
+.d-units-hdr {
+  position: absolute;
+  left: 86px; top: 503px;
+  width: 1748px; height: 41px;
+}
+
+/* Table bodies */
+.d-calls-body {
+  position: absolute;
+  left: 86px; top: 105px;
+  width: 1748px; min-height: 42px; max-height: 100px;
+  overflow-y: auto;
+}
+.d-bolos-body {
+  position: absolute;
+  left: 86px; top: 311px;
+  width: 1748px; min-height: 42px; max-height: 100px;
+  overflow-y: auto;
+}
+.d-units-body {
+  position: absolute;
+  left: 86px; top: 544px;
+  width: 1748px; min-height: 42px; max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Create-call / Create-BOLO buttons */
+.d-cad-btn {
+  position: absolute;
+  width: 192px;
+  height: 44px;
+  font-size: 28px;
+}
+#btn-create-call { left: 86px; top: 162px; }
+#btn-create-bolo { left: 86px; top: 368px; width: 214px; }
+
+/* Column positions — calls / units / history shared */
+.d-col-callnum   { left: 17px; }
+.d-col-nature    { left: 131px; }
+.d-col-location  { left: 503px; }
+.d-col-priority  { left: 905px; }
+.d-col-unit      { left: 1236px; }
+
+/* BOLOs columns */
+.d-col-bolo-type   { left: 25px; }
+.d-col-bolo-reason { left: 272px; }
+.d-col-bolo-desc   { left: 877px; }
+
+/* Units columns */
+.d-col-callsign   { left: 2px; }
+.d-col-dept-type  { left: 151px; }
+.d-col-dept-name  { left: 457px; }
+.d-col-unit-loc   { left: 824px; }
+.d-col-unit-status { left: 1657px; }
+
+/* ── Inline table row content ────────────────────────────────── */
+.d-row-cell {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-white);
+  flex-shrink: 0;
+}
+.d-row-cell-flex { flex: 1; }
+.d-row-cell--leo   { color: var(--status-blue); }
+.d-row-cell--fd    { color: #ff6633; }
+.d-row-cell--green { color: var(--status-green); }
+
+.d-code4-btn {
+  background: var(--status-red);
+  border: none;
+  color: var(--text-white);
+  border-radius: 8px;
+  padding: 3px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.d-code4-btn:hover { filter: brightness(1.15); }
+
+.d-remove-btn {
+  background: var(--status-red);
+  border: none;
+  color: var(--text-white);
+  border-radius: 8px;
+  padding: 3px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.d-remove-btn:hover { filter: brightness(1.15); }
+
+/* ── SEARCH panel ────────────────────────────────────────────── */
+.d-search-block {
+  position: absolute;
+  top: 89px;
+}
+#d-ped-block  { left: 71px; }
+#d-car-block  { left: 731px; }
+#d-gun-block  { left: 1391px; }
+
+.d-search-label {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--text-white);
+  margin-bottom: 8px;
+}
+
+.d-search-input-box {
+  width: 458px;
+  height: 66px;
+  background: #222;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.d-search-input-box input {
+  background: transparent;
+  border: none;
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 24px;
+  font-weight: 700;
+  outline: none;
+  width: 100%;
+}
+.d-search-input-box input::placeholder { color: rgba(255,255,255,0.4); }
+
+/* Search results tables */
+.d-ped-hdr {
+  position: absolute;
+  left: 14px; top: 333px;
+  width: 644px; height: 41px;
+}
+.d-ped-body {
+  position: absolute;
+  left: 14px; top: 374px;
+  width: 644px; min-height: 42px; max-height: 200px;
+  overflow-y: auto;
+}
+
+.d-car-hdr {
+  position: absolute;
+  left: 673px; top: 333px;
+  width: 811px; height: 41px;
+}
+.d-car-body {
+  position: absolute;
+  left: 673px; top: 374px;
+  width: 811px; min-height: 42px; max-height: 200px;
+  overflow-y: auto;
+}
+
+.d-gun-hdr {
+  position: absolute;
+  left: 1501px; top: 333px;
+  width: 405px; height: 41px;
+}
+.d-gun-body {
+  position: absolute;
+  left: 1501px; top: 374px;
+  width: 405px; min-height: 42px; max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Search column positions */
+.d-col-ped-fn    { left: 23px; }
+.d-col-ped-ln    { left: 344px; }
+.d-col-car-owner { left: 19px; }
+.d-col-car-plate { left: 322px; }
+.d-col-car-model { left: 489px; }
+.d-col-car-color { left: 729px; }
+.d-col-gun-owner  { left: 19px; }
+.d-col-gun-serial { left: 209px; }
+
+/* ── REPORTS panel ───────────────────────────────────────────── */
+#reports-title { left: 86px; top: 40px; }
+
+.d-reports-placeholder {
+  position: absolute;
+  left: 86px;
+  top: 100px;
+  width: 1748px;
+  height: 820px;
+  background: #222;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.d-reports-empty {
+  font-size: 24px;
+  color: rgba(255,255,255,0.3);
+}
+
+/* ── CALL HISTORY panel ──────────────────────────────────────── */
+#history-title { left: 102px; top: 37px; }
+
+.d-history-hdr {
+  position: absolute;
+  left: 86px; top: 90px;
+  width: 1748px; height: 41px;
+}
+.d-history-body {
+  position: absolute;
+  left: 86px; top: 131px;
+  width: 1748px; min-height: 42px; max-height: 820px;
+  border-radius: 0 0 15px 15px;
+  overflow-y: auto;
+}
+
+/* History search box inside the header */
+.d-hist-search-wrap {
+  position: absolute;
+  right: 0; top: 5px;
+  width: 213px; height: 30px;
+  background: #111;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+}
+.d-hist-search-input {
+  background: transparent;
+  border: none;
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 15px;
+  outline: none;
+  padding: 0 12px;
+  width: 100%;
+}
+.d-hist-search-input::placeholder { color: rgba(255,255,255,0.4); }
+
+/* ── NOTEPAD panel ───────────────────────────────────────────── */
+#notepad-title { left: 86px; top: 16px; }
+
+.d-notepad {
+  position: absolute;
+  left: 86px;
+  top: 130px;
+  width: 1748px;
+  height: 870px;
+  background: #222;
+  border: none;
+  border-radius: 15px;
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 20px;
+  font-weight: 500;
+  padding: 20px;
+  outline: none;
+  resize: none;
+}
+
+/* ── MODALS ──────────────────────────────────────────────────── */
+.d-modal-box {
+  left: 86px;
+  top: 568px;
+  width: 1748px;
+  height: 492px;
+  padding: 15px;
+}
+
+.d-modal-fields-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+/* Individual field widths */
+.d-fld-callid    { width: 129px; height: 57px; flex-shrink: 0; }
+.d-fld-nature    { width: 185px; height: 57px; flex-shrink: 0; }
+.d-fld-title     { width: 349px; height: 57px; flex-shrink: 0; }
+.d-fld-location  { width: 623px; height: 57px; flex-shrink: 0; }
+.d-fld-priority  { width: 185px; height: 57px; flex-shrink: 0; }
+.d-fld-status    { width: 185px; height: 57px; flex-shrink: 0; }
+.d-fld-desc      { width: 100%;  height: 332px; }
+.d-fld-bolo-type { width: 349px; height: 57px; flex-shrink: 0; }
+.d-fld-bolo-loc  { width: 1349px; height: 57px; flex-shrink: 0; }
+
+/* Textarea inside description field */
+.d-modal-textarea {
+  width: 100%;
+  height: 290px;
+  background: transparent;
+  border: none;
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 17px;
+  font-weight: 700;
+  outline: none;
+  resize: none;
+  margin-top: 2px;
+}
+
+/* Call-ID display span */
+.d-callid-display {
+  color: var(--text-white);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+/* Modal submit button */
+.d-modal-submit {
+  position: absolute;
+  left: 808px;
+  bottom: 12px;
+  width: 132px;
+  height: 44px;
+  font-size: 28px;
+}
+
+/* ── Priority colour helper ──────────────────────────────────── */
+.pri-low      { color: var(--status-green);  }
+.pri-medium   { color: var(--status-yellow); }
+.pri-high     { color: #ff8800; }
+.pri-critical { color: var(--status-red);    }
+
+/* ── Empty-state ─────────────────────────────────────────────── */
+.d-empty {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  padding: 0 17px;
+  font-size: 16px;
+  color: rgba(255,255,255,0.25);
+}

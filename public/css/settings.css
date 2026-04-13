@@ -1,0 +1,459 @@
+/* ============================================================
+   SETTINGS PAGE — settings.css
+   Fixed 1920×1080 canvas, same zoom-scaling pattern as the
+   rest of the project.  No inline styles in the HTML.
+   ============================================================ */
+
+/* ── Navbar ─────────────────────────────────────────────────── */
+.st-navbar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 89px;
+  background: var(--bg-panel);        /* #222 */
+  display: flex;
+  align-items: center;
+  padding: 0 26px 0 32px;
+  flex-shrink: 0;
+}
+
+.st-nav-title {
+  flex: 1;
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--text-white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 24px;
+}
+
+.st-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.st-nav-btn {
+  height: 47px;
+  border-radius: var(--radius-btn);
+  border: none;
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 24px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.st-nav-btn--dashboard {
+  width: 183px;
+  background: var(--bg-panel-header);
+}
+.st-nav-btn--dashboard:hover { background: #555; }
+
+/* ── Panel header (column labels row) ──────────────────────── */
+.st-panel-header {
+  position: absolute;
+  left: 78px;
+  top: 160px;
+  width: 1763px;
+  height: 90px;
+  background: var(--bg-panel-header);
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  gap: 0;
+}
+
+.st-panel-label {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-white);
+  flex: 1;
+  white-space: nowrap;
+}
+
+/* ── Panel body ─────────────────────────────────────────────── */
+.st-panel-body {
+  position: absolute;
+  left: 78px;
+  top: 250px;
+  width: 1763px;
+  height: 697px;
+  background: var(--bg-panel);
+  border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #444 #111;
+}
+
+.st-panel-body::-webkit-scrollbar       { width: 6px; }
+.st-panel-body::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+
+/* ── Account info row ───────────────────────────────────────── */
+.st-info-row {
+  display: flex;
+  align-items: center;
+  height: 72px;
+  padding: 0 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.st-info-cell {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-white);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.st-info-cell--name    { font-size: 32px; }
+.st-info-cell--role    { color: rgba(255, 255, 255, 0.55); font-size: 22px; }
+.st-info-cell--servers { color: rgba(255, 255, 255, 0.7);  font-size: 24px; }
+.st-info-cell--date    { color: rgba(255, 255, 255, 0.55); font-size: 22px; }
+.st-info-cell--discord { color: rgba(255, 255, 255, 0.55); font-size: 20px; font-family: 'Courier New', monospace; }
+
+/* ── Divider ────────────────────────────────────────────────── */
+.st-divider {
+  height: 1px;
+  margin: 0 28px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Two-column settings grid ───────────────────────────────── */
+.st-settings-grid {
+  display: flex;
+  gap: 32px;
+  padding: 32px 40px 24px;
+}
+
+/* ── Section ────────────────────────────────────────────────── */
+.st-section {
+  background: #1a1a1a;
+  border-radius: var(--radius-panel);
+  padding: 28px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Left section: account settings */
+.st-settings-grid > #section-account {
+  width: 580px;
+  flex-shrink: 0;
+}
+
+/* Right section: servers list */
+.st-settings-grid > #section-servers {
+  flex: 1;
+}
+
+.st-section-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-white);
+  margin-bottom: 22px;
+}
+
+/* ── Field group (vertical stack) ──────────────────────────── */
+.st-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.st-field-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.st-field-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding-left: 4px;
+}
+
+.st-field-box {
+  height: 57px;
+  background: var(--bg-panel-header);   /* #444 */
+  border-radius: var(--radius-btn);
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  transition: background 0.15s;
+}
+
+.st-field-box:focus-within {
+  background: #4a4a4a;
+  outline: 2px solid rgba(41, 84, 195, 0.6);
+}
+
+.st-field-box--readonly {
+  background: #2a2a2a;
+  cursor: not-allowed;
+}
+
+.st-field-box--readonly:focus-within {
+  outline: none;
+  background: #2a2a2a;
+}
+
+.st-field-input {
+  background: transparent;
+  border: none;
+  color: var(--text-white);
+  font-family: var(--font);
+  font-size: 20px;
+  font-weight: 600;
+  outline: none;
+  width: 100%;
+}
+
+.st-field-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 400;
+}
+
+.st-field-input[readonly] {
+  color: rgba(255, 255, 255, 0.45);
+  cursor: not-allowed;
+}
+
+/* ── Status messages ────────────────────────────────────────── */
+.st-error-msg {
+  min-height: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ff6b6b;
+  margin-bottom: 6px;
+}
+
+.st-success-msg {
+  min-height: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--status-green);
+  margin-bottom: 6px;
+}
+
+/* ── Save / action buttons ──────────────────────────────────── */
+.st-save-btn {
+  height: 52px;
+  border-radius: var(--radius-btn);
+  border: none;
+  font-family: var(--font);
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, opacity 0.15s;
+  color: var(--text-white);
+}
+
+.st-save-btn--blue          { background: var(--bg-blue); }
+.st-save-btn--blue:hover    { background: #3a6ae0; }
+.st-save-btn--red           { background: #851616; }
+.st-save-btn--red:hover     { background: #a01c1c; }
+.st-save-btn--grey          { background: var(--bg-panel-header); }
+.st-save-btn--grey:hover    { background: #555; }
+
+.st-save-btn.st-loading {
+  opacity: 0.65;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Servers table ──────────────────────────────────────────── */
+.st-servers-table {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-panel);
+  overflow: hidden;
+}
+
+.st-servers-hdr {
+  background: var(--bg-panel-header);
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+  flex-shrink: 0;
+}
+
+.st-srv-col {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-white);
+  width: var(--col-w);
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* last col flexible */
+.st-srv-col:last-child {
+  width: auto;
+  flex: 1;
+}
+
+.st-servers-body {
+  background: #181818;
+  border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+  max-height: 380px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #444 #111;
+}
+
+.st-servers-body::-webkit-scrollbar       { width: 5px; }
+.st-servers-body::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+
+.st-srv-row {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.12s;
+}
+
+.st-srv-row:last-child { border-bottom: none; }
+.st-srv-row:hover { background: rgba(255, 255, 255, 0.04); }
+
+.st-srv-cell {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-white);
+  width: var(--col-w);
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.st-srv-cell:last-child {
+  width: auto;
+  flex: 1;
+}
+
+.st-srv-cell--members  { color: rgba(255, 255, 255, 0.6); }
+.st-srv-cell--role     { }
+.st-srv-cell--date     { color: rgba(255, 255, 255, 0.5); font-size: 16px; }
+
+/* Role badges */
+.st-role-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.st-role-badge--owner  { background: rgba(220, 178, 7, 0.2);  color: #dcb207; }
+.st-role-badge--admin  { background: rgba(41, 84, 195, 0.2);  color: #7eaaff; }
+.st-role-badge--member { background: rgba(255, 255, 255, 0.08); color: rgba(255,255,255,0.5); }
+
+/* Leave server button in row */
+.st-leave-btn {
+  height: 32px;
+  padding: 0 14px;
+  background: rgba(133, 22, 22, 0.35);
+  border: 1px solid rgba(133, 22, 22, 0.6);
+  border-radius: 8px;
+  color: #ff7c7c;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.st-leave-btn:hover { background: rgba(133, 22, 22, 0.6); }
+
+.st-empty-servers {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.2);
+  font-weight: 600;
+}
+
+/* ── Danger zone ────────────────────────────────────────────── */
+.st-danger-zone {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 40px 28px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: auto;
+}
+
+.st-danger-label {
+  font-size: 18px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.35);
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+/* ── Confirm modal ──────────────────────────────────────────── */
+.st-confirm-box {
+  left: 560px;
+  top: 380px;
+  width: 800px;
+  padding: 36px 40px 32px;
+}
+
+.st-confirm-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-white);
+  margin-bottom: 12px;
+}
+
+.st-confirm-desc {
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.st-confirm-actions {
+  display: flex;
+  gap: 14px;
+}
+
+/* ── Fade-in animation ──────────────────────────────────────── */
+@keyframes stRowIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.st-srv-row {
+  animation: stRowIn 0.2s ease both;
+}
