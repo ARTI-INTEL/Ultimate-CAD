@@ -20,10 +20,8 @@
 
   <!-- ======== PANEL: CHARACTERS ======== -->
   <div class="panel active" id="panel-characters">
-
     <span class="civ-section-title">My Characters</span>
 
-    <!-- Characters table -->
     <div class="tbl-hdr civ-hdr civ-chars-hdr" id="chars-table-hdr">
       <span class="tbl-col" id="col-chars-fn">First Name</span>
       <span class="tbl-col" id="col-chars-ln">Last Name</span>
@@ -64,12 +62,10 @@
       <button class="civ-action-btn" id="btn-add-vehicle">Add Vehicle</button>
       <button class="civ-action-btn" id="btn-add-firearm">Add Firearm</button>
     </div>
-
   </div>
 
   <!-- ======== PANEL: VEHICLES ======== -->
   <div class="panel" id="panel-vehicles">
-
     <span class="civ-section-title">Vehicles</span>
 
     <div class="tbl-hdr civ-hdr civ-vehicles-hdr" id="vehicles-table-hdr">
@@ -87,12 +83,10 @@
     <div class="civ-actions" id="vehicles-actions">
       <button class="civ-action-btn" id="btn-add-vehicle-tab">Add Vehicle</button>
     </div>
-
   </div>
 
   <!-- ======== PANEL: FIREARMS ======== -->
   <div class="panel" id="panel-firearms">
-
     <span class="civ-section-title">Firearms</span>
 
     <div class="tbl-hdr civ-hdr civ-firearms-hdr" id="firearms-table-hdr">
@@ -106,7 +100,6 @@
     <div class="civ-actions" id="firearms-actions">
       <button class="civ-action-btn" id="btn-add-firearm-tab">Add Firearm</button>
     </div>
-
   </div>
 
   <!-- ======== MODAL: Add / Edit Character ======== -->
@@ -117,20 +110,16 @@
 
       <div class="civ-modal-grid">
         <div class="fld">
-          <label>First Name</label>
+          <label>First Name *</label>
           <input id="char-fn" autocomplete="off" placeholder="First Name">
         </div>
         <div class="fld">
-          <label>Last Name</label>
+          <label>Last Name *</label>
           <input id="char-ln" autocomplete="off" placeholder="Last Name">
         </div>
         <div class="fld">
-          <label>D.O.B</label>
+          <label>D.O.B *</label>
           <input id="char-dob" autocomplete="off" placeholder="MM/DD/YYYY">
-        </div>
-        <div class="fld">
-          <label>AGE</label>
-          <input id="char-age" autocomplete="off" placeholder="Age" type="number">
         </div>
         <div class="fld">
           <label>Gender</label>
@@ -177,12 +166,15 @@
       <p class="civ-modal-title">Add Vehicle</p>
 
       <div class="civ-modal-grid">
+        <!-- Owner dropdown populated by JS -->
         <div class="fld">
-          <label>Owner (Character Name)</label>
-          <input id="veh-owner" autocomplete="off" placeholder="Character Name">
+          <label>Owner (Character)</label>
+          <select id="veh-owner-select">
+            <option value="">— Select Character —</option>
+          </select>
         </div>
         <div class="fld">
-          <label>Plate</label>
+          <label>Plate *</label>
           <input id="veh-plate" autocomplete="off" placeholder="ABC123">
         </div>
         <div class="fld civ-fld-wide">
@@ -190,7 +182,7 @@
           <input id="veh-vin" autocomplete="off" placeholder="Vehicle Identification Number">
         </div>
         <div class="fld">
-          <label>Brand / Model</label>
+          <label>Brand / Model *</label>
           <input id="veh-model" autocomplete="off" placeholder="e.g. Toyota Camry">
         </div>
         <div class="fld">
@@ -225,12 +217,15 @@
       <p class="civ-modal-title">Register Firearm</p>
 
       <div class="civ-modal-grid">
+        <!-- Owner dropdown populated by JS -->
         <div class="fld">
-          <label>Owner (Character Name)</label>
-          <input id="fa-owner" autocomplete="off" placeholder="Character Name">
+          <label>Owner (Character)</label>
+          <select id="fa-owner-select">
+            <option value="">— Select Character —</option>
+          </select>
         </div>
         <div class="fld">
-          <label>Serial Number</label>
+          <label>Serial Number *</label>
           <input id="fa-serial" autocomplete="off" placeholder="Serial Number">
         </div>
         <div class="fld">
@@ -238,7 +233,7 @@
           <input id="fa-name" autocomplete="off" placeholder="e.g. Glock 19">
         </div>
         <div class="fld">
-          <label>Type</label>
+          <label>Type *</label>
           <input id="fa-type" autocomplete="off" placeholder="e.g. Semi-Auto">
         </div>
       </div>

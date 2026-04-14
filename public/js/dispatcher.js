@@ -1,40 +1,41 @@
 /**
  * dispatcher.js — Ultimate CAD Dispatcher
- *
- * Responsibilities:
- *  - Tab/panel switching
- *  - Status button toggling
- *  - Active Calls: create, close (CODE 4), render
- *  - Active BOLOs: create, remove, render
- *  - Active Units: render mock data
- *  - Search: PED / Car / Gun with mock data
- *  - Call History: render + filter
- *  - Notepad: persist via localStorage
- *  - Modal open / close
- *
- * Zero inline event handlers or inline styles anywhere.
+ * Full API integration: calls, BOLOs, active units, search, history.
+ * Polls live data every 10 seconds.
  */
 
 (function () {
   'use strict';
 
-  /* ── Helpers ─────────────────────────────────────────────── */
-  const $ = id => document.getElementById(id);
-  const esc = s => String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  const API_BASE = '';
 
-  /* ── Priority colour class ─────────────────────────────── */
-  function priClass(p) {
-    const map = { Low: 'pri-low', Medium: 'pri-medium', High: 'pri-high', Critical: 'pri-critical' };
-    return map[p] || '';
+  function get(key) { try { return localStorage.getItem(key); } catch (_) { return null; } }
+
+  const userId    = get('cad_user_id');
+  const serverId  = get('cad_active_server');
+  const officerId = get('cad_officer_id');
+
+  if (!userId || !serverId) { window.location.href = 'server-page.html'; return; }
+
+  const authHeaders = { 'Content-Type': 'application/json', 'x-user-id': userId };
+
+  function apiFetch(url, opts) {
+    return fetch(API_BASE + url, Object.assign({ headers: authHeaders }, opts || {}))
+      .then(function (r) {
+        if (!r.ok) return r.json().then(function (e) { throw new Error(e.error || 'API error'); });
+        return r.json();
+      });
   }
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  function priClass(p) { return {Low:'pri-low',Medium:'pri-medium',High:'pri-high',Critical:'pri-critical'}[p]||''; }
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
      PANEL SWITCHING
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  const PANELS = ['home', 'map', 'cad', 'search', 'reports', 'callhistory', 'notepad'];
+  const PANELS = ['home','map','cad','search','reports','callhistory','notepad'];
 
   function showPanel(id) {
     PANELS.forEach(function (p) {
@@ -43,6 +44,8 @@
       if (panel) panel.classList.toggle('active', p === id);
       if (btn)   btn.classList.toggle('d-btn--active', p === id);
     });
+    if (id === 'cad') { fetchCalls(); fetchBolos(); fetchUnits(); }
+    if (id === 'callhistory') fetchHistory();
   }
 
   PANELS.forEach(function (p) {
@@ -50,22 +53,18 @@
     if (btn) btn.addEventListener('click', function () { showPanel(p); });
   });
 
-  /* ── Clock-Out ───────────────────────────────────────────── */
   $('btn-clockout').addEventListener('click', function () {
+    if (officerId) apiFetch('/officers/clock-out/' + officerId, { method: 'DELETE' }).catch(function () {});
     window.location.href = 'server-page.html';
   });
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
      STATUS BUTTONS
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  var currentStatus = null;
-
+  let currentStatus = null;
   document.querySelectorAll('.d-status-btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      // Deactivate all, activate clicked
-      document.querySelectorAll('.d-status-btn').forEach(function (b) {
-        b.classList.remove('d-status-btn--active-glow');
-      });
+      document.querySelectorAll('.d-status-btn').forEach(function (b) { b.classList.remove('d-status-btn--active-glow'); });
       if (currentStatus !== btn.dataset.code) {
         btn.classList.add('d-status-btn--active-glow');
         currentStatus = btn.dataset.code;
@@ -78,297 +77,267 @@
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
      MODAL HELPERS
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  const MODALS = ['d-call-modal', 'd-bolo-modal'];
-
-  function openModal(id) { $(id).classList.add('open'); }
+  const MODALS = ['d-call-modal','d-bolo-modal'];
+  function openModal(id)  { $(id).classList.add('open'); }
   function closeModal(id) { $(id).classList.remove('open'); }
 
   MODALS.forEach(function (id) {
-    $(id).addEventListener('click', function (e) {
-      if (e.target === this) closeModal(id);
-    });
+    $(id).addEventListener('click', function (e) { if (e.target === this) closeModal(id); });
   });
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') {
-      MODALS.forEach(function (id) { closeModal(id); });
-    }
-  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') MODALS.forEach(closeModal); });
 
   $('btn-create-call').addEventListener('click', function () { openModal('d-call-modal'); });
   $('btn-create-bolo').addEventListener('click', function () { openModal('d-bolo-modal'); });
   $('btn-close-call-modal').addEventListener('click', function () { closeModal('d-call-modal'); });
   $('btn-close-bolo-modal').addEventListener('click', function () { closeModal('d-bolo-modal'); });
 
-  /* ── Clear fields helper ─────────────────────────────────── */
   function clearFields(ids) {
     ids.forEach(function (id) {
-      var el = $(id);
-      if (!el) return;
-      if (el.tagName === 'SELECT') el.selectedIndex = 0;
-      else el.value = '';
+      const el = $(id); if (!el) return;
+      el.tagName === 'SELECT' ? (el.selectedIndex = 0) : (el.value = '');
     });
   }
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
      ACTIVE CALLS
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  var dCalls   = [];
-  var dCallId  = 2001;
+  function fetchCalls() {
+    apiFetch('/calls/' + serverId)
+      .then(function (rows) { renderCalls(rows); })
+      .catch(function () {});
+  }
 
-  function renderCalls() {
-    var el = $('d-calls-list');
-    if (!dCalls.length) {
-      el.innerHTML = '<div class="d-empty">No active calls.</div>';
-      return;
-    }
-    el.innerHTML = dCalls.map(function (c, i) {
-      return (
-        '<div class="tbl-row">' +
-          '<span class="d-row-cell" style="width:100px">' + esc(c.id) + '</span>' +
-          '<span class="d-row-cell" style="flex:1">' + esc(c.nature) + '</span>' +
-          '<span class="d-row-cell" style="width:300px">' + esc(c.location) + '</span>' +
-          '<span class="d-row-cell ' + priClass(c.priority) + '" style="width:120px">' + esc(c.priority) + '</span>' +
-          '<span class="d-row-cell" style="width:120px">—</span>' +
-          '<button class="d-code4-btn" data-idx="' + i + '">CODE 4</button>' +
-        '</div>'
-      );
+  function renderCalls(calls) {
+    const el = $('d-calls-list');
+    if (!calls.length) { el.innerHTML = '<div class="d-empty">No active calls.</div>'; return; }
+    el.innerHTML = calls.map(function (c) {
+      return '<div class="tbl-row">' +
+        '<span class="d-row-cell" style="width:100px">' + esc(c.id)       + '</span>' +
+        '<span class="d-row-cell" style="flex:1">'      + esc(c.nature)   + '</span>' +
+        '<span class="d-row-cell" style="width:300px">' + esc(c.location) + '</span>' +
+        '<span class="d-row-cell ' + priClass(c.priority) + '" style="width:120px">' + esc(c.priority) + '</span>' +
+        '<span class="d-row-cell" style="width:120px">' + esc(c.units || '—') + '</span>' +
+        '<button class="d-code4-btn" data-id="' + c.id + '">CODE 4</button>' +
+        '</div>';
     }).join('');
 
     el.querySelectorAll('.d-code4-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        var idx = parseInt(btn.dataset.idx, 10);
-        dCalls.splice(idx, 1);
-        renderCalls();
+        apiFetch('/calls/' + btn.dataset.id + '/close', {
+          method: 'PATCH',
+          body: JSON.stringify({ serverId: Number(serverId) }),
+        })
+          .then(function () { fetchCalls(); })
+          .catch(function (err) { alert(err.message); });
       });
     });
   }
 
-  // Update the Call ID display each time the modal opens
-  $('btn-create-call').addEventListener('click', function () {
-    $('d-callid-display').textContent = '#' + dCallId;
-  });
-
   $('btn-submit-call').addEventListener('click', function () {
-    var nature = $('d-call-nature').value.trim() || 'Unknown';
-    var loc    = $('d-call-location').value.trim() || 'Unknown';
-    dCalls.push({
-      id:       dCallId++,
-      nature:   nature,
-      location: loc,
-      priority: $('d-call-priority').value,
-      status:   $('d-call-status').value,
-      desc:     $('d-call-desc').value.trim(),
-    });
-    renderCalls();
-    closeModal('d-call-modal');
-    clearFields(['d-call-nature', 'd-call-title', 'd-call-location', 'd-call-desc']);
+    const nature   = $('d-call-nature').value.trim()   || 'Unknown';
+    const location = $('d-call-location').value.trim() || 'Unknown';
+    const priority = $('d-call-priority').value;
+
+    apiFetch('/calls', {
+      method: 'POST',
+      body: JSON.stringify({ serverId: Number(serverId), nature, location, priority }),
+    })
+      .then(function () {
+        fetchCalls();
+        closeModal('d-call-modal');
+        clearFields(['d-call-nature','d-call-title','d-call-location','d-call-desc']);
+      })
+      .catch(function (err) { alert(err.message); });
   });
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
      ACTIVE BOLOs
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  var dBolos = [];
+  function fetchBolos() {
+    apiFetch('/bolos/' + serverId)
+      .then(function (rows) { renderBolos(rows); })
+      .catch(function () {});
+  }
 
-  function renderBolos() {
-    var el = $('d-bolos-list');
-    if (!dBolos.length) {
-      el.innerHTML = '<div class="d-empty">No active BOLOs.</div>';
-      return;
-    }
-    el.innerHTML = dBolos.map(function (b, i) {
-      return (
-        '<div class="tbl-row">' +
-          '<span class="d-row-cell" style="width:220px">' + esc(b.type) + '</span>' +
-          '<span class="d-row-cell" style="width:580px">' + esc(b.loc) + '</span>' +
-          '<span class="d-row-cell" style="flex:1">' + esc(b.desc.substring(0, 80)) + (b.desc.length > 80 ? '…' : '') + '</span>' +
-          '<button class="d-remove-btn" data-idx="' + i + '">Remove</button>' +
-        '</div>'
-      );
+  function renderBolos(bolos) {
+    const el = $('d-bolos-list');
+    if (!bolos.length) { el.innerHTML = '<div class="d-empty">No active BOLOs.</div>'; return; }
+    el.innerHTML = bolos.map(function (b) {
+      const desc = b.description || '';
+      return '<div class="tbl-row">' +
+        '<span class="d-row-cell" style="width:220px">' + esc(b.type) + '</span>' +
+        '<span class="d-row-cell" style="width:350px">' + esc(b.reason) + '</span>' +
+        '<span class="d-row-cell" style="flex:1">'      + esc(desc.substring(0,80)) + (desc.length>80?'…':'') + '</span>' +
+        '<button class="d-remove-btn" data-id="' + b.id + '">Remove</button>' +
+        '</div>';
     }).join('');
 
     el.querySelectorAll('.d-remove-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        var idx = parseInt(btn.dataset.idx, 10);
-        dBolos.splice(idx, 1);
-        renderBolos();
+        apiFetch('/bolos/' + btn.dataset.id, {
+          method: 'DELETE',
+          body: JSON.stringify({ serverId: Number(serverId) }),
+        })
+          .then(function () { fetchBolos(); })
+          .catch(function (err) { alert(err.message); });
       });
     });
   }
 
   $('btn-submit-bolo').addEventListener('click', function () {
-    dBolos.push({
-      type: $('d-bolo-type').value,
-      loc:  $('d-bolo-loc').value.trim(),
-      desc: $('d-bolo-desc').value.trim(),
-    });
-    renderBolos();
-    closeModal('d-bolo-modal');
-    clearFields(['d-bolo-loc', 'd-bolo-desc']);
+    const type = $('d-bolo-type').value;
+    const loc  = $('d-bolo-loc').value.trim()  || '—';
+    const desc = $('d-bolo-desc').value.trim();
+    if (!desc) { alert('Description is required.'); return; }
+
+    apiFetch('/bolos', {
+      method: 'POST',
+      body: JSON.stringify({ serverId: Number(serverId), type, reason: loc, description: desc }),
+    })
+      .then(function () {
+        fetchBolos();
+        closeModal('d-bolo-modal');
+        clearFields(['d-bolo-loc','d-bolo-desc']);
+      })
+      .catch(function (err) { alert(err.message); });
   });
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     ACTIVE UNITS (mock)
+     ACTIVE UNITS (real officers on duty)
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  var mockUnits = [
-    { callsign: 'L-1', type: 'LEO', dept: 'Blaine County Sheriff',    location: 'Main St',   status: '10-8' },
-    { callsign: 'L-3', type: 'LEO', dept: 'LSPD Patrol Division',     location: 'Grove St',  status: '10-97' },
-    { callsign: 'F-2', type: 'FD',  dept: 'Sandy Shores Fire Dept',   location: 'Fire Base', status: '10-8' },
-    { callsign: 'D-1', type: 'DOT', dept: 'Dept of Transport',        location: 'Hwy 101',   status: '10-6' },
-  ];
+  function fetchUnits() {
+    apiFetch('/officers/' + serverId)
+      .then(function (rows) { renderUnits(rows); })
+      .catch(function () {});
+  }
 
-  function renderUnits() {
-    var el = $('d-units-list');
-    if (!mockUnits.length) {
-      el.innerHTML = '<div class="d-empty">No units on duty.</div>';
-      return;
-    }
-    el.innerHTML = mockUnits.map(function (u) {
-      var typeClass = u.type === 'LEO' ? 'd-row-cell--leo' : u.type === 'FD' ? 'd-row-cell--fd' : '';
-      return (
-        '<div class="tbl-row">' +
-          '<span class="d-row-cell" style="width:120px">' + esc(u.callsign) + '</span>' +
-          '<span class="d-row-cell ' + typeClass + '" style="width:160px">' + esc(u.type) + '</span>' +
-          '<span class="d-row-cell" style="flex:1">' + esc(u.dept) + '</span>' +
-          '<span class="d-row-cell" style="width:300px">' + esc(u.location) + '</span>' +
-          '<span class="d-row-cell d-row-cell--green">' + esc(u.status) + '</span>' +
-        '</div>'
-      );
+  function renderUnits(units) {
+    const el = $('d-units-list');
+    if (!units.length) { el.innerHTML = '<div class="d-empty">No units on duty.</div>'; return; }
+    el.innerHTML = units.map(function (u) {
+      const dept = (u.department || '').toLowerCase();
+      const typeLabel = dept.includes('fire') || dept.includes('rescue') ? 'FD' :
+                        dept.includes('transport') || dept.includes('dot') ? 'DOT' : 'LEO';
+      const typeClass = typeLabel === 'LEO' ? 'd-row-cell--leo' : typeLabel === 'FD' ? 'd-row-cell--fd' : '';
+      const statusColor = u.status === 'AVAILABLE' ? 'd-row-cell--green' : '';
+
+      return '<div class="tbl-row">' +
+        '<span class="d-row-cell" style="width:120px">'  + esc(u.callsign)    + '</span>' +
+        '<span class="d-row-cell ' + typeClass + '" style="width:160px">' + esc(typeLabel) + '</span>' +
+        '<span class="d-row-cell" style="flex:1">'       + esc(u.department)  + '</span>' +
+        '<span class="d-row-cell" style="width:300px">'  + esc(u.location || '—') + '</span>' +
+        '<span class="d-row-cell ' + statusColor + '">'  + esc(u.status)      + '</span>' +
+        '</div>';
     }).join('');
   }
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
      SEARCH
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  var mockPeds = [
-    { fn: 'John', ln: 'Smith' },
-    { fn: 'Jane', ln: 'Doe'   },
-  ];
-  var mockCars = [
-    { owner: 'John Smith', plate: 'ABC123', model: 'Toyota Camry', color: 'White' },
-    { owner: 'Jane Doe',   plate: 'XYZ789', model: 'Honda Civic',  color: 'Silver' },
-  ];
-  var mockGuns = [
-    { owner: 'John Smith', serial: 'GUN-001' },
-    { owner: 'John Smith', serial: 'GUN-002' },
-  ];
-
-  function makeEmpty(msg) {
-    return '<div class="d-empty">' + msg + '</div>';
+  function doSearch(q, cb) {
+    if (q.length < 2) { cb({ characters:[], vehicles:[], firearms:[] }); return; }
+    apiFetch('/search/' + serverId + '?q=' + encodeURIComponent(q)).then(cb).catch(function () { cb({ characters:[], vehicles:[], firearms:[] }); });
   }
 
-  function bindSearch(inputId, getData, renderFn) {
-    $(inputId).addEventListener('input', function () {
-      var q = this.value.toLowerCase().trim();
-      renderFn(q.length < 2 ? [] : getData().filter(function (row) {
-        return JSON.stringify(Object.values(row)).toLowerCase().includes(q);
-      }));
+  function makeEmpty(msg) { return '<div class="d-empty">' + msg + '</div>'; }
+
+  $('d-ped-search').addEventListener('input', function () {
+    const q = this.value.toLowerCase().trim();
+    doSearch(q, function (data) {
+      const el = $('d-ped-results');
+      const chars = data.characters || [];
+      el.innerHTML = chars.length
+        ? chars.map(function (c) {
+            return '<div class="tbl-row"><span class="d-row-cell" style="flex:1">' + esc(c.first_name) + '</span><span class="d-row-cell">' + esc(c.last_name) + '</span></div>';
+          }).join('')
+        : makeEmpty('No results.');
     });
-  }
+  });
 
-  function renderPeds(results) {
-    var el = $('d-ped-results');
-    if (!results.length) { el.innerHTML = makeEmpty('No results.'); return; }
-    el.innerHTML = results.map(function (p) {
-      return (
-        '<div class="tbl-row">' +
-          '<span class="d-row-cell" style="flex:1">' + esc(p.fn) + '</span>' +
-          '<span class="d-row-cell">' + esc(p.ln) + '</span>' +
-        '</div>'
-      );
-    }).join('');
-  }
+  $('d-car-search').addEventListener('input', function () {
+    const q = this.value.toLowerCase().trim();
+    doSearch(q, function (data) {
+      const el = $('d-car-results');
+      const vehs = data.vehicles || [];
+      el.innerHTML = vehs.length
+        ? vehs.map(function (v) {
+            return '<div class="tbl-row">' +
+              '<span class="d-row-cell" style="width:190px">' + esc(v.owner_name || '—') + '</span>' +
+              '<span class="d-row-cell" style="width:130px">' + esc(v.plate) + '</span>' +
+              '<span class="d-row-cell" style="flex:1">'      + esc(v.model) + '</span>' +
+              '<span class="d-row-cell">'                     + esc(v.color || '—') + '</span></div>';
+          }).join('')
+        : makeEmpty('No results.');
+    });
+  });
 
-  function renderCars(results) {
-    var el = $('d-car-results');
-    if (!results.length) { el.innerHTML = makeEmpty('No results.'); return; }
-    el.innerHTML = results.map(function (c) {
-      return (
-        '<div class="tbl-row">' +
-          '<span class="d-row-cell" style="width:190px">' + esc(c.owner) + '</span>' +
-          '<span class="d-row-cell" style="width:130px">' + esc(c.plate) + '</span>' +
-          '<span class="d-row-cell" style="flex:1">'     + esc(c.model) + '</span>' +
-          '<span class="d-row-cell">'                    + esc(c.color) + '</span>' +
-        '</div>'
-      );
-    }).join('');
-  }
-
-  function renderGuns(results) {
-    var el = $('d-gun-results');
-    if (!results.length) { el.innerHTML = makeEmpty('No results.'); return; }
-    el.innerHTML = results.map(function (g) {
-      return (
-        '<div class="tbl-row">' +
-          '<span class="d-row-cell" style="flex:1">' + esc(g.owner)  + '</span>' +
-          '<span class="d-row-cell">'                + esc(g.serial) + '</span>' +
-        '</div>'
-      );
-    }).join('');
-  }
-
-  bindSearch('d-ped-search', function () { return mockPeds; }, renderPeds);
-  bindSearch('d-car-search', function () { return mockCars; }, renderCars);
-  bindSearch('d-gun-search', function () { return mockGuns; }, renderGuns);
+  $('d-gun-search').addEventListener('input', function () {
+    const q = this.value.toLowerCase().trim();
+    doSearch(q, function (data) {
+      const el = $('d-gun-results');
+      const fas = data.firearms || [];
+      el.innerHTML = fas.length
+        ? fas.map(function (f) {
+            return '<div class="tbl-row"><span class="d-row-cell" style="flex:1">' + esc(f.owner_name || '—') + '</span><span class="d-row-cell">' + esc(f.serial) + '</span></div>';
+          }).join('')
+        : makeEmpty('No results.');
+    });
+  });
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
      CALL HISTORY
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  var mockHistory = [
-    { id: 2001, nature: 'Traffic Stop',       location: 'Main St',          priority: 'Low',      unit: 'L-1' },
-    { id: 2002, nature: 'Structure Fire',      location: '45 Oak Ave',       priority: 'Critical', unit: 'F-2' },
-    { id: 2003, nature: '10-50 Accident',      location: 'Hwy 101',          priority: 'High',     unit: 'L-3' },
-    { id: 2004, nature: 'Domestic Disturbance',location: '789 Oak Drive',    priority: 'Medium',   unit: 'L-2' },
-    { id: 2005, nature: 'Road Hazard',         location: 'Interstate 5',     priority: 'Medium',   unit: 'D-1' },
-  ];
+  let historyData = [];
+
+  function fetchHistory() {
+    apiFetch('/calls/' + serverId + '/history')
+      .then(function (rows) { historyData = rows; renderHistory(rows); })
+      .catch(function () {});
+  }
 
   function renderHistory(list) {
-    var el = $('d-history-list');
-    if (!list.length) {
-      el.innerHTML = '<div class="d-empty">No calls found.</div>';
-      return;
-    }
+    const el = $('d-history-list');
+    if (!list.length) { el.innerHTML = '<div class="d-empty">No calls found.</div>'; return; }
     el.innerHTML = list.map(function (c) {
-      return (
-        '<div class="tbl-row">' +
-          '<span class="d-row-cell" style="width:100px">' + esc(c.id) + '</span>' +
-          '<span class="d-row-cell" style="flex:1">'      + esc(c.nature) + '</span>' +
-          '<span class="d-row-cell" style="width:300px">' + esc(c.location) + '</span>' +
-          '<span class="d-row-cell ' + priClass(c.priority) + '" style="width:120px">' + esc(c.priority) + '</span>' +
-          '<span class="d-row-cell">'                     + esc(c.unit) + '</span>' +
-        '</div>'
-      );
+      return '<div class="tbl-row">' +
+        '<span class="d-row-cell" style="width:100px">' + esc(c.id)       + '</span>' +
+        '<span class="d-row-cell" style="flex:1">'      + esc(c.nature)   + '</span>' +
+        '<span class="d-row-cell" style="width:300px">' + esc(c.location) + '</span>' +
+        '<span class="d-row-cell ' + priClass(c.priority) + '" style="width:120px">' + esc(c.priority) + '</span>' +
+        '<span class="d-row-cell">' + esc(c.units || '—') + '</span>' +
+        '</div>';
     }).join('');
   }
 
   $('d-hist-search').addEventListener('input', function () {
-    var q = this.value.toLowerCase();
-    renderHistory(mockHistory.filter(function (c) {
-      return String(c.id).includes(q) ||
-             c.nature.toLowerCase().includes(q) ||
-             c.location.toLowerCase().includes(q);
+    const q = this.value.toLowerCase();
+    renderHistory(historyData.filter(function (c) {
+      return String(c.id).includes(q) || c.nature.toLowerCase().includes(q) || c.location.toLowerCase().includes(q);
     }));
   });
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     NOTEPAD — persist across sessions
+     NOTEPAD
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  var notepad = $('d-notepad-text');
-  try {
-    var saved = localStorage.getItem('cad_dispatcher_notepad');
-    if (saved) notepad.value = saved;
-  } catch (_) {}
-
+  const notepad = $('d-notepad-text');
+  try { const s = localStorage.getItem('cad_dispatcher_notepad'); if (s) notepad.value = s; } catch (_) {}
   notepad.addEventListener('input', function () {
     try { localStorage.setItem('cad_dispatcher_notepad', notepad.value); } catch (_) {}
   });
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     INIT
+     INIT + POLLING
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  renderCalls();
-  renderBolos();
-  renderUnits();
-  renderHistory(mockHistory);
+  fetchCalls();
+  fetchBolos();
+  fetchUnits();
+  fetchHistory();
+
+  // Poll live CAD data every 10 seconds
+  setInterval(function () {
+    fetchCalls();
+    fetchBolos();
+    fetchUnits();
+  }, 10000);
 
 })();

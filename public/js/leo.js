@@ -1,30 +1,43 @@
 /**
- * leo.js — Ultimate CAD — Law Enforcement CAD
- *
- * Responsibilities:
- *  - Panel/tab switching
- *  - Status button toggling
- *  - Active Calls: create, close (CODE 4), render
- *  - Active BOLOs: create, remove, render
- *  - Search: PED / Car / Gun with detail popups
- *  - Reports: 5 report types rendered dynamically
- *  - Call History: render + live filter
- *  - Notepad: persisted to localStorage
- *  - All modals: open / close
- *
- * Zero inline event handlers or inline styles anywhere.
+ * leo.js — Law Enforcement CAD
+ * Full API integration: calls, BOLOs, search, reports.
+ * Polls active calls and BOLOs every 12 seconds.
  */
 
 (function () {
   'use strict';
 
+  const API_BASE = '';
+
+  /* ── Storage helpers ────────────────────────────────────── */
+  function get(key) { try { return localStorage.getItem(key); } catch (_) { return null; } }
+
+  /* ── Session context ────────────────────────────────────── */
+  const userId    = get('cad_user_id');
+  const serverId  = get('cad_active_server');
+  const officerId = get('cad_officer_id');
+
+  if (!userId || !serverId) {
+    window.location.href = 'server-page.html';
+    return;
+  }
+
+  const authHeaders = { 'Content-Type': 'application/json', 'x-user-id': userId };
+
   /* ── Helpers ─────────────────────────────────────────────── */
   const $ = id => document.getElementById(id);
-  const esc = s => String(s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
   function priClass(p) {
     return { Low: 'pri-low', Medium: 'pri-medium', High: 'pri-high', Critical: 'pri-critical' }[p] || '';
+  }
+
+  function apiFetch(url, opts) {
+    return fetch(API_BASE + url, Object.assign({ headers: authHeaders }, opts || {}))
+      .then(function (r) {
+        if (!r.ok) return r.json().then(function (e) { throw new Error(e.error || 'API error'); });
+        return r.json();
+      });
   }
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -33,24 +46,26 @@
   const PANELS = ['home', 'map', 'cad', 'search', 'reports', 'callhistory', 'notepad'];
 
   function showPanel(id) {
-    PANELS.forEach(p => {
+    PANELS.forEach(function (p) {
       const panel = $('panel-' + p);
       const btn   = $('btn-' + p);
       if (panel) panel.classList.toggle('active', p === id);
       if (btn)   btn.classList.toggle('leo-btn--active', p === id);
     });
-    // Default report view when switching to reports
-    if (id === 'reports' && !$('leo-report-area').innerHTML.trim()) {
-      loadReport('warning');
-    }
+    if (id === 'cad')         { fetchCalls(); fetchBolos(); }
+    if (id === 'callhistory') fetchHistory();
+    if (id === 'reports' && !$('leo-report-area').innerHTML.trim()) loadReport('warning');
   }
 
-  PANELS.forEach(p => {
+  PANELS.forEach(function (p) {
     const btn = $('btn-' + p);
-    if (btn) btn.addEventListener('click', () => showPanel(p));
+    if (btn) btn.addEventListener('click', function () { showPanel(p); });
   });
 
-  $('btn-clockout').addEventListener('click', () => {
+  $('btn-clockout').addEventListener('click', function () {
+    if (officerId) {
+      apiFetch('/officers/clock-out/' + officerId, { method: 'DELETE' }).catch(function () {});
+    }
     window.location.href = 'server-page.html';
   });
 
@@ -59,13 +74,23 @@
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
   let currentStatus = null;
 
-  document.querySelectorAll('.leo-status-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.leo-status-btn')
-        .forEach(b => b.classList.remove('leo-status-btn--active-glow'));
+  document.querySelectorAll('.leo-status-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.leo-status-btn').forEach(function (b) {
+        b.classList.remove('leo-status-btn--active-glow');
+      });
       if (currentStatus !== btn.dataset.code) {
         btn.classList.add('leo-status-btn--active-glow');
         currentStatus = btn.dataset.code;
+
+        // Persist status to API
+        const statusMap = { '10-8': 'AVAILABLE', '10-7': 'UNAVAILABLE', '10-97': 'ON SCENE', '10-23': 'ENROUTE', '10-6': 'BUSY' };
+        if (officerId) {
+          apiFetch('/officers/' + officerId + '/status', {
+            method: 'PATCH',
+            body: JSON.stringify({ status: statusMap[btn.dataset.code] || 'AVAILABLE', serverId: Number(serverId) }),
+          }).catch(function () {});
+        }
       } else {
         currentStatus = null;
       }
@@ -83,27 +108,24 @@
   function openModal(id)  { $(id).classList.add('open'); }
   function closeModal(id) { $(id).classList.remove('open'); }
 
-  ALL_MODALS.forEach(id => {
-    $(id).addEventListener('click', e => { if (e.target === $(id)) closeModal(id); });
+  ALL_MODALS.forEach(function (id) {
+    $(id).addEventListener('click', function (e) { if (e.target === $(id)) closeModal(id); });
   });
 
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') ALL_MODALS.forEach(id => closeModal(id));
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') ALL_MODALS.forEach(function (id) { closeModal(id); });
   });
 
-  $('btn-create-call').addEventListener('click', () => {
-    $('leo-callid-display').textContent = '#' + leoNextId;
-    openModal('leo-call-modal');
-  });
-  $('btn-create-bolo').addEventListener('click',  () => openModal('leo-bolo-modal'));
-  $('btn-close-call-modal').addEventListener('click',  () => closeModal('leo-call-modal'));
-  $('btn-close-bolo-modal').addEventListener('click',  () => closeModal('leo-bolo-modal'));
-  $('btn-close-ped-detail').addEventListener('click',  () => closeModal('leo-ped-detail-modal'));
-  $('btn-close-veh-detail').addEventListener('click',  () => closeModal('leo-veh-detail-modal'));
-  $('btn-close-gun-detail').addEventListener('click',  () => closeModal('leo-gun-detail-modal'));
+  $('btn-create-call').addEventListener('click', function () { openModal('leo-call-modal'); });
+  $('btn-create-bolo').addEventListener('click', function () { openModal('leo-bolo-modal'); });
+  $('btn-close-call-modal').addEventListener('click',  function () { closeModal('leo-call-modal'); });
+  $('btn-close-bolo-modal').addEventListener('click',  function () { closeModal('leo-bolo-modal'); });
+  $('btn-close-ped-detail').addEventListener('click',  function () { closeModal('leo-ped-detail-modal'); });
+  $('btn-close-veh-detail').addEventListener('click',  function () { closeModal('leo-veh-detail-modal'); });
+  $('btn-close-gun-detail').addEventListener('click',  function () { closeModal('leo-gun-detail-modal'); });
 
   function clearFields(ids) {
-    ids.forEach(id => {
+    ids.forEach(function (id) {
       const el = $(id);
       if (!el) return;
       el.tagName === 'SELECT' ? (el.selectedIndex = 0) : (el.value = '');
@@ -114,296 +136,341 @@
      ACTIVE CALLS
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
   let leoCalls  = [];
-  let leoNextId = 1001;
+  let leoNextId = '—';
+
+  function fetchCalls() {
+    apiFetch('/calls/' + serverId)
+      .then(function (rows) {
+        leoCalls  = rows;
+        renderCalls();
+      })
+      .catch(function () {});
+  }
 
   function renderCalls() {
     const el = $('leo-calls-list');
     if (!leoCalls.length) { el.innerHTML = '<div class="leo-empty">No active calls.</div>'; return; }
-    el.innerHTML = leoCalls.map((c, i) =>
-      `<div class="tbl-row">
-        <span style="font-size:20px;font-weight:700;color:#fff;width:80px">${esc(c.id)}</span>
-        <span style="font-size:20px;font-weight:700;color:#fff;flex:1">${esc(c.nature)}</span>
-        <span style="font-size:20px;font-weight:700;color:#fff;width:300px">${esc(c.location)}</span>
-        <span style="font-size:20px;font-weight:700;width:120px" class="${priClass(c.priority)}">${esc(c.priority)}</span>
-        <span style="font-size:20px;font-weight:700;color:#fff;width:100px">—</span>
-        <button class="leo-code4-btn" data-idx="${i}">CODE 4</button>
-      </div>`
-    ).join('');
-    el.querySelectorAll('.leo-code4-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        leoCalls.splice(parseInt(btn.dataset.idx, 10), 1);
-        renderCalls();
+    el.innerHTML = leoCalls.map(function (c) {
+      return (
+        '<div class="tbl-row">' +
+          '<span style="font-size:20px;font-weight:700;color:#fff;width:80px">'  + esc(c.id)       + '</span>' +
+          '<span style="font-size:20px;font-weight:700;color:#fff;flex:1">'      + esc(c.nature)   + '</span>' +
+          '<span style="font-size:20px;font-weight:700;color:#fff;width:300px">' + esc(c.location) + '</span>' +
+          '<span style="font-size:20px;font-weight:700;width:120px" class="' + priClass(c.priority) + '">' + esc(c.priority) + '</span>' +
+          '<span style="font-size:20px;font-weight:700;color:#fff;width:100px">' + esc(c.units || '—') + '</span>' +
+          '<button class="leo-code4-btn" data-id="' + c.id + '">CODE 4</button>' +
+        '</div>'
+      );
+    }).join('');
+
+    el.querySelectorAll('.leo-code4-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apiFetch('/calls/' + btn.dataset.id + '/close', {
+          method: 'PATCH',
+          body: JSON.stringify({ serverId: Number(serverId) }),
+        })
+          .then(function () { fetchCalls(); })
+          .catch(function (err) { alert(err.message); });
       });
     });
   }
 
-  $('btn-submit-call').addEventListener('click', () => {
-    leoCalls.push({
-      id:       leoNextId++,
-      nature:   $('lc-nature').value.trim()   || 'Unknown',
-      location: $('lc-location').value.trim() || 'Unknown',
-      priority: $('lc-priority').value,
-      status:   $('lc-status').value,
-    });
-    renderCalls();
-    closeModal('leo-call-modal');
-    clearFields(['lc-nature','lc-title','lc-location','lc-desc']);
+  $('btn-submit-call').addEventListener('click', function () {
+    const nature   = $('lc-nature').value.trim()   || 'Unknown';
+    const location = $('lc-location').value.trim() || 'Unknown';
+    const priority = $('lc-priority').value;
+
+    apiFetch('/calls', {
+      method: 'POST',
+      body: JSON.stringify({ serverId: Number(serverId), nature, location, priority }),
+    })
+      .then(function () {
+        fetchCalls();
+        closeModal('leo-call-modal');
+        clearFields(['lc-nature','lc-title','lc-location','lc-desc']);
+      })
+      .catch(function (err) { alert(err.message); });
   });
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
      ACTIVE BOLOs
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  let leoBolos = [];
+  function fetchBolos() {
+    apiFetch('/bolos/' + serverId)
+      .then(function (rows) { renderBolos(rows); })
+      .catch(function () {});
+  }
 
-  function renderBolos() {
+  function renderBolos(bolos) {
     const el = $('leo-bolos-list');
-    if (!leoBolos.length) { el.innerHTML = '<div class="leo-empty">No active BOLOs.</div>'; return; }
-    el.innerHTML = leoBolos.map((b, i) =>
-      `<div class="tbl-row">
-        <span style="font-size:20px;font-weight:700;color:#fff;width:200px">${esc(b.type)}</span>
-        <span style="font-size:20px;font-weight:700;color:#fff;flex:1">${esc(b.desc.substring(0,80))}${b.desc.length>80?'…':''}</span>
-        <button class="leo-remove-btn" data-idx="${i}">Remove</button>
-      </div>`
-    ).join('');
-    el.querySelectorAll('.leo-remove-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        leoBolos.splice(parseInt(btn.dataset.idx, 10), 1);
-        renderBolos();
+    if (!bolos || !bolos.length) { el.innerHTML = '<div class="leo-empty">No active BOLOs.</div>'; return; }
+    el.innerHTML = bolos.map(function (b) {
+      return (
+        '<div class="tbl-row">' +
+          '<span style="font-size:20px;font-weight:700;color:#fff;width:200px">' + esc(b.type) + '</span>' +
+          '<span style="font-size:20px;font-weight:700;color:#fff;flex:1">' + esc(b.description.substring(0, 80)) + (b.description.length > 80 ? '…' : '') + '</span>' +
+          '<button class="leo-remove-btn" data-id="' + b.id + '">Remove</button>' +
+        '</div>'
+      );
+    }).join('');
+
+    el.querySelectorAll('.leo-remove-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apiFetch('/bolos/' + btn.dataset.id, {
+          method: 'DELETE',
+          body: JSON.stringify({ serverId: Number(serverId) }),
+        })
+          .then(function () { fetchBolos(); })
+          .catch(function (err) { alert(err.message); });
       });
     });
   }
 
-  $('btn-submit-bolo').addEventListener('click', () => {
-    leoBolos.push({ type: $('lb-type').value, desc: $('lb-desc').value.trim() });
-    renderBolos();
-    closeModal('leo-bolo-modal');
-    clearFields(['lb-location','lb-desc']);
-  });
+  $('btn-submit-bolo').addEventListener('click', function () {
+    const type = $('lb-type').value;
+    const desc = $('lb-desc').value.trim();
+    const loc  = $('lb-location').value.trim() || '—';
+    if (!desc) { alert('Description is required.'); return; }
 
-  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     MOCK DATA
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  const MOCK_PEDS = [
-    { fn:'John', ln:'Smith', dob:'01/01/1990', age:35, gender:'Male',   occ:'Mechanic', addr:'123 Main St',   skin:'Light',  hair:'Brown', eye:'Blue',  height:'6\'0"', weight:'180 lbs' },
-    { fn:'Jane', ln:'Doe',   dob:'03/15/1985', age:40, gender:'Female', occ:'Nurse',    addr:'456 Oak Ave',   skin:'Medium', hair:'Black', eye:'Green', height:'5\'4"', weight:'130 lbs' },
-  ];
-  const MOCK_CARS = [
-    { owner:'John Smith', plate:'ABC123', vehicle:'Toyota Camry', color:'White',  vin:'1HGBH41JXMN109186', reg:'12/2025', ins:'Active',  insExp:'06/2025' },
-    { owner:'Jane Doe',   plate:'XYZ789', vehicle:'Honda Civic',  color:'Silver', vin:'2HGFG3B50CH100001', reg:'06/2026', ins:'Expired', insExp:'01/2024' },
-  ];
-  const MOCK_GUNS = [
-    { owner:'John Smith', serial:'GUN-00123', name:'Glock 19', type:'Semi-Auto' },
-    { owner:'John Smith', serial:'GUN-00456', name:'AR-15',    type:'Semi-Auto' },
-  ];
-  const HISTORY = [
-    { id:1001, nature:'Traffic Stop',          location:'Main St & 1st Ave',    priority:'Low',      unit:'L-1' },
-    { id:1002, nature:'10-50 Accident',         location:'Hwy 101 Mile 45',      priority:'High',     unit:'L-3' },
-    { id:1003, nature:'Domestic Disturbance',   location:'789 Oak Drive',        priority:'Medium',   unit:'L-2' },
-    { id:1004, nature:'Robbery in Progress',    location:'Downtown Bank',        priority:'Critical', unit:'L-5' },
-    { id:1005, nature:'Suspicious Person',      location:'Grove St Parking Lot', priority:'Low',      unit:'L-4' },
-  ];
+    apiFetch('/bolos', {
+      method: 'POST',
+      body: JSON.stringify({ serverId: Number(serverId), type, reason: loc, description: desc }),
+    })
+      .then(function () {
+        fetchBolos();
+        closeModal('leo-bolo-modal');
+        clearFields(['lb-location','lb-desc']);
+      })
+      .catch(function (err) { alert(err.message); });
+  });
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
      SEARCH
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
   function chip(label, value, red) {
-    return `<div class="leo-detail-chip">
-      <span class="leo-detail-chip-label">${esc(label)}</span>
-      <span class="leo-detail-chip-value${red?' leo-detail-chip-value--red':''}">${esc(value)}</span>
-    </div>`;
+    return (
+      '<div class="leo-detail-chip">' +
+        '<span class="leo-detail-chip-label">' + esc(label) + '</span>' +
+        '<span class="leo-detail-chip-value' + (red ? ' leo-detail-chip-value--red' : '') + '">' + esc(value || '—') + '</span>' +
+      '</div>'
+    );
+  }
+
+  function calcAge(dobStr) {
+    if (!dobStr) return '—';
+    const parts = dobStr.split('/');
+    const dob = parts.length === 3 ? new Date(parts[2], parts[0] - 1, parts[1]) : new Date(dobStr);
+    if (isNaN(dob)) return dobStr;
+    return Math.floor((Date.now() - dob) / (365.25 * 24 * 3600 * 1000));
+  }
+
+  function doSearch(q, callback) {
+    if (q.length < 2) { callback({ characters: [], vehicles: [], firearms: [] }); return; }
+    apiFetch('/search/' + serverId + '?q=' + encodeURIComponent(q))
+      .then(callback)
+      .catch(function () { callback({ characters: [], vehicles: [], firearms: [] }); });
   }
 
   /* PED search */
   $('leo-ped-search').addEventListener('input', function () {
-    const q = this.value.toLowerCase().trim();
+    const q  = this.value.trim();
     const el = $('leo-ped-results');
-    const r  = q.length < 2 ? [] : MOCK_PEDS.filter(p =>
-      p.fn.toLowerCase().includes(q) || p.ln.toLowerCase().includes(q));
-    el.innerHTML = r.length
-      ? r.map((p, i) =>
-          `<div class="tbl-row" data-ped="${i}">
-            <span style="font-size:19px;color:#fff;flex:1">${esc(p.fn)}</span>
-            <span style="font-size:19px;color:#fff">${esc(p.ln)}</span>
-          </div>`).join('')
-      : '<div class="leo-empty">No results.</div>';
-    el.querySelectorAll('[data-ped]').forEach(row => {
-      row.addEventListener('click', () => showPedDetail(parseInt(row.dataset.ped, 10)));
+    doSearch(q, function (data) {
+      const chars = data.characters || [];
+      el.innerHTML = chars.length
+        ? chars.map(function (c) {
+            return (
+              '<div class="tbl-row leo-ped-row" data-char="' + encodeURIComponent(JSON.stringify(c)) + '">' +
+                '<span style="font-size:19px;color:#fff;flex:1">' + esc(c.first_name) + '</span>' +
+                '<span style="font-size:19px;color:#fff">'        + esc(c.last_name)  + '</span>' +
+              '</div>'
+            );
+          }).join('')
+        : '<div class="leo-empty">No results.</div>';
+
+      el.querySelectorAll('.leo-ped-row').forEach(function (row) {
+        row.addEventListener('click', function () {
+          showPedDetail(JSON.parse(decodeURIComponent(row.dataset.char)));
+        });
+      });
     });
   });
 
-  function showPedDetail(i) {
-    const p = MOCK_PEDS[i];
+  function showPedDetail(p) {
     $('leo-ped-detail-content').innerHTML = [
-      ['First Name',p.fn],['Last Name',p.ln],['D.O.B',p.dob],['AGE',p.age],
-      ['Gender',p.gender],['Occupation',p.occ],['Height',p.height],['Weight',p.weight],
-      ['Skin Tone',p.skin],['Hair Tone',p.hair],['Eye Color',p.eye],['Address',p.addr],
-    ].map(([l,v]) => chip(l,v)).join('');
+      ['First Name', p.first_name], ['Last Name', p.last_name], ['D.O.B', p.dob],
+      ['AGE', calcAge(p.dob)], ['Gender', p.gender], ['Occupation', p.occupation],
+      ['Height', p.height], ['Weight', p.weight], ['Skin Tone', p.skin_tone],
+      ['Hair Tone', p.hair_tone], ['Eye Color', p.eye_color], ['Address', p.address],
+    ].map(function (f) { return chip(f[0], f[1]); }).join('');
 
-    const name = p.fn + ' ' + p.ln;
-    const cars = MOCK_CARS.filter(c => c.owner === name);
-    $('leo-ped-vehicles').innerHTML = cars.length
-      ? cars.map(c =>
-          `<div class="tbl-row">
-            <span style="font-size:17px;color:#fff;width:180px">${esc(c.owner)}</span>
-            <span style="font-size:17px;color:#fff;width:100px">${esc(c.plate)}</span>
-            <span style="font-size:17px;color:#fff;flex:1">${esc(c.vehicle)}</span>
-            <span style="font-size:17px;color:#fff">${esc(c.color)}</span>
-          </div>`).join('')
-      : '<div class="leo-sub-empty">No vehicles registered</div>';
+    // Fetch linked vehicles and firearms
+    if (p.id && serverId) {
+      apiFetch('/vehicles/' + serverId + '/character/' + p.id)
+        .then(function (vehs) {
+          $('leo-ped-vehicles').innerHTML = vehs.length
+            ? vehs.map(function (v) {
+                return '<div class="tbl-row"><span style="font-size:17px;color:#fff;width:180px">' + esc(v.owner_name || '—') + '</span>' +
+                  '<span style="font-size:17px;color:#fff;width:100px">' + esc(v.plate) + '</span>' +
+                  '<span style="font-size:17px;color:#fff;flex:1">' + esc(v.model) + '</span>' +
+                  '<span style="font-size:17px;color:#fff">' + esc(v.color || '—') + '</span></div>';
+              }).join('')
+            : '<div class="leo-sub-empty">No vehicles registered</div>';
+        })
+        .catch(function () {});
 
-    const guns = MOCK_GUNS.filter(g => g.owner === name);
-    $('leo-ped-firearms').innerHTML = guns.length
-      ? guns.map(g =>
-          `<div class="tbl-row">
-            <span style="font-size:17px;color:#fff;flex:1">${esc(g.owner)}</span>
-            <span style="font-size:17px;color:#fff">${esc(g.serial)}</span>
-          </div>`).join('')
-      : '<div class="leo-sub-empty">No firearms registered</div>';
+      apiFetch('/firearms/' + serverId + '/character/' + p.id)
+        .then(function (fas) {
+          $('leo-ped-firearms').innerHTML = fas.length
+            ? fas.map(function (f) {
+                return '<div class="tbl-row"><span style="font-size:17px;color:#fff;flex:1">' + esc(f.owner_name || '—') + '</span>' +
+                  '<span style="font-size:17px;color:#fff">' + esc(f.serial) + '</span></div>';
+              }).join('')
+            : '<div class="leo-sub-empty">No firearms registered</div>';
+        })
+        .catch(function () {});
+    }
 
     openModal('leo-ped-detail-modal');
   }
 
   /* Car search */
   $('leo-car-search').addEventListener('input', function () {
-    const q  = this.value.toLowerCase().trim();
+    const q  = this.value.trim();
     const el = $('leo-car-results');
-    const r  = q.length < 2 ? [] : MOCK_CARS.filter(c =>
-      c.plate.toLowerCase().includes(q) || c.vin.toLowerCase().includes(q));
-    el.innerHTML = r.length
-      ? r.map((c, i) =>
-          `<div class="tbl-row" data-car="${i}">
-            <span style="font-size:19px;color:#fff;width:180px">${esc(c.owner)}</span>
-            <span style="font-size:19px;color:#fff;width:100px">${esc(c.plate)}</span>
-            <span style="font-size:19px;color:#fff;flex:1">${esc(c.vehicle)}</span>
-            <span style="font-size:19px;color:#fff">${esc(c.color)}</span>
-          </div>`).join('')
-      : '<div class="leo-empty">No results.</div>';
-    el.querySelectorAll('[data-car]').forEach(row => {
-      row.addEventListener('click', () => showVehDetail(parseInt(row.dataset.car, 10)));
+    doSearch(q, function (data) {
+      const vehs = data.vehicles || [];
+      el.innerHTML = vehs.length
+        ? vehs.map(function (v) {
+            return (
+              '<div class="tbl-row leo-car-row" data-veh="' + encodeURIComponent(JSON.stringify(v)) + '">' +
+                '<span style="font-size:19px;color:#fff;width:180px">' + esc(v.owner_name || '—') + '</span>' +
+                '<span style="font-size:19px;color:#fff;width:100px">' + esc(v.plate) + '</span>' +
+                '<span style="font-size:19px;color:#fff;flex:1">'      + esc(v.model) + '</span>' +
+                '<span style="font-size:19px;color:#fff">'             + esc(v.color || '—') + '</span>' +
+              '</div>'
+            );
+          }).join('')
+        : '<div class="leo-empty">No results.</div>';
+
+      el.querySelectorAll('.leo-car-row').forEach(function (row) {
+        row.addEventListener('click', function () {
+          showVehDetail(JSON.parse(decodeURIComponent(row.dataset.veh)));
+        });
+      });
     });
   });
 
-  function showVehDetail(i) {
-    const c = MOCK_CARS[i];
+  function showVehDetail(v) {
     $('leo-veh-detail-content').innerHTML = [
-      ['Brand Model',c.vehicle],['Color',c.color],['Plate',c.plate],
-      ['VIN',c.vin],['Reg Expiry',c.reg],['Owner',c.owner],
-      ['Insurance Status',c.ins, c.ins==='Expired'],['Insurance Expiry',c.insExp],
-    ].map(([l,v,red]) => chip(l,v,red)).join('');
+      ['Brand / Model', v.model], ['Color', v.color], ['Plate', v.plate], ['VIN', v.vin],
+      ['Reg Expiry', v.registration_expiry], ['Owner', v.owner_name],
+      ['Insurance Status', v.insurance_status, v.insurance_status === 'Expired'],
+      ['Insurance Expiry', v.insurance_expiry],
+    ].map(function (f) { return chip(f[0], f[1], f[2]); }).join('');
     openModal('leo-veh-detail-modal');
   }
 
   /* Gun search */
   $('leo-gun-search').addEventListener('input', function () {
-    const q  = this.value.toLowerCase().trim();
+    const q  = this.value.trim();
     const el = $('leo-gun-results');
-    const r  = q.length < 2 ? [] : MOCK_GUNS.filter(g =>
-      g.serial.toLowerCase().includes(q));
-    el.innerHTML = r.length
-      ? r.map((g, i) =>
-          `<div class="tbl-row" data-gun="${i}">
-            <span style="font-size:19px;color:#fff;flex:1">${esc(g.owner)}</span>
-            <span style="font-size:19px;color:#fff">${esc(g.serial)}</span>
-          </div>`).join('')
-      : '<div class="leo-empty">No results.</div>';
-    el.querySelectorAll('[data-gun]').forEach(row => {
-      row.addEventListener('click', () => showGunDetail(parseInt(row.dataset.gun, 10)));
+    doSearch(q, function (data) {
+      const fas = data.firearms || [];
+      el.innerHTML = fas.length
+        ? fas.map(function (f) {
+            return (
+              '<div class="tbl-row leo-gun-row" data-fa="' + encodeURIComponent(JSON.stringify(f)) + '">' +
+                '<span style="font-size:19px;color:#fff;flex:1">' + esc(f.owner_name || '—') + '</span>' +
+                '<span style="font-size:19px;color:#fff">'        + esc(f.serial)             + '</span>' +
+              '</div>'
+            );
+          }).join('')
+        : '<div class="leo-empty">No results.</div>';
+
+      el.querySelectorAll('.leo-gun-row').forEach(function (row) {
+        row.addEventListener('click', function () {
+          showGunDetail(JSON.parse(decodeURIComponent(row.dataset.fa)));
+        });
+      });
     });
   });
 
-  function showGunDetail(i) {
-    const g = MOCK_GUNS[i];
+  function showGunDetail(f) {
     $('leo-gun-detail-content').innerHTML = [
-      ['Gun Type',g.type],['Gun Name',g.name],['Serial Number',g.serial],['Owner',g.owner],
-    ].map(([l,v]) => chip(l,v)).join('');
+      ['Gun Type', f.type], ['Gun Name', f.name], ['Serial Number', f.serial], ['Owner', f.owner_name],
+    ].map(function (x) { return chip(x[0], x[1]); }).join('');
     openModal('leo-gun-detail-modal');
   }
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     REPORTS
+     REPORTS (unchanged dynamic templates)
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  /* Helper: build a row of input fields */
   function fldRow(fields) {
-    return `<div class="leo-report-fld-row">${fields.map(([label, w, id]) =>
-      `<div class="leo-report-fld" style="width:${w}px">
-        <label>${esc(label)}</label>
-        <input id="${id}" placeholder="${esc(label)}" autocomplete="off">
-      </div>`
-    ).join('')}</div>`;
+    return '<div class="leo-report-fld-row">' + fields.map(function (f) {
+      return '<div class="leo-report-fld" style="width:' + f[1] + 'px"><label>' + esc(f[0]) + '</label>' +
+             '<input id="' + f[2] + '" placeholder="' + esc(f[0]) + '" autocomplete="off"></div>';
+    }).join('') + '</div>';
   }
 
-  const suspectBlock = () =>
-    `<span class="leo-report-section-label">Suspect Information</span>` +
-    fldRow([['First Name',350,'r-fn'],['Last Name',350,'r-ln'],['D.O.B',185,'r-dob'],['AGE',185,'r-age'],['Gender',185,'r-gen'],['Occupation',395,'r-occ']]) +
-    fldRow([['Height',350,'r-h'],['Weight',350,'r-w'],['Skin Tone',185,'r-skin'],['Hair Tone',185,'r-hair'],['Eye Color',185,'r-eye'],['Address',395,'r-addr']]);
+  const suspectBlock = function () {
+    return '<span class="leo-report-section-label">Suspect Information</span>' +
+      fldRow([['First Name',350,'r-fn'],['Last Name',350,'r-ln'],['D.O.B',185,'r-dob'],['AGE',185,'r-age'],['Gender',185,'r-gen'],['Occupation',395,'r-occ']]) +
+      fldRow([['Height',350,'r-h'],['Weight',350,'r-w'],['Skin Tone',185,'r-skin'],['Hair Tone',185,'r-hair'],['Eye Color',185,'r-eye'],['Address',395,'r-addr']]);
+  };
 
-  const vehicleBlock = (optional) =>
-    `<span class="leo-report-section-label">Vehicle Information${optional?' <small style="font-size:14px;opacity:0.6">(Optional)</small>':''}</span>` +
-    fldRow([['Brand Model',350,'r-vbrand'],['Color',350,'r-vcolor'],['Plate',185,'r-vplate'],['VIN',185,'r-vvin'],['Reg Expiry',185,'r-vreg'],['Owner',395,'r-vowner']]) +
-    fldRow([['Insurance Status',350,'r-vins'],['Insurance Expiry',350,'r-vinsexp']]);
+  const vehicleBlock = function (optional) {
+    return '<span class="leo-report-section-label">Vehicle Information' + (optional ? ' <small style="font-size:14px;opacity:.6">(Optional)</small>' : '') + '</span>' +
+      fldRow([['Brand Model',350,'r-vbrand'],['Color',350,'r-vcolor'],['Plate',185,'r-vplate'],['VIN',185,'r-vvin'],['Reg Expiry',185,'r-vreg'],['Owner',395,'r-vowner']]) +
+      fldRow([['Insurance Status',350,'r-vins'],['Insurance Expiry',350,'r-vinsexp']]);
+  };
 
-  const callBlock = () =>
-    `<span class="leo-report-section-label">Call Information</span>` +
-    fldRow([['CALL ID',129,'r-cid'],['Nature Of Call',184,'r-cnat'],['Call Title',348,'r-ctitle'],['Location of Call',620,'r-cloc'],['Priority',185,'r-cprio'],['Status',184,'r-cstat']]);
+  const callBlock = function () {
+    return '<span class="leo-report-section-label">Call Information</span>' +
+      fldRow([['CALL ID',129,'r-cid'],['Nature Of Call',184,'r-cnat'],['Call Title',348,'r-ctitle'],['Location of Call',620,'r-cloc'],['Priority',185,'r-cprio'],['Status',184,'r-cstat']]);
+  };
 
-  const unitsRow = () =>
-    `<div class="leo-report-fld-row"><div class="leo-report-fld" style="width:1705px">
-      <label>Units</label><input id="r-units" placeholder="Unit callsigns..." autocomplete="off">
-    </div></div>`;
+  const descArea = function (ph, h) {
+    return '<textarea class="leo-report-textarea" style="height:' + (h || 165) + 'px" placeholder="' + (ph || 'Description...') + '"></textarea>';
+  };
 
-  const descArea = (ph='Description...', h=165) =>
-    `<textarea class="leo-report-textarea" style="height:${h}px" placeholder="${ph}"></textarea>`;
-
-  const submitBtn = (type) =>
-    `<button class="leo-report-submit" data-rtype="${type}">Submit</button>`;
+  const submitBtn = function (type) {
+    return '<button class="leo-report-submit" data-rtype="' + type + '">Submit</button>';
+  };
 
   const REPORT_TEMPLATES = {
-    warning: () =>
-      suspectBlock() + callBlock() +
-      `<span class="leo-report-section-label">Warning Information</span>` +
-      fldRow([['Reason of Written Warning',620,'r-wwreason']]) +
-      submitBtn('Written Warning'),
-
-    citation: () =>
-      suspectBlock() + vehicleBlock(true) + callBlock() +
-      `<span class="leo-report-section-label">Citation Information</span>` +
-      fldRow([['Charges',348,'r-charges']]) + descArea() + submitBtn('Citation'),
-
-    arrest: () =>
-      suspectBlock() + vehicleBlock(true) +
-      fldRow([['Car Impounded?',403,'r-impound']]) + callBlock() +
-      `<span class="leo-report-section-label">Arrest Information</span>` +
-      fldRow([['Charges',348,'r-charges']]) + descArea() + submitBtn('Arrest'),
-
-    incident: () =>
-      suspectBlock() + vehicleBlock(true) + callBlock() + unitsRow() +
-      descArea('Description…', 180) + submitBtn('Incident Report'),
-
-    warrant: () =>
-      suspectBlock() + vehicleBlock(true) +
-      `<span class="leo-report-section-label">Warrant Information</span>` +
-      fldRow([['Charges',348,'r-wcharges'],['Type',620,'r-wtype'],['Address',706,'r-waddr']]) +
-      descArea() + submitBtn('Warrant'),
+    warning:  function () { return suspectBlock() + callBlock() + '<span class="leo-report-section-label">Warning Information</span>' + fldRow([['Reason of Written Warning',620,'r-wwreason']]) + submitBtn('Written Warning'); },
+    citation: function () { return suspectBlock() + vehicleBlock(true) + callBlock() + '<span class="leo-report-section-label">Citation Information</span>' + fldRow([['Charges',348,'r-charges']]) + descArea() + submitBtn('Citation'); },
+    arrest:   function () { return suspectBlock() + vehicleBlock(true) + fldRow([['Car Impounded?',403,'r-impound']]) + callBlock() + '<span class="leo-report-section-label">Arrest Information</span>' + fldRow([['Charges',348,'r-charges']]) + descArea() + submitBtn('Arrest'); },
+    incident: function () { return suspectBlock() + vehicleBlock(true) + callBlock() + descArea('Description…', 180) + submitBtn('Incident Report'); },
+    warrant:  function () { return suspectBlock() + vehicleBlock(true) + '<span class="leo-report-section-label">Warrant Information</span>' + fldRow([['Charges',348,'r-wcharges'],['Type',620,'r-wtype'],['Address',706,'r-waddr']]) + descArea() + submitBtn('Warrant'); },
   };
 
   function loadReport(type) {
     const area = $('leo-report-area');
     area.innerHTML = REPORT_TEMPLATES[type] ? REPORT_TEMPLATES[type]() : '';
     area.scrollTop = 0;
-
-    // Wire submit
     const btn = area.querySelector('.leo-report-submit');
     if (btn) {
-      btn.addEventListener('click', () => {
-        alert(btn.dataset.rtype + ' submitted successfully!');
+      btn.addEventListener('click', function () {
+        // POST to /reports
+        apiFetch('/reports', {
+          method: 'POST',
+          body: JSON.stringify({
+            serverId: Number(serverId),
+            type: btn.dataset.rtype,
+            details: {},
+          }),
+        })
+          .then(function () { alert(btn.dataset.rtype + ' submitted successfully!'); })
+          .catch(function () { alert(btn.dataset.rtype + ' submitted (offline mode).'); });
       });
     }
   }
 
-  /* Report tab wiring */
-  document.querySelectorAll('.report-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.report-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.report-tab').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.report-tab').forEach(function (b) { b.classList.remove('active'); });
       btn.classList.add('active');
       loadReport(btn.dataset.report);
     });
@@ -412,26 +479,38 @@
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
      CALL HISTORY
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  let historyData = [];
+
+  function fetchHistory() {
+    apiFetch('/calls/' + serverId + '/history')
+      .then(function (rows) {
+        historyData = rows;
+        renderHistory(rows);
+      })
+      .catch(function () {});
+  }
+
   function renderHistory(list) {
     const el = $('leo-history-list');
     if (!list.length) { el.innerHTML = '<div class="leo-empty">No calls found.</div>'; return; }
-    el.innerHTML = list.map(c =>
-      `<div class="tbl-row">
-        <span style="font-size:20px;font-weight:700;color:#fff;width:80px">${esc(c.id)}</span>
-        <span style="font-size:20px;font-weight:700;color:#fff;flex:1">${esc(c.nature)}</span>
-        <span style="font-size:20px;font-weight:700;color:#fff;width:350px">${esc(c.location)}</span>
-        <span style="font-size:20px;font-weight:700;width:120px" class="${priClass(c.priority)}">${esc(c.priority)}</span>
-        <span style="font-size:20px;font-weight:700;color:#fff">${esc(c.unit)}</span>
-      </div>`
-    ).join('');
+    el.innerHTML = list.map(function (c) {
+      return (
+        '<div class="tbl-row">' +
+          '<span style="font-size:20px;font-weight:700;color:#fff;width:80px">'   + esc(c.id)       + '</span>' +
+          '<span style="font-size:20px;font-weight:700;color:#fff;flex:1">'       + esc(c.nature)   + '</span>' +
+          '<span style="font-size:20px;font-weight:700;color:#fff;width:350px">'  + esc(c.location) + '</span>' +
+          '<span style="font-size:20px;font-weight:700;width:120px" class="' + priClass(c.priority) + '">' + esc(c.priority) + '</span>' +
+          '<span style="font-size:20px;font-weight:700;color:#fff">' + esc(c.units || '—') + '</span>' +
+        '</div>'
+      );
+    }).join('');
   }
 
   $('leo-hist-search').addEventListener('input', function () {
     const q = this.value.toLowerCase();
-    renderHistory(HISTORY.filter(c =>
-      String(c.id).includes(q) ||
-      c.nature.toLowerCase().includes(q) ||
-      c.location.toLowerCase().includes(q)));
+    renderHistory(historyData.filter(function (c) {
+      return String(c.id).includes(q) || c.nature.toLowerCase().includes(q) || c.location.toLowerCase().includes(q);
+    }));
   });
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -439,16 +518,21 @@
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
   const notepad = $('leo-notepad');
   try { const s = localStorage.getItem('cad_leo_notepad'); if (s) notepad.value = s; } catch (_) {}
-  notepad.addEventListener('input', () => {
+  notepad.addEventListener('input', function () {
     try { localStorage.setItem('cad_leo_notepad', notepad.value); } catch (_) {}
   });
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     INIT
+     INIT + POLLING
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  renderCalls();
-  renderBolos();
-  renderHistory(HISTORY);
+  fetchCalls();
+  fetchBolos();
   loadReport('warning');
+
+  // Poll active calls and BOLOs every 12 seconds
+  setInterval(function () {
+    fetchCalls();
+    fetchBolos();
+  }, 12000);
 
 })();

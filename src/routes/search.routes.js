@@ -4,7 +4,7 @@ import { verifyUser, verifyMember } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
-// GET /search/:serverId?q= — search characters, vehicles, firearms (any member)
+// GET /search/:serverId?q= — search characters, vehicles, firearms
 router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
   const { q } = req.query;
   const { serverId } = req.params;
@@ -15,9 +15,11 @@ router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
   try {
     const [characters] = await pool.query(
       `SELECT * FROM characters
-       WHERE server_id = ? AND (first_name LIKE ? OR last_name LIKE ? OR CONCAT(first_name, ' ', last_name) LIKE ?)`,
+       WHERE server_id = ?
+         AND (first_name LIKE ? OR last_name LIKE ? OR CONCAT(first_name, ' ', last_name) LIKE ?)`,
       [serverId, like, like, like]
     );
+
     const [vehicles] = await pool.query(
       `SELECT v.*, CONCAT(c.first_name, ' ', c.last_name) AS owner_name
        FROM vehicles v
@@ -25,6 +27,7 @@ router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
        WHERE v.server_id = ? AND (v.plate LIKE ? OR v.vin LIKE ?)`,
       [serverId, like, like]
     );
+
     const [firearms] = await pool.query(
       `SELECT f.*, CONCAT(c.first_name, ' ', c.last_name) AS owner_name
        FROM firearms f
@@ -32,6 +35,7 @@ router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
        WHERE f.server_id = ? AND f.serial LIKE ?`,
       [serverId, like]
     );
+
     res.json({ characters, vehicles, firearms });
   } catch (err) {
     console.error(err);

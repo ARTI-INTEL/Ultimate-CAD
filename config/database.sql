@@ -1,225 +1,198 @@
-CREATE DATABASE  IF NOT EXISTS `ultimate_cad` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+CREATE DATABASE IF NOT EXISTS `ultimate_cad` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */;
 USE `ultimate_cad`;
--- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
---
--- Host: 127.0.0.1    Database: ultimate_cad
--- ------------------------------------------------------
--- Server version	8.0.44
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+SET FOREIGN_KEY_CHECKS = 0;
 
---
--- Table structure for table `bolos`
---
-
-DROP TABLE IF EXISTS `bolos`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `bolos` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `server_id` int NOT NULL,
-  `type` enum('Vehicle','Ped') NOT NULL,
-  `reason` varchar(256) NOT NULL,
-  `description` text NOT NULL,
-  `active` tinyint(1) DEFAULT '1',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `server_id` (`server_id`),
-  CONSTRAINT `bolos_ibfk_1` FOREIGN KEY (`server_id`) REFERENCES `servers` (`idserver`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `calls`
---
-
-DROP TABLE IF EXISTS `calls`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `calls` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `server_id` int NOT NULL,
-  `nature` varchar(128) NOT NULL,
-  `location` varchar(128) NOT NULL,
-  `priority` enum('Low','Medium','High') DEFAULT 'Low',
-  `status` enum('ACTIVE','CLOSED') DEFAULT 'ACTIVE',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `closed_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `server_id` (`server_id`),
-  CONSTRAINT `calls_ibfk_1` FOREIGN KEY (`server_id`) REFERENCES `servers` (`idserver`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `characters`
---
-
-DROP TABLE IF EXISTS `characters`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `characters` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `server_id` int NOT NULL,
-  `user_id` int NOT NULL,
-  `first_name` varchar(64) NOT NULL,
-  `last_name` varchar(64) NOT NULL,
-  `dob` date NOT NULL,
-  `flags` json DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `server_id` (`server_id`),
-  KEY `user_id` (`user_id`),
-  CONSTRAINT `characters_ibfk_1` FOREIGN KEY (`server_id`) REFERENCES `servers` (`idserver`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `firearms`
---
-
-DROP TABLE IF EXISTS `firearms`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `firearms` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `server_id` int NOT NULL,
-  `owner_id` int DEFAULT NULL,
-  `serial` varchar(32) NOT NULL,
-  `type` varchar(64) NOT NULL,
-  `stolen` tinyint(1) DEFAULT '0',
-  PRIMARY KEY (`id`),
-  KEY `server_id` (`server_id`),
-  KEY `owner_id` (`owner_id`),
-  CONSTRAINT `firearms_ibfk_1` FOREIGN KEY (`server_id`) REFERENCES `servers` (`idserver`) ON DELETE CASCADE,
-  CONSTRAINT `firearms_ibfk_2` FOREIGN KEY (`owner_id`) REFERENCES `characters` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `officers`
---
-
-DROP TABLE IF EXISTS `officers`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `officers` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `user_id` int NOT NULL,
-  `server_id` int NOT NULL,
-  `name` varchar(64) NOT NULL,
-  `callsign` varchar(32) NOT NULL,
-  `department` varchar(128) NOT NULL,
-  `status` enum('AVAILABLE','UNAVAILABLE','ON SCENE','ENROUTE','BUSY') DEFAULT 'AVAILABLE',
-  `current_call` int DEFAULT NULL,
-  `location` varchar(128) DEFAULT '',
-  `clocked_in` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`),
-  KEY `server_id` (`server_id`),
-  CONSTRAINT `officers_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`iduser`) ON DELETE CASCADE,
-  CONSTRAINT `officers_ibfk_2` FOREIGN KEY (`server_id`) REFERENCES `servers` (`idserver`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `server_members`
---
-
-DROP TABLE IF EXISTS `server_members`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `server_members` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `user_id` int NOT NULL,
-  `server_id` int NOT NULL,
-  `joined_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `unique_member` (`user_id`,`server_id`),
-  KEY `server_id` (`server_id`),
-  CONSTRAINT `server_members_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`iduser`) ON DELETE CASCADE,
-  CONSTRAINT `server_members_ibfk_2` FOREIGN KEY (`server_id`) REFERENCES `servers` (`idserver`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `servers`
---
-
-DROP TABLE IF EXISTS `servers`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `servers` (
-  `idserver` int NOT NULL AUTO_INCREMENT,
-  `discord_id` varchar(32) NOT NULL,
-  `name` varchar(128) NOT NULL,
-  `join_code` varchar(32) NOT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `description` varchar(255) DEFAULT NULL,
-  `icon_url` varchar(512) DEFAULT NULL,
-  `owner_id` int NOT NULL DEFAULT '0',
-  PRIMARY KEY (`idserver`),
-  UNIQUE KEY `discord_id` (`discord_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `users`
---
-
+-- ─────────────────────────────────────────────
+-- USERS
+-- ─────────────────────────────────────────────
 DROP TABLE IF EXISTS `users`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
-  `iduser` int NOT NULL AUTO_INCREMENT,
-  `discord_id` varchar(32) NOT NULL,
-  `username` varchar(64) NOT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `iduser`     INT          NOT NULL AUTO_INCREMENT,
+  `discord_id` VARCHAR(32)  NOT NULL,
+  `username`   VARCHAR(64)  NOT NULL,
+  `created_at` TIMESTAMP    NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`iduser`),
   UNIQUE KEY `discord_id` (`discord_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Table structure for table `vehicles`
---
+-- ─────────────────────────────────────────────
+-- SERVERS
+-- ─────────────────────────────────────────────
+DROP TABLE IF EXISTS `servers`;
+CREATE TABLE `servers` (
+  `idserver`    INT           NOT NULL AUTO_INCREMENT,
+  `discord_id`  VARCHAR(32)   NULL DEFAULT NULL,
+  `name`        VARCHAR(128)  NOT NULL,
+  `join_code`   VARCHAR(32)   NOT NULL,
+  `description` VARCHAR(255)  DEFAULT NULL,
+  `icon_url`    VARCHAR(512)  DEFAULT NULL,
+  `owner_id`    INT           NOT NULL DEFAULT 0,
+  `created_at`  TIMESTAMP     NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`idserver`),
+  UNIQUE KEY `join_code` (`join_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `vehicles`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `vehicles` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `server_id` int NOT NULL,
-  `owner_id` int DEFAULT NULL,
-  `plate` varchar(16) NOT NULL,
-  `vin` varchar(32) DEFAULT NULL,
-  `model` varchar(64) NOT NULL,
-  `color` varchar(32) DEFAULT NULL,
-  `stolen` tinyint(1) DEFAULT '0',
+-- ─────────────────────────────────────────────
+-- SERVER MEMBERS
+-- ─────────────────────────────────────────────
+DROP TABLE IF EXISTS `server_members`;
+CREATE TABLE `server_members` (
+  `id`        INT  NOT NULL AUTO_INCREMENT,
+  `user_id`   INT  NOT NULL,
+  `server_id` INT  NOT NULL,
+  `joined_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_member` (`user_id`, `server_id`),
+  KEY `server_id` (`server_id`),
+  CONSTRAINT `sm_user_fk`   FOREIGN KEY (`user_id`)   REFERENCES `users`   (`iduser`)   ON DELETE CASCADE,
+  CONSTRAINT `sm_server_fk` FOREIGN KEY (`server_id`) REFERENCES `servers` (`idserver`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ─────────────────────────────────────────────
+-- OFFICERS  (clocked-in sessions)
+-- ─────────────────────────────────────────────
+DROP TABLE IF EXISTS `officers`;
+CREATE TABLE `officers` (
+  `id`           INT          NOT NULL AUTO_INCREMENT,
+  `user_id`      INT          NOT NULL,
+  `server_id`    INT          NOT NULL,
+  `name`         VARCHAR(64)  NOT NULL,
+  `callsign`     VARCHAR(32)  NOT NULL,
+  `department`   VARCHAR(128) NOT NULL,
+  `status`       ENUM('AVAILABLE','UNAVAILABLE','ON SCENE','ENROUTE','BUSY') DEFAULT 'AVAILABLE',
+  `current_call` INT          DEFAULT NULL,
+  `location`     VARCHAR(128) DEFAULT '',
+  `clocked_in`   TIMESTAMP    NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id`   (`user_id`),
+  KEY `server_id` (`server_id`),
+  CONSTRAINT `off_user_fk`   FOREIGN KEY (`user_id`)   REFERENCES `users`   (`iduser`)   ON DELETE CASCADE,
+  CONSTRAINT `off_server_fk` FOREIGN KEY (`server_id`) REFERENCES `servers` (`idserver`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ─────────────────────────────────────────────
+-- CALLS
+-- ─────────────────────────────────────────────
+DROP TABLE IF EXISTS `calls`;
+CREATE TABLE `calls` (
+  `id`         INT          NOT NULL AUTO_INCREMENT,
+  `server_id`  INT          NOT NULL,
+  `nature`     VARCHAR(128) NOT NULL,
+  `location`   VARCHAR(128) NOT NULL,
+  `priority`   ENUM('Low','Medium','High','Critical') DEFAULT 'Low',
+  `status`     ENUM('ACTIVE','CLOSED') DEFAULT 'ACTIVE',
+  `created_at` TIMESTAMP    NULL DEFAULT CURRENT_TIMESTAMP,
+  `closed_at`  TIMESTAMP    NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `server_id` (`server_id`),
-  KEY `owner_id` (`owner_id`),
-  CONSTRAINT `vehicles_ibfk_1` FOREIGN KEY (`server_id`) REFERENCES `servers` (`idserver`) ON DELETE CASCADE,
-  CONSTRAINT `vehicles_ibfk_2` FOREIGN KEY (`owner_id`) REFERENCES `characters` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+  CONSTRAINT `call_server_fk` FOREIGN KEY (`server_id`) REFERENCES `servers` (`idserver`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+-- ─────────────────────────────────────────────
+-- BOLOs
+-- ─────────────────────────────────────────────
+DROP TABLE IF EXISTS `bolos`;
+CREATE TABLE `bolos` (
+  `id`          INT           NOT NULL AUTO_INCREMENT,
+  `server_id`   INT           NOT NULL,
+  `type`        ENUM('Vehicle','Person','Ped') NOT NULL,
+  `reason`      VARCHAR(256)  NOT NULL,
+  `description` TEXT          NOT NULL,
+  `active`      TINYINT(1)    DEFAULT 1,
+  `created_at`  TIMESTAMP     NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `server_id` (`server_id`),
+  CONSTRAINT `bolo_server_fk` FOREIGN KEY (`server_id`) REFERENCES `servers` (`idserver`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Dump completed on 2026-04-13 23:46:18
+-- ─────────────────────────────────────────────
+-- CHARACTERS
+-- ─────────────────────────────────────────────
+DROP TABLE IF EXISTS `characters`;
+CREATE TABLE `characters` (
+  `id`         INT          NOT NULL AUTO_INCREMENT,
+  `server_id`  INT          NOT NULL,
+  `user_id`    INT          NOT NULL,
+  `first_name` VARCHAR(64)  NOT NULL,
+  `last_name`  VARCHAR(64)  NOT NULL,
+  `dob`        VARCHAR(16)  NOT NULL,
+  `gender`     VARCHAR(32)  DEFAULT NULL,
+  `occupation` VARCHAR(64)  DEFAULT NULL,
+  `height`     VARCHAR(16)  DEFAULT NULL,
+  `weight`     VARCHAR(16)  DEFAULT NULL,
+  `skin_tone`  VARCHAR(32)  DEFAULT NULL,
+  `hair_tone`  VARCHAR(32)  DEFAULT NULL,
+  `eye_color`  VARCHAR(32)  DEFAULT NULL,
+  `address`    VARCHAR(128) DEFAULT NULL,
+  `flags`      JSON         DEFAULT NULL,
+  `created_at` TIMESTAMP    NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `server_id` (`server_id`),
+  KEY `user_id`   (`user_id`),
+  CONSTRAINT `char_server_fk` FOREIGN KEY (`server_id`) REFERENCES `servers`  (`idserver`) ON DELETE CASCADE,
+  CONSTRAINT `char_user_fk`   FOREIGN KEY (`user_id`)   REFERENCES `users`    (`iduser`)   ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ─────────────────────────────────────────────
+-- VEHICLES
+-- ─────────────────────────────────────────────
+DROP TABLE IF EXISTS `vehicles`;
+CREATE TABLE `vehicles` (
+  `id`                 INT          NOT NULL AUTO_INCREMENT,
+  `server_id`          INT          NOT NULL,
+  `owner_id`           INT          DEFAULT NULL,
+  `plate`              VARCHAR(16)  NOT NULL,
+  `vin`                VARCHAR(32)  DEFAULT NULL,
+  `model`              VARCHAR(64)  NOT NULL,
+  `color`              VARCHAR(32)  DEFAULT NULL,
+  `registration_expiry` VARCHAR(16) DEFAULT NULL,
+  `insurance_status`   ENUM('Active','Expired') DEFAULT 'Active',
+  `insurance_expiry`   VARCHAR(16)  DEFAULT NULL,
+  `stolen`             TINYINT(1)   DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `server_id` (`server_id`),
+  KEY `owner_id`  (`owner_id`),
+  CONSTRAINT `veh_server_fk` FOREIGN KEY (`server_id`) REFERENCES `servers`    (`idserver`) ON DELETE CASCADE,
+  CONSTRAINT `veh_char_fk`   FOREIGN KEY (`owner_id`)  REFERENCES `characters` (`id`)       ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ─────────────────────────────────────────────
+-- FIREARMS
+-- ─────────────────────────────────────────────
+DROP TABLE IF EXISTS `firearms`;
+CREATE TABLE `firearms` (
+  `id`         INT         NOT NULL AUTO_INCREMENT,
+  `server_id`  INT         NOT NULL,
+  `owner_id`   INT         DEFAULT NULL,
+  `serial`     VARCHAR(32) NOT NULL,
+  `name`       VARCHAR(64) DEFAULT NULL,
+  `type`       VARCHAR(64) NOT NULL,
+  `stolen`     TINYINT(1)  DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `server_id` (`server_id`),
+  KEY `owner_id`  (`owner_id`),
+  CONSTRAINT `fa_server_fk` FOREIGN KEY (`server_id`) REFERENCES `servers`    (`idserver`) ON DELETE CASCADE,
+  CONSTRAINT `fa_char_fk`   FOREIGN KEY (`owner_id`)  REFERENCES `characters` (`id`)       ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ─────────────────────────────────────────────
+-- REPORTS
+-- ─────────────────────────────────────────────
+DROP TABLE IF EXISTS `reports`;
+CREATE TABLE `reports` (
+  `id`             INT          NOT NULL AUTO_INCREMENT,
+  `server_id`      INT          NOT NULL,
+  `officer_id`     INT          DEFAULT NULL,
+  `call_id`        INT          DEFAULT NULL,
+  `type`           VARCHAR(64)  NOT NULL,
+  `subject_name`   VARCHAR(128) DEFAULT NULL,
+  `subject_plate`  VARCHAR(16)  DEFAULT NULL,
+  `details`        JSON         DEFAULT NULL,
+  `created_at`     TIMESTAMP    NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `server_id` (`server_id`),
+  CONSTRAINT `rep_server_fk` FOREIGN KEY (`server_id`) REFERENCES `servers` (`idserver`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+SET FOREIGN_KEY_CHECKS = 1;

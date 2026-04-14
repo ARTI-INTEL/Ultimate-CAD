@@ -1,30 +1,77 @@
 /**
  * civilian.js — Ultimate CAD Civilian Page
- *
- * Responsibilities:
- *  - Tab navigation (Characters / Vehicles / Firearms)
- *  - In-memory state for characters, vehicles, firearms
- *  - Render tables for each category
- *  - Open / close modals for creating records
- *  - Handle form submission and clear fields
- *  - Navigate back to server-page
- *
- * No inline event handlers or inline styles anywhere in HTML.
+ * Full API integration for characters, vehicles, and firearms.
  */
 
 (function () {
   'use strict';
 
+  const API_BASE = '';
+
+  /* ── Storage helpers ────────────────────────────────────── */
+  function get(key) { try { return localStorage.getItem(key); } catch (_) { return null; } }
+
+  /* ── Auth / server context ───────────────────────────────── */
+  const userId   = get('cad_user_id');
+  const serverId = get('cad_active_server');
+
+  if (!userId || !serverId) {
+    window.location.href = 'server-page.html';
+    return;
+  }
+
+  const headers = { 'Content-Type': 'application/json', 'x-user-id': userId };
+
   /* ── Helpers ────────────────────────────────────────────── */
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+  function calcAge(dobStr) {
+    if (!dobStr) return '—';
+    const parts = dobStr.split('/');
+    const dob = parts.length === 3
+      ? new Date(parts[2], parts[0] - 1, parts[1])
+      : new Date(dobStr);
+    if (isNaN(dob)) return '—';
+    return Math.floor((Date.now() - dob) / (365.25 * 24 * 3600 * 1000));
+  }
+
   /* ── State ──────────────────────────────────────────────── */
-  const state = {
-    characters: [],
-    vehicles:   [],
-    firearms:   [],
-  };
+  let characters = [];
+  let vehicles   = [];
+  let firearms   = [];
+  let selectedCharId = null;
+
+  /* ── API helpers ─────────────────────────────────────────── */
+  function apiFetch(url, opts) {
+    return fetch(API_BASE + url, Object.assign({ headers }, opts || {}))
+      .then(function (r) {
+        if (!r.ok) return r.json().then(function (e) { throw new Error(e.error || 'API error'); });
+        return r.json();
+      });
+  }
+
+  /* ── Load all data ───────────────────────────────────────── */
+  function loadAll() {
+    Promise.all([
+      apiFetch('/characters/' + serverId + '/mine'),
+      apiFetch('/vehicles/' + serverId + '/mine'),
+      apiFetch('/firearms/' + serverId + '/mine'),
+    ])
+      .then(function (results) {
+        characters = results[0];
+        vehicles   = results[1];
+        firearms   = results[2];
+        renderChars();
+        renderVehiclesSubTable(null);
+        renderFirearmsSubTable(null);
+        renderVehicles();
+        renderFirearms();
+      })
+      .catch(function (err) {
+        console.error('Load error:', err);
+      });
+  }
 
   /* ── Tab switching ──────────────────────────────────────── */
   const TABS = ['characters', 'vehicles', 'firearms'];
@@ -40,35 +87,25 @@
 
   TABS.forEach(function (t) {
     const btn = $('btn-tab-' + t);
-    if (btn) {
-      btn.addEventListener('click', function () { showTab(t); });
-    }
+    if (btn) btn.addEventListener('click', function () { showTab(t); });
   });
 
-  /* ── Back navigation ────────────────────────────────────── */
   $('btn-back').addEventListener('click', function () {
     window.location.href = 'server-page.html';
   });
 
   /* ── Modal helpers ──────────────────────────────────────── */
-  function openModal(id) {
-    $(id).classList.add('open');
-  }
+  function openModal(id)  { $(id).classList.add('open'); }
+  function closeModal(id) { $(id).classList.remove('open'); }
 
-  function closeModal(id) {
-    $(id).classList.remove('open');
-  }
+  ['modal-character', 'modal-vehicle', 'modal-firearm'].forEach(function (id) {
+    $(id).addEventListener('click', function (e) { if (e.target === this) closeModal(id); });
+  });
 
-  const MODALS = ['modal-character', 'modal-vehicle', 'modal-firearm'];
-
-  MODALS.forEach(function (id) {
-    // Close when clicking the overlay background
-    $(id).addEventListener('click', function (e) {
-      if (e.target === this) closeModal(id);
-    });
-    // Escape key
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && $(id).classList.contains('open')) closeModal(id);
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    ['modal-character', 'modal-vehicle', 'modal-firearm'].forEach(function (id) {
+      closeModal(id);
     });
   });
 
@@ -76,163 +113,175 @@
   $('btn-close-veh-modal').addEventListener('click',  function () { closeModal('modal-vehicle'); });
   $('btn-close-fa-modal').addEventListener('click',   function () { closeModal('modal-firearm'); });
 
-  /* ── Open modals via action buttons ────────────────────── */
+  /* ── Open modals ────────────────────────────────────────── */
   $('btn-add-character').addEventListener('click',  function () { openModal('modal-character'); });
-  $('btn-add-vehicle').addEventListener('click',    function () { openModal('modal-vehicle'); });
-  $('btn-add-firearm').addEventListener('click',    function () { openModal('modal-firearm'); });
-  $('btn-add-vehicle-tab').addEventListener('click', function () { openModal('modal-vehicle'); });
-  $('btn-add-firearm-tab').addEventListener('click', function () { openModal('modal-firearm'); });
+  $('btn-add-vehicle').addEventListener('click',    function () {
+    populateOwnerDropdown('veh-owner-select');
+    openModal('modal-vehicle');
+  });
+  $('btn-add-firearm').addEventListener('click',    function () {
+    populateOwnerDropdown('fa-owner-select');
+    openModal('modal-firearm');
+  });
+  $('btn-add-vehicle-tab').addEventListener('click', function () {
+    populateOwnerDropdown('veh-owner-select');
+    openModal('modal-vehicle');
+  });
+  $('btn-add-firearm-tab').addEventListener('click', function () {
+    populateOwnerDropdown('fa-owner-select');
+    openModal('modal-firearm');
+  });
 
-  /* ── Render: Characters ─────────────────────────────────── */
+  function populateOwnerDropdown(selectId) {
+    const sel = $(selectId);
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— Select Character —</option>';
+    characters.forEach(function (c) {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.first_name + ' ' + c.last_name;
+      sel.appendChild(opt);
+    });
+    // Pre-select if a character is active
+    if (selectedCharId) sel.value = selectedCharId;
+  }
+
+  /* ── Render: Characters table ───────────────────────────── */
   function renderChars() {
     const list = $('chars-list');
-    if (!state.characters.length) {
-      list.innerHTML = '<div class="civ-empty">No characters created yet.</div>';
+    if (!characters.length) {
+      list.innerHTML = '<div class="civ-empty">No characters yet. Click "Add Character" to create one.</div>';
       return;
     }
-    list.innerHTML = state.characters
-      .map(function (c, i) {
-        return (
-          '<div class="civ-row" data-type="char" data-idx="' + i + '">' +
-            '<span style="width:220px">'  + esc(c.fn)     + '</span>' +
-            '<span style="width:220px">'  + esc(c.ln)     + '</span>' +
-            '<span style="width:180px">'  + esc(c.dob)    + '</span>' +
-            '<span style="width:100px">'  + esc(c.age)    + '</span>' +
-            '<span style="width:170px">'  + esc(c.gender) + '</span>' +
-            '<span style="width:230px">'  + esc(c.occ)    + '</span>' +
-            '<span class="civ-col-flex">' + esc(c.addr)   + '</span>' +
-          '</div>'
-        );
-      })
-      .join('');
+    list.innerHTML = characters.map(function (c, i) {
+      return (
+        '<div class="civ-row" data-idx="' + i + '">' +
+          '<span style="width:220px">'  + esc(c.first_name)              + '</span>' +
+          '<span style="width:220px">'  + esc(c.last_name)               + '</span>' +
+          '<span style="width:180px">'  + esc(c.dob || '—')              + '</span>' +
+          '<span style="width:100px">'  + esc(calcAge(c.dob))            + '</span>' +
+          '<span style="width:170px">'  + esc(c.gender || '—')           + '</span>' +
+          '<span style="width:230px">'  + esc(c.occupation || '—')       + '</span>' +
+          '<span class="civ-col-flex">' + esc(c.address || '—')          + '</span>' +
+        '</div>'
+      );
+    }).join('');
 
-    // Row click → highlight + filter sub-tables
     list.querySelectorAll('.civ-row').forEach(function (row) {
       row.addEventListener('click', function () {
-        list.querySelectorAll('.civ-row').forEach(function (r) {
-          r.classList.remove('civ-row-selected');
-        });
+        list.querySelectorAll('.civ-row').forEach(function (r) { r.classList.remove('civ-row-selected'); });
         row.classList.add('civ-row-selected');
-        var idx  = parseInt(row.dataset.idx, 10);
-        var char = state.characters[idx];
-        var name = char.fn + ' ' + char.ln;
-        renderVehiclesSubTable(name);
-        renderFirearmsSubTable(name);
+        const char = characters[parseInt(row.dataset.idx, 10)];
+        selectedCharId = char.id;
+        renderVehiclesSubTable(char.id);
+        renderFirearmsSubTable(char.id);
       });
     });
   }
 
-  /* ── Render: Vehicles sub-table (inside Characters panel) ─ */
-  function renderVehiclesSubTable(ownerFilter) {
-    var list = $('chars-veh-list');
-    var data = ownerFilter
-      ? state.vehicles.filter(function (v) { return v.owner === ownerFilter; })
-      : state.vehicles;
+  /* ── Render: Vehicles sub-table ─────────────────────────── */
+  function renderVehiclesSubTable(charId) {
+    const list = $('chars-veh-list');
+    const data = charId
+      ? vehicles.filter(function (v) { return v.owner_id === charId; })
+      : vehicles;
 
     if (!data.length) {
       list.innerHTML = '<div class="civ-empty">' +
-        (ownerFilter ? 'No vehicles registered to this character.' : 'No vehicles registered yet.') +
+        (charId ? 'No vehicles for this character.' : 'No vehicles registered yet.') +
         '</div>';
       return;
     }
 
-    list.innerHTML = data
-      .map(function (v) {
-        var insClass = v.ins === 'Expired' ? 'civ-ins-expired' : 'civ-ins-active';
-        return (
-          '<div class="civ-row">' +
-            '<span style="width:240px">'  + esc(v.owner)  + '</span>' +
-            '<span style="width:170px">'  + esc(v.plate)  + '</span>' +
-            '<span style="width:270px">'  + esc(v.model)  + '</span>' +
-            '<span style="width:150px">'  + esc(v.color)  + '</span>' +
-            '<span style="width:230px">'  + esc(v.vin)    + '</span>' +
-            '<span style="width:180px">'  + esc(v.reg)    + '</span>' +
-            '<span class="' + insClass + ' civ-col-flex">' + esc(v.ins) + '</span>' +
-          '</div>'
-        );
-      })
-      .join('');
+    list.innerHTML = data.map(function (v) {
+      const insClass = v.insurance_status === 'Expired' ? 'civ-ins-expired' : 'civ-ins-active';
+      return (
+        '<div class="civ-row">' +
+          '<span style="width:240px">'  + esc(v.owner_name || '—')       + '</span>' +
+          '<span style="width:170px">'  + esc(v.plate)                   + '</span>' +
+          '<span style="width:270px">'  + esc(v.model)                   + '</span>' +
+          '<span style="width:150px">'  + esc(v.color || '—')            + '</span>' +
+          '<span style="width:230px">'  + esc(v.vin || '—')              + '</span>' +
+          '<span style="width:180px">'  + esc(v.registration_expiry || '—') + '</span>' +
+          '<span class="' + insClass + ' civ-col-flex">' + esc(v.insurance_status || '—') + '</span>' +
+        '</div>'
+      );
+    }).join('');
   }
 
-  /* ── Render: Firearms sub-table (inside Characters panel) ─ */
-  function renderFirearmsSubTable(ownerFilter) {
-    var list = $('chars-fa-list');
-    var data = ownerFilter
-      ? state.firearms.filter(function (f) { return f.owner === ownerFilter; })
-      : state.firearms;
+  /* ── Render: Firearms sub-table ─────────────────────────── */
+  function renderFirearmsSubTable(charId) {
+    const list = $('chars-fa-list');
+    const data = charId
+      ? firearms.filter(function (f) { return f.owner_id === charId; })
+      : firearms;
 
     if (!data.length) {
       list.innerHTML = '<div class="civ-empty">' +
-        (ownerFilter ? 'No firearms registered to this character.' : 'No firearms registered yet.') +
+        (charId ? 'No firearms for this character.' : 'No firearms registered yet.') +
         '</div>';
       return;
     }
 
-    list.innerHTML = data
-      .map(function (f) {
-        return (
-          '<div class="civ-row">' +
-            '<span style="width:260px">'  + esc(f.owner)  + '</span>' +
-            '<span style="width:360px">'  + esc(f.serial) + '</span>' +
-            '<span style="width:360px">'  + esc(f.name)   + '</span>' +
-            '<span class="civ-col-flex">' + esc(f.type)   + '</span>' +
-          '</div>'
-        );
-      })
-      .join('');
+    list.innerHTML = data.map(function (f) {
+      return (
+        '<div class="civ-row">' +
+          '<span style="width:260px">'  + esc(f.owner_name || '—') + '</span>' +
+          '<span style="width:360px">'  + esc(f.serial)            + '</span>' +
+          '<span style="width:360px">'  + esc(f.name || '—')       + '</span>' +
+          '<span class="civ-col-flex">' + esc(f.type)              + '</span>' +
+        '</div>'
+      );
+    }).join('');
   }
 
   /* ── Render: Vehicles tab ───────────────────────────────── */
   function renderVehicles() {
-    var list = $('vehicles-list');
-    if (!state.vehicles.length) {
+    const list = $('vehicles-list');
+    if (!vehicles.length) {
       list.innerHTML = '<div class="civ-empty">No vehicles registered yet.</div>';
       return;
     }
-    list.innerHTML = state.vehicles
-      .map(function (v) {
-        var insClass = v.ins === 'Expired' ? 'civ-ins-expired' : 'civ-ins-active';
-        return (
-          '<div class="civ-row">' +
-            '<span style="width:240px">'  + esc(v.owner)  + '</span>' +
-            '<span style="width:170px">'  + esc(v.plate)  + '</span>' +
-            '<span style="width:270px">'  + esc(v.model)  + '</span>' +
-            '<span style="width:150px">'  + esc(v.color)  + '</span>' +
-            '<span style="width:220px">'  + esc(v.vin)    + '</span>' +
-            '<span style="width:170px">'  + esc(v.reg)    + '</span>' +
-            '<span class="' + insClass + '" style="width:180px">' + esc(v.ins) + '</span>' +
-            '<span class="civ-col-flex">' + esc(v.insExp) + '</span>' +
-          '</div>'
-        );
-      })
-      .join('');
+    list.innerHTML = vehicles.map(function (v) {
+      const insClass = v.insurance_status === 'Expired' ? 'civ-ins-expired' : 'civ-ins-active';
+      return (
+        '<div class="civ-row">' +
+          '<span style="width:240px">'  + esc(v.owner_name || '—')          + '</span>' +
+          '<span style="width:170px">'  + esc(v.plate)                      + '</span>' +
+          '<span style="width:270px">'  + esc(v.model)                      + '</span>' +
+          '<span style="width:150px">'  + esc(v.color || '—')               + '</span>' +
+          '<span style="width:220px">'  + esc(v.vin || '—')                 + '</span>' +
+          '<span style="width:170px">'  + esc(v.registration_expiry || '—') + '</span>' +
+          '<span class="' + insClass + '" style="width:180px">' + esc(v.insurance_status || '—') + '</span>' +
+          '<span class="civ-col-flex">' + esc(v.insurance_expiry || '—')    + '</span>' +
+        '</div>'
+      );
+    }).join('');
   }
 
   /* ── Render: Firearms tab ───────────────────────────────── */
   function renderFirearms() {
-    var list = $('firearms-list');
-    if (!state.firearms.length) {
+    const list = $('firearms-list');
+    if (!firearms.length) {
       list.innerHTML = '<div class="civ-empty">No firearms registered yet.</div>';
       return;
     }
-    list.innerHTML = state.firearms
-      .map(function (f) {
-        return (
-          '<div class="civ-row">' +
-            '<span style="width:260px">'  + esc(f.owner)  + '</span>' +
-            '<span style="width:360px">'  + esc(f.serial) + '</span>' +
-            '<span style="width:360px">'  + esc(f.name)   + '</span>' +
-            '<span class="civ-col-flex">' + esc(f.type)   + '</span>' +
-          '</div>'
-        );
-      })
-      .join('');
+    list.innerHTML = firearms.map(function (f) {
+      return (
+        '<div class="civ-row">' +
+          '<span style="width:260px">'  + esc(f.owner_name || '—') + '</span>' +
+          '<span style="width:360px">'  + esc(f.serial)            + '</span>' +
+          '<span style="width:360px">'  + esc(f.name || '—')       + '</span>' +
+          '<span class="civ-col-flex">' + esc(f.type)              + '</span>' +
+        '</div>'
+      );
+    }).join('');
   }
 
   /* ── Clear form fields ──────────────────────────────────── */
   function clearFields(ids) {
     ids.forEach(function (id) {
-      var el = $(id);
+      const el = $(id);
       if (!el) return;
       if (el.tagName === 'SELECT') el.selectedIndex = 0;
       else el.value = '';
@@ -241,89 +290,97 @@
 
   /* ── Submit: Create Character ───────────────────────────── */
   $('btn-submit-char').addEventListener('click', function () {
-    var fn = $('char-fn').value.trim();
-    var ln = $('char-ln').value.trim();
-    if (!fn || !ln) {
-      $('char-fn').focus();
-      return;
-    }
+    const fn = $('char-fn').value.trim();
+    const ln = $('char-ln').value.trim();
+    const dob = $('char-dob').value.trim();
+    if (!fn || !ln || !dob) { alert('First name, last name, and D.O.B. are required.'); return; }
 
-    state.characters.push({
-      fn:     fn,
-      ln:     ln,
-      dob:    $('char-dob').value.trim(),
-      age:    $('char-age').value.trim(),
-      gender: $('char-gender').value.trim(),
-      occ:    $('char-occ').value.trim(),
-      height: $('char-height').value.trim(),
-      weight: $('char-weight').value.trim(),
-      skin:   $('char-skin').value.trim(),
-      hair:   $('char-hair').value.trim(),
-      eye:    $('char-eye').value.trim(),
-      addr:   $('char-addr').value.trim(),
-    });
-
-    renderChars();
-    closeModal('modal-character');
-    clearFields([
-      'char-fn','char-ln','char-dob','char-age','char-gender','char-occ',
-      'char-height','char-weight','char-skin','char-hair','char-eye','char-addr',
-    ]);
+    apiFetch('/characters', {
+      method: 'POST',
+      body: JSON.stringify({
+        serverId:   Number(serverId),
+        firstName:  fn,
+        lastName:   ln,
+        dob:        dob,
+        gender:     $('char-gender').value.trim() || null,
+        occupation: $('char-occ').value.trim()    || null,
+        height:     $('char-height').value.trim() || null,
+        weight:     $('char-weight').value.trim() || null,
+        skinTone:   $('char-skin').value.trim()   || null,
+        hairTone:   $('char-hair').value.trim()   || null,
+        eyeColor:   $('char-eye').value.trim()    || null,
+        address:    $('char-addr').value.trim()   || null,
+      }),
+    })
+      .then(function (char) {
+        characters.push(char);
+        renderChars();
+        closeModal('modal-character');
+        clearFields(['char-fn','char-ln','char-dob','char-age','char-gender','char-occ',
+                     'char-height','char-weight','char-skin','char-hair','char-eye','char-addr']);
+      })
+      .catch(function (err) { alert(err.message); });
   });
 
   /* ── Submit: Add Vehicle ────────────────────────────────── */
   $('btn-submit-veh').addEventListener('click', function () {
-    var plate = $('veh-plate').value.trim();
-    if (!plate) {
-      $('veh-plate').focus();
-      return;
-    }
+    const plate   = $('veh-plate').value.trim();
+    const model   = $('veh-model').value.trim();
+    const ownerId = $('veh-owner-select') ? $('veh-owner-select').value : '';
+    if (!plate || !model) { alert('Plate and model are required.'); return; }
 
-    var entry = {
-      owner:  $('veh-owner').value.trim(),
-      plate:  plate,
-      model:  $('veh-model').value.trim(),
-      color:  $('veh-color').value.trim(),
-      vin:    $('veh-vin').value.trim(),
-      reg:    $('veh-reg').value.trim(),
-      ins:    $('veh-ins').value,
-      insExp: $('veh-insexp').value.trim(),
-    };
-
-    state.vehicles.push(entry);
-    renderVehicles();
-    renderVehiclesSubTable(null);
-    closeModal('modal-vehicle');
-    clearFields(['veh-owner','veh-plate','veh-model','veh-color','veh-vin','veh-reg','veh-insexp']);
+    apiFetch('/vehicles', {
+      method: 'POST',
+      body: JSON.stringify({
+        serverId:            Number(serverId),
+        ownerId:             ownerId ? Number(ownerId) : null,
+        plate:               plate,
+        vin:                 $('veh-vin').value.trim()    || null,
+        model:               model,
+        color:               $('veh-color').value.trim()  || null,
+        registrationExpiry:  $('veh-reg').value.trim()    || null,
+        insuranceStatus:     $('veh-ins').value           || 'Active',
+        insuranceExpiry:     $('veh-insexp').value.trim() || null,
+      }),
+    })
+      .then(function (veh) {
+        vehicles.push(veh);
+        renderVehicles();
+        renderVehiclesSubTable(selectedCharId);
+        closeModal('modal-vehicle');
+        clearFields(['veh-plate','veh-model','veh-color','veh-vin','veh-reg','veh-insexp']);
+      })
+      .catch(function (err) { alert(err.message); });
   });
 
   /* ── Submit: Register Firearm ───────────────────────────── */
   $('btn-submit-fa').addEventListener('click', function () {
-    var serial = $('fa-serial').value.trim();
-    if (!serial) {
-      $('fa-serial').focus();
-      return;
-    }
+    const serial  = $('fa-serial').value.trim();
+    const type    = $('fa-type').value.trim();
+    const ownerId = $('fa-owner-select') ? $('fa-owner-select').value : '';
+    if (!serial || !type) { alert('Serial number and type are required.'); return; }
 
-    var entry = {
-      owner:  $('fa-owner').value.trim(),
-      serial: serial,
-      name:   $('fa-name').value.trim(),
-      type:   $('fa-type').value.trim(),
-    };
-
-    state.firearms.push(entry);
-    renderFirearms();
-    renderFirearmsSubTable(null);
-    closeModal('modal-firearm');
-    clearFields(['fa-owner','fa-serial','fa-name','fa-type']);
+    apiFetch('/firearms', {
+      method: 'POST',
+      body: JSON.stringify({
+        serverId: Number(serverId),
+        ownerId:  ownerId ? Number(ownerId) : null,
+        serial:   serial,
+        name:     $('fa-name').value.trim()  || null,
+        type:     type,
+      }),
+    })
+      .then(function (fa) {
+        firearms.push(fa);
+        renderFirearms();
+        renderFirearmsSubTable(selectedCharId);
+        closeModal('modal-firearm');
+        clearFields(['fa-serial','fa-name','fa-type']);
+      })
+      .catch(function (err) { alert(err.message); });
   });
 
   /* ── Init ───────────────────────────────────────────────── */
-  renderChars();
-  renderVehiclesSubTable(null);
-  renderFirearmsSubTable(null);
-  renderVehicles();
-  renderFirearms();
+  loadAll();
 
 })();

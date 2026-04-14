@@ -4,7 +4,6 @@ import { verifyUser } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
-// Generate a random join code
 function generateJoinCode(length = 8) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
@@ -68,7 +67,7 @@ router.get('/members/:serverId/:userId', async (req, res) => {
   }
 });
 
-// POST /servers/members
+// POST /servers/members — add member directly
 router.post('/members', async (req, res) => {
   const { userId, serverId } = req.body;
   if (!userId || !serverId)
@@ -85,16 +84,42 @@ router.post('/members', async (req, res) => {
   }
 });
 
+// POST /servers/join — join by code
+router.post('/join', verifyUser, async (req, res) => {
+  const { joinCode } = req.body;
+  if (!joinCode) return res.status(400).json({ error: 'joinCode is required' });
+
+  try {
+    const [servers] = await pool.query(
+      'SELECT * FROM servers WHERE join_code = ?',
+      [joinCode.trim().toUpperCase()]
+    );
+    if (!servers.length)
+      return res.status(404).json({ error: 'Invalid join code — server not found' });
+
+    const server = servers[0];
+
+    await pool.query(
+      'INSERT IGNORE INTO server_members (user_id, server_id) VALUES (?, ?)',
+      [req.user.iduser, server.idserver]
+    );
+
+    res.json(server);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
 // POST /servers/create — create a new server
 router.post('/create', verifyUser, async (req, res) => {
   const { name, description, iconUrl, joinCode, discordId } = req.body;
-
   if (!name) return res.status(400).json({ error: 'Server name is required' });
 
-  const code = joinCode?.trim() || generateJoinCode();
+  const code = joinCode?.trim().toUpperCase() || generateJoinCode();
 
   try {
-    // Check discord_id isn't already linked
+    // Check discord_id uniqueness only if provided
     if (discordId) {
       const [existing] = await pool.query(
         'SELECT idserver FROM servers WHERE discord_id = ?',
@@ -110,7 +135,7 @@ router.post('/create', verifyUser, async (req, res) => {
       [name, description || null, iconUrl || null, code, discordId || null, req.user.iduser]
     );
 
-    // Auto-add creator as a member
+    // Auto-add creator as member
     await pool.query(
       'INSERT IGNORE INTO server_members (user_id, server_id) VALUES (?, ?)',
       [req.user.iduser, result.insertId]
@@ -124,16 +149,51 @@ router.post('/create', verifyUser, async (req, res) => {
   }
 });
 
-// GET /servers/my-servers/:userId — get all servers a user is a member of
+// GET /servers/my-servers/:userId
 router.get('/my-servers/:userId', verifyUser, async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT s.* FROM servers s
+      `SELECT s.*, sm.joined_at,
+              CASE WHEN s.owner_id = ? THEN 'Owner' ELSE 'Member' END AS role
+       FROM servers s
        INNER JOIN server_members sm ON sm.server_id = s.idserver
-       WHERE sm.user_id = ?`,
-      [req.params.userId]
+       WHERE sm.user_id = ?
+       ORDER BY sm.joined_at DESC`,
+      [req.user.iduser, req.params.userId]
     );
     res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// PATCH /servers/:serverId/update — update server settings
+router.patch('/:serverId/update', verifyUser, async (req, res) => {
+  const { name, description, joinCode, discordId, iconUrl } = req.body;
+  const { serverId } = req.params;
+
+  try {
+    // Only owner can update
+    const [servers] = await pool.query(
+      'SELECT * FROM servers WHERE idserver = ? AND owner_id = ?',
+      [serverId, req.user.iduser]
+    );
+    if (!servers.length) return res.status(403).json({ error: 'Forbidden: not the server owner' });
+
+    await pool.query(
+      `UPDATE servers SET
+         name = COALESCE(?, name),
+         description = COALESCE(?, description),
+         join_code = COALESCE(?, join_code),
+         discord_id = COALESCE(?, discord_id),
+         icon_url = COALESCE(?, icon_url)
+       WHERE idserver = ?`,
+      [name || null, description || null, joinCode || null, discordId || null, iconUrl || null, serverId]
+    );
+
+    const [rows] = await pool.query('SELECT * FROM servers WHERE idserver = ?', [serverId]);
+    res.json(rows[0]);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Database error' });
