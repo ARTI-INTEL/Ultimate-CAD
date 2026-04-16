@@ -1,3 +1,28 @@
-[✓] Task 1
-[x] Task 2
-[x] Task 3 (Completed)
+# TODO:
+Proper Report saving in db
+Fix online users tracking(officers)
+Server Settings Page
+Account Settings Page
+Server Logo's(maybe)
+Link to ERLC
+Email Verfication Code for Critical Actions(delete account/server etc)
+
+
+# FIX:
+Discord Server's not showing in create drop down
+Remove suggestions from the reports area(can cause leaking of address)
+
+# BUGS(dont know fix yet):
+leo-cad and dispatcher-cad nav bar buttons on bottom or nav bar.
+
+# IDEA'S
+Department/Server Documents
+Shift Tracking
+Motorpool Tracking
+Additional Reports
+Supervisor Exclusive Functios
+Sound Board
+VC Radio(Using Mumble)
+Employee Management(Infractions, LOA etc.)
+Bodycam System
+Discord Integ(Using Bot or Webhooks)
