@@ -3,7 +3,7 @@ Copy
 
 /* ============================================================
    LANDING PAGE  landing.css
-   Companion to styles.css for the Ultimate CAD landing page.
+   Standalone landing page styles for Ultimate CAD.
    No inline styles exist in index.html; all visual rules live here.
    ============================================================ */
  
@@ -26,7 +26,7 @@ Copy
   color: #fff;
   font-family: var(--font-body);
   overflow-x: hidden;
-  overflow-y: auto;     /* override the global overflow:hidden from styles.css */
+  overflow-y: auto;     /* allow page scrolling for the landing page */
 }
  
 /* ── NAVBAR ────────────────────────────────────────────────── */
