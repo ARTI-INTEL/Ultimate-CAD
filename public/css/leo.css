@@ -91,6 +91,17 @@ html, body {
   isolation: isolate;
 }
 
+/* ── Navbar button positions ──────────────────────────────── */
+#leo-nav-clockout    { left: 1.25rem;   width: 11.4375rem; }
+#leo-nav-home        { left: 13.5625rem;  width: 6.9375rem; }
+#leo-nav-map         { left: 21.25rem;  width: 4.9375rem;  }
+#leo-nav-cad         { left: 27.0625rem;  width: 4.9375rem;  }
+#leo-nav-search      { left: 32.8125rem;  width: 7.4375rem; }
+#leo-nav-reports     { left: 41.125rem;  width: 8.3125rem; }
+#leo-nav-callhistory { left: 50.25rem;  width: 12.25rem; }
+#leo-nav-notepad     { left: 63.3125rem; width: 9.375rem; }
+
+
 .navbar::before,
 .leo-navbar::before,
 .fr-navbar::before,
@@ -357,13 +368,6 @@ html, body {
 /* ===== LEO THEME ===== */
 .leo-navbar { background: #1e3a8a; }
 
-.leo-btn {
-  position: absolute; height: 2.9375rem; border-radius: 0.9375rem; border: none;
-  background: #2954c3; color: #fff; font-family: 'Inter', sans-serif;
-  font-size: 1.5rem; font-weight: 500; cursor: pointer; top: 1.1875rem;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.15s;
-}
 .leo-btn:hover  { background: #3a6ae0; }
 .leo-btn.active { background: #3a6ae0; outline: 0.125rem solid #fff; }
 
