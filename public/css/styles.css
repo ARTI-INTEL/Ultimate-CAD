@@ -7,6 +7,8 @@
 }
 
 :root {
+  --design-width: 120rem;
+  --design-height: 67.5rem;
   --bg-primary: #000000;
   --bg-dark: #111111;
   --bg-panel: #222222;
@@ -19,9 +21,13 @@
   --status-red: #ff0004;
   --status-yellow: #ffbb00;
   --status-blue: #00b2ff;
-  --radius-btn: 15px;
-  --radius-panel: 15px;
+  --radius-btn: 0.9375rem;
+  --radius-panel: 0.9375rem;
   --font: 'Inter', sans-serif;
+}
+
+html {
+  font-size: min(calc(100vw / 120), calc(100vh / 67.5));
 }
 
 html, body {
@@ -31,23 +37,22 @@ html, body {
   background: var(--bg-primary);
   font-family: var(--font);
   color: var(--text-white);
-  zoom: 0.9;
 }
 
-/* Scale the 1920x1080 design to fit viewport */
 .page-wrapper {
-  width: 100%;
-  min-height: 100%;
+  width: var(--design-width);
+  min-height: var(--design-height);
   position: relative;
+  margin: 0 auto;
 }
 
-Global page layout
-/* .page-container {
+/* Global page layout
+   .page-container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 75rem;
     margin: 0 auto;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
 } */
 
 /* Ensure body uses full width */
@@ -63,7 +68,7 @@ Global page layout
 
 .main-container {
   width: 100%;
-  max-width: 1600px;
+  max-width: 100rem;
   margin: auto;
 }
 
@@ -71,7 +76,37 @@ Global page layout
 .navbar {
   position: relative;
   width: 100%;
-  height: 89px;
+  height: 5.5625rem;
+}
+
+.navbar,
+.leo-navbar,
+.fr-navbar,
+.dot-navbar,
+.d-navbar,
+.civ-navbar,
+.sp-navbar,
+.ss-navbar,
+.st-navbar {
+  isolation: isolate;
+}
+
+.navbar::before,
+.leo-navbar::before,
+.fr-navbar::before,
+.dot-navbar::before,
+.d-navbar::before,
+.civ-navbar::before,
+.sp-navbar::before,
+.ss-navbar::before,
+.st-navbar::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  background: inherit;
+  z-index: -1;
 }
 
 .navbar-dark { background: var(--bg-panel); }
@@ -88,7 +123,7 @@ Global page layout
   color: var(--text-white);
   font-family: var(--font);
   font-weight: 500;
-  font-size: 24px;
+  font-size: 1.5rem;
   text-align: center;
   transition: opacity 0.15s;
 }
@@ -96,12 +131,12 @@ Global page layout
 
 .nav-btn-blue     { background: var(--bg-blue); }
 .nav-btn-dark     { background: var(--bg-panel-header); }
-.nav-btn-discord  { background: var(--bg-discord); border-radius: 22px; }
+.nav-btn-discord  { background: var(--bg-discord); border-radius: 1.375rem; }
 
 /* Status buttons */
 .status-btn {
   position: absolute;
-  height: 47px;
+  height: 2.9375rem;
   border-radius: var(--radius-btn);
   display: flex;
   align-items: center;
@@ -111,8 +146,8 @@ Global page layout
   color: var(--text-white);
   font-family: var(--font);
   font-weight: 500;
-  font-size: 24px;
-  top: 21px;
+  font-size: 1.5rem;
+  top: 1.3125rem;
 }
 .status-green  { background: var(--status-green); }
 .status-red    { background: var(--status-red); }
@@ -134,7 +169,16 @@ Global page layout
 }
 
 /* CAD panel switcher */
-.panel { display: none; position: absolute; left: 0; top: 89px; width: 1920px; height: 991px; }
+.panel {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 5.5625rem;
+  width: 120rem;
+  height: 61.9375rem;
+  transform: scale(1.025);
+  transform-origin: top center;
+}
 .panel.active { display: block; }
 
 /* ===== TABLE ===== */
@@ -150,21 +194,21 @@ Global page layout
 }
 .table-label {
   font-weight: 700;
-  font-size: 24px;
+  font-size: 1.5rem;
   color: var(--text-white);
   position: absolute;
 }
 
 /* CAD-style table components */
-.tbl-hdr { background: #444; border-radius: 15px 15px 0 0; position: absolute; }
-.tbl-body { background: #222; border-radius: 0 0 15px 15px; position: absolute; overflow-y: auto; }
+.tbl-hdr { background: #444; border-radius: 0.9375rem 0.9375rem 0 0; position: absolute; }
+.tbl-body { background: #222; border-radius: 0 0 0.9375rem 0.9375rem; position: absolute; overflow-y: auto; }
 .tbl-col {
-  position: absolute; font-size: 24px; font-weight: 700;
+  position: absolute; font-size: 1.5rem; font-weight: 700;
   color: #fff; top: 50%; transform: translateY(-50%); white-space: nowrap;
 }
 .tbl-row {
-  display: flex; align-items: center; height: 44px;
-  padding: 0 17px; border-bottom: 1px solid #333; cursor: pointer;
+  display: flex; align-items: center; height: 2.75rem;
+  padding: 0 1.0625rem; border-bottom: 0.0625rem solid #333; cursor: pointer;
 }
 .tbl-row:hover { background: #2a2a2a; }
 
@@ -175,16 +219,16 @@ Global page layout
   border-radius: var(--radius-btn);
   color: var(--text-white);
   font-family: var(--font);
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 700;
-  padding: 10px 16px;
+  padding: 0.625rem 1rem;
   outline: none;
   width: 100%;
 }
 .input-field::placeholder { color: rgba(255,255,255,0.5); }
 
 .input-label {
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
   color: rgba(255,255,255,0.6);
   position: absolute;
@@ -192,17 +236,17 @@ Global page layout
 
 /* CAD field box */
 .fld {
-  background: #333; border-radius: 12px;
+  background: #333; border-radius: 0.75rem;
   display: flex; flex-direction: column;
-  padding: 6px 12px; flex-shrink: 0;
+  padding: 0.375rem 0.75rem; flex-shrink: 0;
 }
-.fld label { font-size: 11px; color: rgba(255,255,255,0.55); font-weight: 700; }
+.fld label { font-size: 0.6875rem; color: rgba(255,255,255,0.55); font-weight: 700; }
 .fld input,
 .fld select,
 .fld textarea {
   background: transparent; border: none; color: #fff;
-  font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 700;
-  outline: none; width: 100%; margin-top: 2px;
+  font-family: 'Inter', sans-serif; font-size: 1.0625rem; font-weight: 700;
+  outline: none; width: 100%; margin-top: 0.125rem;
 }
 .fld textarea { resize: none; }
 
@@ -214,7 +258,7 @@ Global page layout
   color: var(--text-white);
   font-family: var(--font);
   font-weight: 700;
-  font-size: 32px;
+  font-size: 2rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -222,14 +266,14 @@ Global page layout
   transition: background 0.15s;
 }
 .action-btn:hover        { background: #555; }
-.action-btn-sm           { font-size: 20px; }
+.action-btn-sm           { font-size: 1.25rem; }
 .action-btn-blue         { background: var(--bg-blue); }
 .action-btn-blue:hover   { background: #3366dd; }
 
 /* CAD act-btn family */
 .act-btn {
-  background: #444; border: none; border-radius: 15px; color: #fff;
-  font-family: 'Inter', sans-serif; font-size: 32px; font-weight: 700;
+  background: #444; border: none; border-radius: 0.9375rem; color: #fff;
+  font-family: 'Inter', sans-serif; font-size: 2rem; font-weight: 700;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   transition: background 0.15s; position: absolute;
 }
@@ -245,68 +289,68 @@ Global page layout
 .modal-overlay {
   position: absolute;
   left: 0; top: 0;
-  width: 1920px; height: 100%;
+  width: 120rem; height: 100%;
   background: rgba(0,0,0,0.65);
   display: none;
   z-index: 100;
 }
 .modal-overlay.active { display: block; }
 .modal-overlay.open   { display: block; }    /* used by CAD pages */
-.modal-box { background: #222; border-radius: 15px; position: absolute; }
+.modal-box { background: #222; border-radius: 0.9375rem; position: absolute; }
 
 .close-btn {
-  position: absolute; right: 10px; top: 10px;
+  position: absolute; right: 0.625rem; top: 0.625rem;
   background: #555; border: none; color: #fff;
-  border-radius: 8px; width: 30px; height: 30px;
-  cursor: pointer; font-size: 16px; z-index: 1;
+  border-radius: 0.5rem; width: 1.875rem; height: 1.875rem;
+  cursor: pointer; font-size: 1rem; z-index: 1;
 }
 
 /* ===== SEARCH INPUT BOX (light, LEO search panel) ===== */
 .search-input-box {
-  width: 458px; height: 66px;
-  background: #d9d9d9; border-radius: 15px;
+  width: 28.625rem; height: 4.125rem;
+  background: #d9d9d9; border-radius: 0.9375rem;
   display: flex; align-items: center;
 }
 .search-input-box input {
   background: transparent; border: none;
   color: #000; font-family: 'Inter', sans-serif;
-  font-size: 24px; font-weight: 700; outline: none;
-  padding: 0 20px; width: 100%;
+  font-size: 1.5rem; font-weight: 700; outline: none;
+  padding: 0 1.25rem; width: 100%;
 }
 .search-input-box input::placeholder { color: rgba(0,0,0,0.31); }
 
 /* ===== REPORT TABS ===== */
 .report-tab {
-  background: #444; border: none; border-radius: 15px; color: #fff;
-  font-family: 'Inter', sans-serif; font-size: 24px; font-weight: 700;
-  cursor: pointer; height: 44px; padding: 0 20px;
+  background: #444; border: none; border-radius: 0.9375rem; color: #fff;
+  font-family: 'Inter', sans-serif; font-size: 1.5rem; font-weight: 700;
+  cursor: pointer; height: 2.75rem; padding: 0 1.25rem;
   display: inline-flex; align-items: center; justify-content: center;
   transition: background 0.15s;
 }
 .report-tab:hover  { background: #555; }
-.report-tab.active { background: #2954c3; outline: 2px solid #fff; }
+.report-tab.active { background: #2954c3; outline: 0.125rem solid #fff; }
 
 /* Theme overrides for report tab active state */
-.fr-theme  .report-tab.active { background: #851616; outline: 2px solid #fff; }
-.dot-theme .report-tab.active { background: #dcb207; color: #000; outline: 2px solid #000; }
+.fr-theme  .report-tab.active { background: #851616; outline: 0.125rem solid #fff; }
+.dot-theme .report-tab.active { background: #dcb207; color: #000; outline: 0.125rem solid #000; }
 
 /* ===== NOTEPAD ===== */
 .cad-notepad {
-  position: absolute; left: 86px; top: 130px;
-  width: 1748px; height: 820px;
-  background: #222; border: none; border-radius: 15px;
+  position: absolute; left: 5.375rem; top: 8.125rem;
+  width: 109.25rem; height: 51.25rem;
+  background: #222; border: none; border-radius: 0.9375rem;
   color: #fff; font-family: 'Inter', sans-serif;
-  font-size: 20px; font-weight: 500; padding: 20px;
+  font-size: 1.25rem; font-weight: 500; padding: 1.25rem;
   outline: none; resize: none;
 }
 
 /* Dispatcher notepad is slightly taller */
 #notepad-text {
-  position: absolute; left: 86px; top: 130px;
-  width: 1748px; height: 870px;
-  background: #222; border: none; border-radius: 15px;
+  position: absolute; left: 5.375rem; top: 8.125rem;
+  width: 109.25rem; height: 54.375rem;
+  background: #222; border: none; border-radius: 0.9375rem;
   color: #fff; font-family: 'Inter', sans-serif;
-  font-size: 20px; font-weight: 500; padding: 20px;
+  font-size: 1.25rem; font-weight: 500; padding: 1.25rem;
   outline: none; resize: none;
 }
 
@@ -314,74 +358,86 @@ Global page layout
 .leo-navbar { background: #1e3a8a; }
 
 .leo-btn {
-  position: absolute; height: 47px; border-radius: 15px; border: none;
+  position: absolute; height: 2.9375rem; border-radius: 0.9375rem; border: none;
   background: #2954c3; color: #fff; font-family: 'Inter', sans-serif;
-  font-size: 24px; font-weight: 500; cursor: pointer; top: 19px;
+  font-size: 1.5rem; font-weight: 500; cursor: pointer; top: 1.1875rem;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.15s;
 }
 .leo-btn:hover  { background: #3a6ae0; }
-.leo-btn.active { background: #3a6ae0; outline: 2px solid #fff; }
+.leo-btn.active { background: #3a6ae0; outline: 0.125rem solid #fff; }
+
+.leo-status-group {
+  align-self: flex-start;
+  margin-top: 1.3125rem;
+  transform: none;
+}
 
 /* ===== F&R THEME ===== */
 .fr-navbar { background: #711818; }
 
 .fr-btn {
-  position: absolute; height: 47px; border-radius: 15px; border: none;
+  position: absolute; height: 2.9375rem; border-radius: 0.9375rem; border: none;
   background: #851616; color: #fff; font-family: 'Inter', sans-serif;
-  font-size: 24px; font-weight: 500; cursor: pointer; top: 19px;
+  font-size: 1.5rem; font-weight: 500; cursor: pointer; top: 1.1875rem;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.15s;
 }
 .fr-btn:hover  { background: #a01c1c; }
-.fr-btn.active { background: #c02020; outline: 2px solid #fff; }
+.fr-btn.active { background: #c02020; outline: 0.125rem solid #fff; }
 
 /* ===== DOT THEME ===== */
 .dot-navbar { background: #eec007; }
 
 .dot-btn {
-  position: absolute; height: 47px; border-radius: 15px; border: none;
+  position: absolute; height: 2.9375rem; border-radius: 0.9375rem; border: none;
   background: #dcb207; color: #000; font-family: 'Inter', sans-serif;
-  font-size: 24px; font-weight: 500; cursor: pointer; top: 19px;
+  font-size: 1.5rem; font-weight: 500; cursor: pointer; top: 1.1875rem;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.15s;
 }
 .dot-btn:hover  { background: #c9a206; }
-.dot-btn.active { background: #b89100; outline: 2px solid #000; }
+.dot-btn.active { background: #b89100; outline: 0.125rem solid #000; }
 
 /* ===== DISPATCHER THEME ===== */
 .d-navbar { background: #222; }
 
 .d-btn {
-  position: absolute; height: 47px; border-radius: 15px; border: none;
+  position: absolute; height: 2.9375rem; border-radius: 0.9375rem; border: none;
   background: #444; color: #fff; font-family: 'Inter', sans-serif;
-  font-size: 24px; font-weight: 500; cursor: pointer; top: 19px;
+  font-size: 1.5rem; font-weight: 500; cursor: pointer; top: 1.1875rem;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.15s;
 }
 .d-btn:hover  { background: #666; }
-.d-btn.active { background: #666; outline: 2px solid #fff; }
+.d-btn.active { background: #666; outline: 0.125rem solid #fff; }
+
+.d-status-group {
+  align-self: flex-start;
+  margin-top: 1.3125rem;
+  transform: none;
+}
 
 /* ===== INDEX PAGE ===== */
 body.index-bg { background: #222; }
 
-/* ===== SERVER PAGE — dept panels ===== */
+/* ===== SERVER PAGE  dept panels ===== */
 .dept-heading {
   position: absolute;
-  left: 39px; top: 31px;
-  font-size: 28px;       /* reduced from 48px so text never covers input fields */
+  left: 2.4375rem; top: 1.9375rem;
+  font-size: 1.75rem;       /* reduced from 3rem so text never covers input fields */
   font-weight: 700;
   color: #fff;
-  width: 347px;
+  width: 21.6875rem;
   line-height: 1.3;
 }
 
 /* Typography helpers */
-.text-xl       { font-size: 48px; font-weight: 700; }
-.text-lg       { font-size: 36px; font-weight: 700; }
-.text-md       { font-size: 32px; font-weight: 700; }
-.text-sm       { font-size: 24px; font-weight: 500; }
-.text-xs       { font-size: 20px; font-weight: 700; }
+.text-xl       { font-size: 3rem; font-weight: 700; }
+.text-lg       { font-size: 2.25rem; font-weight: 700; }
+.text-md       { font-size: 2rem; font-weight: 700; }
+.text-sm       { font-size: 1.5rem; font-weight: 500; }
+.text-xs       { font-size: 1.25rem; font-weight: 700; }
 .text-bold     { font-weight: 700; }
 .text-extrabold{ font-weight: 800; }
 .text-center   { text-align: center; }
@@ -390,7 +446,7 @@ body.index-bg { background: #222; }
 /* Section title above tables */
 .section-title {
   position: absolute;
-  font-size: 32px;
+  font-size: 2rem;
   font-weight: 700;
   color: var(--text-white);
 }
@@ -401,8 +457,8 @@ body.index-bg { background: #222; }
   scrollbar-width: thin;
   scrollbar-color: #444 #111;
 }
-.list-area::-webkit-scrollbar       { width: 6px; }
-.list-area::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+.list-area::-webkit-scrollbar       { width: 0.375rem; }
+.list-area::-webkit-scrollbar-thumb { background: #444; border-radius: 0.1875rem; }
 
 /* Textarea */
 .textarea-field {
@@ -411,9 +467,9 @@ body.index-bg { background: #222; }
   border-radius: var(--radius-btn);
   color: var(--text-white);
   font-family: var(--font);
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 500;
-  padding: 12px 16px;
+  padding: 0.75rem 1rem;
   outline: none;
   resize: none;
   width: 100%;

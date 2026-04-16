@@ -1,5 +1,5 @@
 /**
- * settings.js — Ultimate CAD Account Settings Page
+ * settings.js  Ultimate CAD Account Settings Page
  *
  * Responsibilities:
  *  - Populate the navbar title with the stored username
@@ -34,7 +34,7 @@
   /* ── Cached values ───────────────────────────────────────── */
   const userId   = get('cad_user_id');
   const username = get('cad_username') || 'Unknown User';
-  const discordId = get('cad_discord_id') || '—';
+  const discordId = get('cad_discord_id') || '';
 
   /* ── Element refs ────────────────────────────────────────── */
   const navTitle        = document.getElementById('st-nav-title');
@@ -70,7 +70,7 @@
 
   /* ── Utility: format date ────────────────────────────────── */
   function formatDate(isoString) {
-    if (!isoString) return '—';
+    if (!isoString) return '';
     const d = new Date(isoString);
     if (isNaN(d.getTime())) return isoString;
     return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -78,7 +78,7 @@
 
   /* ── Utility: format member count ───────────────────────── */
   function fmtNum(n) {
-    if (typeof n !== 'number') return '—';
+    if (typeof n !== 'number') return '';
     if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
     return String(n);
   }
@@ -110,7 +110,7 @@
     inputDiscordId.value = localUser.discord_id;
     inputJoinDate.value  = formatDate(localUser.created_at);
 
-    if (!userId || !discordId || discordId === '—') return;
+    if (!userId || !discordId || discordId === '') return;
 
     fetch(API_BASE + '/users/getUserByDiscordId/' + discordId)
       .then(function (r) { return r.ok ? r.json() : null; })
@@ -171,13 +171,13 @@
                        : 'st-role-badge--member';
 
       row.innerHTML = [
-        '<span class="st-srv-cell" style="--col-w:480px">' + esc(srv.name) + '</span>',
-        '<span class="st-srv-cell st-srv-cell--members" style="--col-w:200px">' + fmtNum(srv.members) + '</span>',
-        '<span class="st-srv-cell st-srv-cell--role" style="--col-w:200px">',
+        '<span class="st-srv-cell" style="--col-w:30rem">' + esc(srv.name) + '</span>',
+        '<span class="st-srv-cell st-srv-cell--members" style="--col-w:12.5rem">' + fmtNum(srv.members) + '</span>',
+        '<span class="st-srv-cell st-srv-cell--role" style="--col-w:12.5rem">',
           '<span class="st-role-badge ' + badgeClass + '">' + esc(srv.role || 'Member') + '</span>',
         '</span>',
-        '<span class="st-srv-cell st-srv-cell--date" style="--col-w:240px">' + formatDate(srv.joinedAt || null) + '</span>',
-        '<span class="st-srv-cell" style="--col-w:160px">',
+        '<span class="st-srv-cell st-srv-cell--date" style="--col-w:15rem">' + formatDate(srv.joinedAt || null) + '</span>',
+        '<span class="st-srv-cell" style="--col-w:10rem">',
           '<button class="st-leave-btn" data-server-id="' + esc(String(srv.id)) + '" data-server-name="' + esc(srv.name) + '">Leave</button>',
         '</span>',
       ].join('');

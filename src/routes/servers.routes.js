@@ -67,7 +67,7 @@ router.get('/members/:serverId/:userId', async (req, res) => {
   }
 });
 
-// POST /servers/members — add member directly
+// POST /servers/members  add member directly
 router.post('/members', async (req, res) => {
   const { userId, serverId } = req.body;
   if (!userId || !serverId)
@@ -84,7 +84,7 @@ router.post('/members', async (req, res) => {
   }
 });
 
-// POST /servers/join — join by code
+// POST /servers/join  join by code
 router.post('/join', verifyUser, async (req, res) => {
   const { joinCode } = req.body;
   if (!joinCode) return res.status(400).json({ error: 'joinCode is required' });
@@ -95,7 +95,7 @@ router.post('/join', verifyUser, async (req, res) => {
       [joinCode.trim().toUpperCase()]
     );
     if (!servers.length)
-      return res.status(404).json({ error: 'Invalid join code — server not found' });
+      return res.status(404).json({ error: 'Invalid join code  server not found' });
 
     const server = servers[0];
 
@@ -111,7 +111,7 @@ router.post('/join', verifyUser, async (req, res) => {
   }
 });
 
-// POST /servers/create — create a new server
+// POST /servers/create  create a new server
 router.post('/create', verifyUser, async (req, res) => {
   const { name, description, iconUrl, joinCode, discordId } = req.body;
   if (!name) return res.status(400).json({ error: 'Server name is required' });
@@ -168,7 +168,7 @@ router.get('/my-servers/:userId', verifyUser, async (req, res) => {
   }
 });
 
-// PATCH /servers/:serverId/update — update server settings
+// PATCH /servers/:serverId/update  update server settings
 router.patch('/:serverId/update', verifyUser, async (req, res) => {
   const { name, description, joinCode, discordId, iconUrl } = req.body;
   const { serverId } = req.params;

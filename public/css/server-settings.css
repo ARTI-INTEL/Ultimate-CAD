@@ -1,5 +1,5 @@
 /* ============================================================
-   SERVER SETTINGS — server-settings.css
+   SERVER SETTINGS  server-settings.css
    Fixed 1920×1080 canvas.  Matches SVG pixel layout:
      Left member panel : x=78  → x=862  (w=784)
      Right config panel: x=960 → x=1842 (w=882)
@@ -12,77 +12,77 @@
   position: absolute;
   left: 0;
   top: 0;
-  width: 1920px;
-  height: 89px;
+  width: 120rem;
+  height: 5.5625rem;
   background: var(--bg-panel);
   display: flex;
   align-items: center;
-  padding: 0 26px 0 32px;
+  padding: 0 1.625rem 0 2rem;
 }
 
 .ss-nav-title {
   flex: 1;
-  font-size: 36px;
+  font-size: 2.25rem;
   font-weight: 800;
   color: var(--text-white);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding-right: 24px;
+  padding-right: 1.5rem;
 }
 
 .ss-nav-actions {
   display: flex;
-  gap: 12px;
+  gap: 0.75rem;
   flex-shrink: 0;
 }
 
 .ss-nav-btn {
-  height: 47px;
+  height: 2.9375rem;
   border-radius: var(--radius-btn);
   border: none;
   color: var(--text-white);
   font-family: var(--font);
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 500;
   cursor: pointer;
-  padding: 0 22px;
+  padding: 0 1.375rem;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background 0.15s;
 }
 
-.ss-nav-btn--back       { width: 183px; background: var(--bg-panel-header); }
+.ss-nav-btn--back       { width: 15rem; background: var(--bg-panel-header); }
 .ss-nav-btn--back:hover { background: #555; }
 
-.ss-nav-btn--dashboard       { width: 183px; background: var(--bg-blue); }
+.ss-nav-btn--dashboard       { width: 11.4375rem; background: var(--bg-blue); }
 .ss-nav-btn--dashboard:hover { background: #3a6ae0; }
 
 /* ── Left: Member panel ─────────────────────────────────────── */
 .ss-members-panel {
   position: absolute;
-  left: 78px;
-  top: 161px;
-  width: 784px;
-  height: 878px;          /* 161→1039 = 878px */
+  left: 4.875rem;
+  top: 10.0625rem;
+  width: 49rem;
+  height: 54.875rem;          /* 161→1039 = 54.875rem */
   display: flex;
   flex-direction: column;
 }
 
 /* Header row */
 .ss-members-hdr {
-  height: 75px;
+  height: 4.6875rem;
   background: var(--bg-panel-header);
   border-radius: var(--radius-panel) var(--radius-panel) 0 0;
   display: flex;
   align-items: center;
-  padding: 0 28px;
+  padding: 0 1.75rem;
   flex-shrink: 0;
 }
 
 .ss-mhdr-col {
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-white);
   white-space: nowrap;
@@ -90,12 +90,12 @@
   text-overflow: ellipsis;
 }
 
-.ss-mhdr-col--name     { width: 200px; flex-shrink: 0; }
-.ss-mhdr-col--role     { width: 120px; flex-shrink: 0; }
+.ss-mhdr-col--name     { width: 12.5rem; flex-shrink: 0; }
+.ss-mhdr-col--role     { width: 7.5rem; flex-shrink: 0; }
 .ss-mhdr-col--dept     { flex: 1; }
-.ss-mhdr-col--callsign { width: 100px; flex-shrink: 0; }
-.ss-mhdr-col--joined   { width: 130px; flex-shrink: 0; }
-.ss-mhdr-col--action   { width: 120px; flex-shrink: 0; text-align: right; }
+.ss-mhdr-col--callsign { width: 6.25rem; flex-shrink: 0; }
+.ss-mhdr-col--joined   { width: 8.125rem; flex-shrink: 0; }
+.ss-mhdr-col--action   { width: 7.5rem; flex-shrink: 0; text-align: right; }
 
 /* Body */
 .ss-members-body {
@@ -106,23 +106,23 @@
   scrollbar-color: #444 #111;
 }
 
-.ss-members-body::-webkit-scrollbar       { width: 5px; }
-.ss-members-body::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+.ss-members-body::-webkit-scrollbar       { width: 0.3125rem; }
+.ss-members-body::-webkit-scrollbar-thumb { background: #444; border-radius: 0.1875rem; }
 
 /* Footer strip */
 .ss-members-footer {
-  height: 36px;
+  height: 2.25rem;
   background: var(--bg-panel);
   border-radius: 0 0 var(--radius-panel) var(--radius-panel);
   display: flex;
   align-items: center;
-  padding: 0 28px;
+  padding: 0 1.75rem;
   flex-shrink: 0;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 0.0625rem solid rgba(255,255,255,0.06);
 }
 
 .ss-members-count {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
   color: rgba(255,255,255,0.35);
 }
@@ -131,9 +131,9 @@
 .ss-member-row {
   display: flex;
   align-items: center;
-  height: 60px;
-  padding: 0 28px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  height: 3.75rem;
+  padding: 0 1.75rem;
+  border-bottom: 0.0625rem solid rgba(255,255,255,0.05);
   transition: background 0.12s;
   animation: ssRowIn 0.2s ease both;
 }
@@ -142,12 +142,12 @@
 .ss-member-row:hover { background: rgba(255,255,255,0.03); }
 
 @keyframes ssRowIn {
-  from { opacity: 0; transform: translateX(-6px); }
+  from { opacity: 0; transform: translateX(-0.375rem); }
   to   { opacity: 1; transform: translateX(0); }
 }
 
 .ss-member-cell {
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 600;
   color: var(--text-white);
   white-space: nowrap;
@@ -155,21 +155,21 @@
   text-overflow: ellipsis;
 }
 
-.ss-member-cell--name     { width: 200px; flex-shrink: 0; }
-.ss-member-cell--role     { width: 120px; flex-shrink: 0; }
-.ss-member-cell--dept     { flex: 1; color: rgba(255,255,255,0.65); font-size: 18px; }
-.ss-member-cell--callsign { width: 100px; flex-shrink: 0; color: rgba(255,255,255,0.55); }
-.ss-member-cell--joined   { width: 130px; flex-shrink: 0; color: rgba(255,255,255,0.45); font-size: 16px; }
-.ss-member-cell--action   { width: 120px; flex-shrink: 0; display: flex; gap: 6px; justify-content: flex-end; }
+.ss-member-cell--name     { width: 12.5rem; flex-shrink: 0; }
+.ss-member-cell--role     { width: 7.5rem; flex-shrink: 0; }
+.ss-member-cell--dept     { flex: 1; color: rgba(255,255,255,0.65); font-size: 1.125rem; }
+.ss-member-cell--callsign { width: 6.25rem; flex-shrink: 0; color: rgba(255,255,255,0.55); }
+.ss-member-cell--joined   { width: 8.125rem; flex-shrink: 0; color: rgba(255,255,255,0.45); font-size: 1rem; }
+.ss-member-cell--action   { width: 7.5rem; flex-shrink: 0; display: flex; gap: 0.375rem; justify-content: flex-end; }
 
 /* Role badge */
 .ss-role-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 3px 10px;
-  border-radius: 8px;
-  font-size: 13px;
+  padding: 0.1875rem 0.625rem;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
   font-weight: 700;
 }
 
@@ -180,12 +180,12 @@
 
 /* Row action buttons */
 .ss-row-btn {
-  height: 30px;
-  padding: 0 10px;
-  border-radius: 8px;
+  height: 1.875rem;
+  padding: 0 0.625rem;
+  border-radius: 0.5rem;
   border: none;
   font-family: var(--font);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.15s;
@@ -194,14 +194,14 @@
 .ss-row-btn--role {
   background: rgba(41,84,195,0.3);
   color: #7eaaff;
-  border: 1px solid rgba(41,84,195,0.5);
+  border: 0.0625rem solid rgba(41,84,195,0.5);
 }
 .ss-row-btn--role:hover { background: rgba(41,84,195,0.55); }
 
 .ss-row-btn--kick {
   background: rgba(133,22,22,0.3);
   color: #ff7c7c;
-  border: 1px solid rgba(133,22,22,0.55);
+  border: 0.0625rem solid rgba(133,22,22,0.55);
 }
 .ss-row-btn--kick:hover { background: rgba(133,22,22,0.55); }
 
@@ -213,8 +213,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 120px;
-  font-size: 20px;
+  height: 7.5rem;
+  font-size: 1.25rem;
   color: rgba(255,255,255,0.2);
   font-weight: 600;
 }
@@ -222,19 +222,19 @@
 /* ── Right: Config panel ────────────────────────────────────── */
 .ss-config {
   position: absolute;
-  left: 960px;
-  top: 161px;
-  width: 882px;
-  /* no fixed height — content driven */
+  left: 60rem;
+  top: 10.0625rem;
+  width: 55.125rem;
+  /* no fixed height  content driven */
 }
 
 /* ── Logo upload area ───────────────────────────────────────── */
 .ss-logo-area {
   position: absolute;
-  left: 79px;               /* 1039-960 = 79 */
-  top: 22px;
-  width: 286px;
-  height: 228px;
+  left: 4.9375rem;               /* 1039-960 = 79 */
+  top: 1.375rem;
+  width: 17.875rem;
+  height: 14.25rem;
   background: #d9d9d9;
   border-radius: var(--radius-panel);
   overflow: hidden;
@@ -276,7 +276,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 0.375rem;
   pointer-events: none;
 }
 
@@ -285,20 +285,20 @@
 }
 
 .ss-logo-icon {
-  font-size: 48px;
+  font-size: 3rem;
   filter: grayscale(1);
   opacity: 0.4;
 }
 
 .ss-logo-hint {
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #000;
   opacity: 0.6;
 }
 
 .ss-logo-sub {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   color: #000;
   opacity: 0.4;
@@ -306,17 +306,17 @@
 
 .ss-logo-clear-btn {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 0.5rem;
+  right: 0.5rem;
   z-index: 4;
   background: rgba(0,0,0,0.6);
   border: none;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   color: #fff;
   font-family: var(--font);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
-  padding: 4px 10px;
+  padding: 0.25rem 0.625rem;
   cursor: pointer;
   display: none;
 }
@@ -329,31 +329,31 @@
   left: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0.375rem;
 }
 
 /* Stacking positions matching SVG coords (relative to ss-config top) */
 /* Server Name: y=527-89=438 → relative to ss-config top (161) = 527-161=366 */
 #field-section-name-wrap,
-.ss-field-section:nth-of-type(1) { top: 366px; }   /* y=527 relative */
-.ss-field-section:nth-of-type(2) { top: 463px; }   /* y=624 relative */
-.ss-field-section:nth-of-type(3) { top: 550px; }   /* y=711 relative */
-.ss-field-section:nth-of-type(4) { top: 735px; }   /* y=896 relative */
-.ss-field-section:nth-of-type(5) { top: 805px; }   /* y=966 relative */
+.ss-field-section:nth-of-type(1) { top: 22.875rem; }   /* y=527 relative */
+.ss-field-section:nth-of-type(2) { top: 28.9375rem; }   /* y=624 relative */
+.ss-field-section:nth-of-type(3) { top: 34.375rem; }   /* y=711 relative */
+.ss-field-section:nth-of-type(4) { top: 45.9375rem; }   /* y=896 relative */
+.ss-field-section:nth-of-type(5) { top: 50.3125rem; }   /* y=966 relative */
 
 /* Use a simpler vertical flow since absolute within ss-config */
 .ss-config {
   /* override to normal flow */
 }
 
-/* Simpler approach — make ss-config a normal flex column */
+/* Simpler approach  make ss-config a normal flex column */
 .ss-config {
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding-top: 270px;      /* space for logo area */
+  padding-top: 16.875rem;      /* space for logo area */
   padding-left: 0;
-  padding-right: 20px;
+  padding-right: 1.25rem;
 }
 
 /* Reset field section absolute */
@@ -361,49 +361,49 @@
   position: relative;
   left: auto;
   top: auto;
-  margin-bottom: 14px;
+  margin-bottom: 0.875rem;
 }
 
 .ss-field-label {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 700;
   color: rgba(255,255,255,0.5);
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  padding-left: 4px;
+  padding-left: 0.25rem;
 }
 
 /* Field boxes */
 .ss-field-box {
-  height: 67px;
+  height: 4.1875rem;
   background: var(--bg-panel-header);
   border-radius: var(--radius-btn);
   display: flex;
   align-items: center;
-  padding: 0 20px;
-  width: 468px;
+  padding: 0 1.25rem;
+  width: 29.25rem;
   transition: background 0.15s;
 }
 
 .ss-field-box:focus-within {
   background: #4a4a4a;
-  outline: 2px solid rgba(41,84,195,0.55);
+  outline: 0.125rem solid rgba(41,84,195,0.55);
 }
 
 .ss-field-box--sm {
-  height: 57px;
+  height: 3.5625rem;
 }
 
 .ss-field-box--row {
-  gap: 10px;
+  gap: 0.625rem;
 }
 
 .ss-field-box--confirm {
   width: 100%;
-  height: 57px;
+  height: 3.5625rem;
   background: #1a1a1a;
-  border: 1px solid rgba(133,22,22,0.5);
-  margin-bottom: 8px;
+  border: 0.0625rem solid rgba(133,22,22,0.5);
+  margin-bottom: 0.5rem;
 }
 
 .ss-field-input {
@@ -411,7 +411,7 @@
   border: none;
   color: var(--text-white);
   font-family: var(--font);
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 600;
   outline: none;
   flex: 1;
@@ -430,9 +430,9 @@
 
 .ss-textarea {
   resize: none;
-  height: 52px;
-  padding-top: 6px;
-  font-size: 18px;
+  height: 3.25rem;
+  padding-top: 0.375rem;
+  font-size: 1.125rem;
   line-height: 1.5;
   align-self: flex-start;
 }
@@ -440,12 +440,12 @@
 /* Inline buttons inside field box */
 .ss-inline-btn {
   flex-shrink: 0;
-  height: 38px;
-  padding: 0 14px;
-  border-radius: 10px;
+  height: 2.375rem;
+  padding: 0 0.875rem;
+  border-radius: 0.625rem;
   border: none;
   font-family: var(--font);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
   cursor: pointer;
   background: var(--bg-blue);
@@ -462,29 +462,29 @@
 
 /* ── Status messages ────────────────────────────────────────── */
 .ss-error-msg {
-  min-height: 20px;
-  font-size: 14px;
+  min-height: 1.25rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #ff6b6b;
 }
 
 .ss-success-msg {
-  min-height: 20px;
-  font-size: 14px;
+  min-height: 1.25rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--status-green);
 }
 
 /* ── Save button ────────────────────────────────────────────── */
 .ss-save-btn {
-  height: 52px;
+  height: 3.25rem;
   border-radius: var(--radius-btn);
   border: none;
   font-family: var(--font);
-  font-size: 22px;
+  font-size: 1.375rem;
   font-weight: 700;
   cursor: pointer;
-  padding: 0 28px;
+  padding: 0 1.75rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -492,7 +492,7 @@
   color: var(--text-white);
 }
 
-.ss-save-btn--blue       { background: var(--bg-blue); width: 200px; }
+.ss-save-btn--blue       { background: var(--bg-blue); width: 12.5rem; }
 .ss-save-btn--blue:hover { background: #3a6ae0; }
 .ss-save-btn--red        { background: #851616; }
 .ss-save-btn--red:hover  { background: #a01c1c; }
@@ -509,14 +509,14 @@
 .ss-danger-zone {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-top: 6px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  gap: 1rem;
+  margin-top: 0.375rem;
+  padding-top: 0.875rem;
+  border-top: 0.0625rem solid rgba(255,255,255,0.06);
 }
 
 .ss-danger-label {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 700;
   color: rgba(255,255,255,0.3);
   flex-shrink: 0;
@@ -524,56 +524,56 @@
 
 /* ── Modals ─────────────────────────────────────────────────── */
 .ss-modal-box {
-  left: 460px;
-  top: 360px;
-  width: 720px;
-  padding: 36px 40px 32px;
+  left: 28.75rem;
+  top: 22.5rem;
+  width: 45rem;
+  padding: 2.25rem 2.5rem 2rem;
 }
 
 .ss-modal-box--wide {
-  width: 840px;
-  left: 400px;
+  width: 52.5rem;
+  left: 25rem;
 }
 
 .ss-modal-title {
-  font-size: 32px;
+  font-size: 2rem;
   font-weight: 800;
   color: var(--text-white);
-  margin-bottom: 10px;
+  margin-bottom: 0.625rem;
 }
 
 .ss-modal-title--danger { color: #ff6b6b; }
 
 .ss-modal-desc {
-  font-size: 18px;
+  font-size: 1.125rem;
   color: rgba(255,255,255,0.5);
   line-height: 1.6;
-  margin-bottom: 22px;
+  margin-bottom: 1.375rem;
 }
 
 .ss-modal-actions {
   display: flex;
-  gap: 14px;
-  margin-top: 18px;
+  gap: 0.875rem;
+  margin-top: 1.125rem;
 }
 
 /* Role selection grid */
 .ss-role-grid {
   display: flex;
-  gap: 10px;
+  gap: 0.625rem;
   flex-wrap: wrap;
-  margin-bottom: 18px;
+  margin-bottom: 1.125rem;
 }
 
 .ss-role-btn {
-  height: 48px;
-  padding: 0 22px;
+  height: 3rem;
+  padding: 0 1.375rem;
   border-radius: var(--radius-btn);
-  border: 2px solid rgba(255,255,255,0.12);
+  border: 0.125rem solid rgba(255,255,255,0.12);
   background: transparent;
   color: rgba(255,255,255,0.55);
   font-family: var(--font);
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 700;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s, color 0.15s;

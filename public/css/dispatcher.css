@@ -1,5 +1,5 @@
 /* ============================================================
-   DISPATCHER CAD — dispatcher.css
+   DISPATCHER CAD  dispatcher.css
    Fixed 1920×1080 canvas, zoom-scaling pattern.
    All layout and visual rules for dispatcher-cad.html.
    ============================================================ */
@@ -9,12 +9,12 @@
   position: absolute;
   left: 0;
   top: 0;
-  width: 1920px;
-  height: 89px;
+  width: 120rem;
+  height: 5.5625rem;
   background: #222;
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 1.25rem;
   gap: 0;
   flex-shrink: 0;
 }
@@ -22,13 +22,13 @@
 /* Nav tab buttons */
 .d-btn {
   position: relative;
-  height: 47px;
+  height: 2.9375rem;
   border-radius: var(--radius-btn);
   border: none;
   background: var(--bg-panel-header);
   color: var(--text-white);
   font-family: var(--font);
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 500;
   cursor: pointer;
   display: flex;
@@ -36,49 +36,49 @@
   justify-content: center;
   transition: background 0.15s;
   white-space: nowrap;
-  padding: 0 16px;
-  margin-right: 8px;
+  padding: 0 1rem;
+  margin-right: 0.5rem;
   flex-shrink: 0;
 }
 
 .d-btn:hover         { background: #555; }
-.d-btn--active       { background: #555; outline: 2px solid var(--text-white); }
+.d-btn--active       { background: #555; outline: 0.125rem solid var(--text-white); }
 
 /* Clock-Out gets a fixed wider look */
-#btn-clockout { min-width: 183px; }
+#btn-clockout { min-width: 11.4375rem; }
 
 /* Individual nav button widths from design */
-#btn-home        { min-width: 111px; }
-#btn-map         { min-width: 79px; }
-#btn-cad         { min-width: 79px; }
-#btn-search      { min-width: 119px; }
-#btn-reports     { min-width: 133px; }
-#btn-callhistory { min-width: 196px; }
-#btn-notepad     { min-width: 150px; }
+#btn-home        { min-width: 6.9375rem; }
+#btn-map         { min-width: 4.9375rem; }
+#btn-cad         { min-width: 4.9375rem; }
+#btn-search      { min-width: 7.4375rem; }
+#btn-reports     { min-width: 8.3125rem; }
+#btn-callhistory { min-width: 12.25rem; }
+#btn-notepad     { min-width: 9.375rem; }
 
-/* Status button cluster — pushed to the right */
+/* Status button cluster  pushed to the right */
 .d-status-group {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 0.3125rem;
   margin-left: auto;
 }
 
 .d-status-btn {
-  width: 79px;
-  height: 47px;
+  width: 4.9375rem;
+  height: 8.125rem;
   border-radius: var(--radius-btn);
   border: none;
   color: var(--text-white);
   font-family: var(--font);
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 500;
   cursor: pointer;
   transition: filter 0.15s;
 }
 .d-status-btn:hover { filter: brightness(1.15); }
 .d-status-btn--active-glow {
-  outline: 3px solid #fff;
+  outline: 0.1875rem solid #fff;
   filter: brightness(1.2);
 }
 
@@ -93,7 +93,7 @@
 /* ── Section titles ──────────────────────────────────────────── */
 .d-section-title {
   position: absolute;
-  font-size: 32px;
+  font-size: 2rem;
   font-weight: 700;
   color: var(--text-white);
 }
@@ -101,20 +101,20 @@
 /* ── HOME panel ──────────────────────────────────────────────── */
 .d-welcome-text {
   position: absolute;
-  left: 41px;
-  top: 44px;
-  font-size: 32px;
+  left: 2.5625rem;
+  top: 2.75rem;
+  font-size: 2rem;
   font-weight: 500;
   color: var(--text-white);
-  width: 617px;
+  width: 38.5625rem;
   line-height: 1.6;
 }
 
 .d-welcome-list {
   position: absolute;
-  left: 89px;
-  top: 190px;
-  font-size: 32px;
+  left: 5.5625rem;
+  top: 11.875rem;
+  font-size: 2rem;
   font-weight: 500;
   color: var(--text-white);
   line-height: 1.8;
@@ -123,10 +123,10 @@
 /* ── MAP panel ───────────────────────────────────────────────── */
 .d-map-placeholder {
   position: absolute;
-  left: 388px;
+  left: 24.25rem;
   top: 0;
-  width: 1143px;
-  height: 991px;
+  width: 71.4375rem;
+  height: 61.9375rem;
   background: #1a1a2e;
   border-radius: 0;
   display: flex;
@@ -135,84 +135,84 @@
 }
 
 .d-map-inner { text-align: center; color: rgba(255,255,255,0.2); }
-.d-map-icon  { font-size: 80px; }
-.d-map-title { font-size: 28px; font-weight: 700; margin-top: 16px; color: rgba(255,255,255,0.2); }
-.d-map-subtitle { font-size: 18px; margin-top: 8px; color: rgba(255,255,255,0.2); }
+.d-map-icon  { font-size: 5rem; }
+.d-map-title { font-size: 1.75rem; font-weight: 700; margin-top: 1rem; color: rgba(255,255,255,0.2); }
+.d-map-subtitle { font-size: 1.125rem; margin-top: 0.5rem; color: rgba(255,255,255,0.2); }
 
 /* ── CAD panel ───────────────────────────────────────────────── */
-#cad-calls-title  { left: 86px; top: 22px; }
-#cad-bolos-title  { left: 86px; top: 222px; }
-#cad-units-title  { left: 86px; top: 455px; }
+#cad-calls-title  { left: 5.375rem; top: 1.375rem; }
+#cad-bolos-title  { left: 5.375rem; top: 13.875rem; }
+#cad-units-title  { left: 5.375rem; top: 28.4375rem; }
 
 /* Table headers */
 .d-calls-hdr {
   position: absolute;
-  left: 86px; top: 64px;
-  width: 1748px; height: 41px;
+  left: 5.375rem; top: 4rem;
+  width: 109.25rem; height: 2.5625rem;
 }
 .d-bolos-hdr {
   position: absolute;
-  left: 86px; top: 270px;
-  width: 1748px; height: 41px;
+  left: 5.375rem; top: 16.875rem;
+  width: 109.25rem; height: 2.5625rem;
 }
 .d-units-hdr {
   position: absolute;
-  left: 86px; top: 503px;
-  width: 1748px; height: 41px;
+  left: 5.375rem; top: 31.4375rem;
+  width: 109.25rem; height: 2.5625rem;
 }
 
 /* Table bodies */
 .d-calls-body {
   position: absolute;
-  left: 86px; top: 105px;
-  width: 1748px; min-height: 42px; max-height: 100px;
+  left: 5.375rem; top: 6.5625rem;
+  width: 109.25rem; min-height: 2.625rem; max-height: 6.25rem;
   overflow-y: auto;
 }
 .d-bolos-body {
   position: absolute;
-  left: 86px; top: 311px;
-  width: 1748px; min-height: 42px; max-height: 100px;
+  left: 5.375rem; top: 19.4375rem;
+  width: 109.25rem; min-height: 2.625rem; max-height: 6.25rem;
   overflow-y: auto;
 }
 .d-units-body {
   position: absolute;
-  left: 86px; top: 544px;
-  width: 1748px; min-height: 42px; max-height: 400px;
+  left: 5.375rem; top: 34rem;
+  width: 109.25rem; min-height: 2.625rem; max-height: 25rem;
   overflow-y: auto;
 }
 
 /* Create-call / Create-BOLO buttons */
 .d-cad-btn {
   position: absolute;
-  width: 192px;
-  height: 44px;
-  font-size: 28px;
+  width: 12rem;
+  height: 2.75rem;
+  font-size: 1.75rem;
 }
-#btn-create-call { left: 86px; top: 162px; }
-#btn-create-bolo { left: 86px; top: 368px; width: 214px; }
+#btn-create-call { left: 5.375rem; top: 10.125rem; }
+#btn-create-bolo { left: 5.375rem; top: 23rem; width: 13.375rem; }
 
-/* Column positions — calls / units / history shared */
-.d-col-callnum   { left: 17px; }
-.d-col-nature    { left: 131px; }
-.d-col-location  { left: 503px; }
-.d-col-priority  { left: 905px; }
-.d-col-unit      { left: 1236px; }
+/* Column positions  calls / units / history shared */
+.d-col-callnum   { left: 1.0625rem; }
+.d-col-nature    { left: 8.1875rem; }
+.d-col-location  { left: 31.4375rem; }
+.d-col-priority  { left: 56.5625rem; }
+.d-col-unit      { left: 77.25rem; }
 
 /* BOLOs columns */
-.d-col-bolo-type   { left: 25px; }
-.d-col-bolo-reason { left: 272px; }
-.d-col-bolo-desc   { left: 877px; }
+.d-col-bolo-type   { left: 1.5625rem; }
+.d-col-bolo-reason { left: 17rem; }
+.d-col-bolo-desc   { left: 54.8125rem; }
 
 /* Units columns */
-.d-col-callsign   { left: 2px; }
-.d-col-dept-type  { left: 151px; }
-.d-col-dept-name  { left: 457px; }
-.d-col-unit-loc   { left: 824px; }
-.d-col-unit-status { left: 1657px; }
+.d-col-callsign   { left: 0.125rem; }
+.d-col-dept-type  { left: 9.4375rem; }
+.d-col-dept-name  { left: 28.5625rem; }
+.d-col-unit-loc   { left: 51.5rem; }
+.d-col-unit-status { left: 103.5625rem; }
 
 /* ── Inline table row content ────────────────────────────────── */
 .d-row-cell {
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--text-white);
   flex-shrink: 0;
@@ -226,10 +226,10 @@
   background: var(--status-red);
   border: none;
   color: var(--text-white);
-  border-radius: 8px;
-  padding: 3px 10px;
+  border-radius: 0.5rem;
+  padding: 0.1875rem 0.625rem;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 700;
   margin-left: auto;
   flex-shrink: 0;
@@ -240,10 +240,10 @@
   background: var(--status-red);
   border: none;
   color: var(--text-white);
-  border-radius: 8px;
-  padding: 3px 10px;
+  border-radius: 0.5rem;
+  padding: 0.1875rem 0.625rem;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -252,27 +252,27 @@
 /* ── SEARCH panel ────────────────────────────────────────────── */
 .d-search-block {
   position: absolute;
-  top: 89px;
+  top: 5.5625rem;
 }
-#d-ped-block  { left: 71px; }
-#d-car-block  { left: 731px; }
-#d-gun-block  { left: 1391px; }
+#d-ped-block  { left: 4.4375rem; }
+#d-car-block  { left: 45.6875rem; }
+#d-gun-block  { left: 86.9375rem; }
 
 .d-search-label {
-  font-size: 48px;
+  font-size: 3rem;
   font-weight: 700;
   color: var(--text-white);
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
 }
 
 .d-search-input-box {
-  width: 458px;
-  height: 66px;
+  width: 28.625rem;
+  height: 4.125rem;
   background: #222;
-  border-radius: 15px;
+  border-radius: 0.9375rem;
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 1.25rem;
 }
 
 .d-search-input-box input {
@@ -280,7 +280,7 @@
   border: none;
   color: var(--text-white);
   font-family: var(--font);
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 700;
   outline: none;
   width: 100%;
@@ -290,94 +290,94 @@
 /* Search results tables */
 .d-ped-hdr {
   position: absolute;
-  left: 14px; top: 333px;
-  width: 644px; height: 41px;
+  left: 0.875rem; top: 20.8125rem;
+  width: 40.25rem; height: 2.5625rem;
 }
 .d-ped-body {
   position: absolute;
-  left: 14px; top: 374px;
-  width: 644px; min-height: 42px; max-height: 200px;
+  left: 0.875rem; top: 23.375rem;
+  width: 40.25rem; min-height: 2.625rem; max-height: 12.5rem;
   overflow-y: auto;
 }
 
 .d-car-hdr {
   position: absolute;
-  left: 673px; top: 333px;
-  width: 811px; height: 41px;
+  left: 42.0625rem; top: 20.8125rem;
+  width: 50.6875rem; height: 2.5625rem;
 }
 .d-car-body {
   position: absolute;
-  left: 673px; top: 374px;
-  width: 811px; min-height: 42px; max-height: 200px;
+  left: 42.0625rem; top: 23.375rem;
+  width: 50.6875rem; min-height: 2.625rem; max-height: 12.5rem;
   overflow-y: auto;
 }
 
 .d-gun-hdr {
   position: absolute;
-  left: 1501px; top: 333px;
-  width: 405px; height: 41px;
+  left: 93.8125rem; top: 20.8125rem;
+  width: 25.3125rem; height: 2.5625rem;
 }
 .d-gun-body {
   position: absolute;
-  left: 1501px; top: 374px;
-  width: 405px; min-height: 42px; max-height: 200px;
+  left: 93.8125rem; top: 23.375rem;
+  width: 25.3125rem; min-height: 2.625rem; max-height: 12.5rem;
   overflow-y: auto;
 }
 
 /* Search column positions */
-.d-col-ped-fn    { left: 23px; }
-.d-col-ped-ln    { left: 344px; }
-.d-col-car-owner { left: 19px; }
-.d-col-car-plate { left: 322px; }
-.d-col-car-model { left: 489px; }
-.d-col-car-color { left: 729px; }
-.d-col-gun-owner  { left: 19px; }
-.d-col-gun-serial { left: 209px; }
+.d-col-ped-fn    { left: 1.4375rem; }
+.d-col-ped-ln    { left: 21.5rem; }
+.d-col-car-owner { left: 1.1875rem; }
+.d-col-car-plate { left: 20.125rem; }
+.d-col-car-model { left: 30.5625rem; }
+.d-col-car-color { left: 45.5625rem; }
+.d-col-gun-owner  { left: 1.1875rem; }
+.d-col-gun-serial { left: 13.0625rem; }
 
 /* ── REPORTS panel ───────────────────────────────────────────── */
-#reports-title { left: 86px; top: 40px; }
+#reports-title { left: 5.375rem; top: 2.5rem; }
 
 .d-reports-placeholder {
   position: absolute;
-  left: 86px;
-  top: 100px;
-  width: 1748px;
-  height: 820px;
+  left: 5.375rem;
+  top: 6.25rem;
+  width: 109.25rem;
+  height: 51.25rem;
   background: #222;
-  border-radius: 15px;
+  border-radius: 0.9375rem;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .d-reports-empty {
-  font-size: 24px;
+  font-size: 1.5rem;
   color: rgba(255,255,255,0.3);
 }
 
 /* ── CALL HISTORY panel ──────────────────────────────────────── */
-#history-title { left: 102px; top: 37px; }
+#history-title { left: 6.375rem; top: 2.3125rem; }
 
 .d-history-hdr {
   position: absolute;
-  left: 86px; top: 90px;
-  width: 1748px; height: 41px;
+  left: 5.375rem; top: 5.625rem;
+  width: 109.25rem; height: 2.5625rem;
 }
 .d-history-body {
   position: absolute;
-  left: 86px; top: 131px;
-  width: 1748px; min-height: 42px; max-height: 820px;
-  border-radius: 0 0 15px 15px;
+  left: 5.375rem; top: 8.1875rem;
+  width: 109.25rem; min-height: 2.625rem; max-height: 51.25rem;
+  border-radius: 0 0 0.9375rem 0.9375rem;
   overflow-y: auto;
 }
 
 /* History search box inside the header */
 .d-hist-search-wrap {
   position: absolute;
-  right: 0; top: 5px;
-  width: 213px; height: 30px;
+  right: 0; top: 0.3125rem;
+  width: 13.3125rem; height: 1.875rem;
   background: #111;
-  border-radius: 10px;
+  border-radius: 0.625rem;
   display: flex;
   align-items: center;
 }
@@ -386,91 +386,91 @@
   border: none;
   color: var(--text-white);
   font-family: var(--font);
-  font-size: 15px;
+  font-size: 0.9375rem;
   outline: none;
-  padding: 0 12px;
+  padding: 0 0.75rem;
   width: 100%;
 }
 .d-hist-search-input::placeholder { color: rgba(255,255,255,0.4); }
 
 /* ── NOTEPAD panel ───────────────────────────────────────────── */
-#notepad-title { left: 86px; top: 16px; }
+#notepad-title { left: 5.375rem; top: 1rem; }
 
 .d-notepad {
   position: absolute;
-  left: 86px;
-  top: 130px;
-  width: 1748px;
-  height: 870px;
+  left: 5.375rem;
+  top: 8.125rem;
+  width: 109.25rem;
+  height: 54.375rem;
   background: #222;
   border: none;
-  border-radius: 15px;
+  border-radius: 0.9375rem;
   color: var(--text-white);
   font-family: var(--font);
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 500;
-  padding: 20px;
+  padding: 1.25rem;
   outline: none;
   resize: none;
 }
 
 /* ── MODALS ──────────────────────────────────────────────────── */
 .d-modal-box {
-  left: 86px;
-  top: 568px;
-  width: 1748px;
-  height: 492px;
-  padding: 15px;
+  left: 5.375rem;
+  top: 35.5rem;
+  width: 109.25rem;
+  height: 30.75rem;
+  padding: 0.9375rem;
 }
 
 .d-modal-fields-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 /* Individual field widths */
-.d-fld-callid    { width: 129px; height: 57px; flex-shrink: 0; }
-.d-fld-nature    { width: 185px; height: 57px; flex-shrink: 0; }
-.d-fld-title     { width: 349px; height: 57px; flex-shrink: 0; }
-.d-fld-location  { width: 623px; height: 57px; flex-shrink: 0; }
-.d-fld-priority  { width: 185px; height: 57px; flex-shrink: 0; }
-.d-fld-status    { width: 185px; height: 57px; flex-shrink: 0; }
-.d-fld-desc      { width: 100%;  height: 332px; }
-.d-fld-bolo-type { width: 349px; height: 57px; flex-shrink: 0; }
-.d-fld-bolo-loc  { width: 1349px; height: 57px; flex-shrink: 0; }
+.d-fld-callid    { width: 8.0625rem; height: 3.5625rem; flex-shrink: 0; }
+.d-fld-nature    { width: 11.5625rem; height: 3.5625rem; flex-shrink: 0; }
+.d-fld-title     { width: 21.8125rem; height: 3.5625rem; flex-shrink: 0; }
+.d-fld-location  { width: 38.9375rem; height: 3.5625rem; flex-shrink: 0; }
+.d-fld-priority  { width: 11.5625rem; height: 3.5625rem; flex-shrink: 0; }
+.d-fld-status    { width: 11.5625rem; height: 3.5625rem; flex-shrink: 0; }
+.d-fld-desc      { width: 100%;  height: 20.75rem; }
+.d-fld-bolo-type { width: 21.8125rem; height: 3.5625rem; flex-shrink: 0; }
+.d-fld-bolo-loc  { width: 84.3125rem; height: 3.5625rem; flex-shrink: 0; }
 
 /* Textarea inside description field */
 .d-modal-textarea {
   width: 100%;
-  height: 290px;
+  height: 18.125rem;
   background: transparent;
   border: none;
   color: var(--text-white);
   font-family: var(--font);
-  font-size: 17px;
+  font-size: 1.0625rem;
   font-weight: 700;
   outline: none;
   resize: none;
-  margin-top: 2px;
+  margin-top: 0.125rem;
 }
 
 /* Call-ID display span */
 .d-callid-display {
   color: var(--text-white);
-  font-size: 17px;
+  font-size: 1.0625rem;
   font-weight: 700;
 }
 
 /* Modal submit button */
 .d-modal-submit {
   position: absolute;
-  left: 808px;
-  bottom: 12px;
-  width: 132px;
-  height: 44px;
-  font-size: 28px;
+  left: 50.5rem;
+  bottom: 0.75rem;
+  width: 8.25rem;
+  height: 2.75rem;
+  font-size: 1.75rem;
 }
 
 /* ── Priority colour helper ──────────────────────────────────── */
@@ -481,10 +481,10 @@
 
 /* ── Empty-state ─────────────────────────────────────────────── */
 .d-empty {
-  height: 42px;
+  height: 2.625rem;
   display: flex;
   align-items: center;
-  padding: 0 17px;
-  font-size: 16px;
+  padding: 0 1.0625rem;
+  font-size: 1rem;
   color: rgba(255,255,255,0.25);
 }

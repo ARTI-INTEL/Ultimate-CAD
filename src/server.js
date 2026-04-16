@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
+import authRoutes       from './routes/auth.routes.js';
 import userRoutes       from './routes/users.routes.js';
 import serverRoutes     from './routes/servers.routes.js';
 import officerRoutes    from './routes/officers.routes.js';
@@ -23,6 +24,7 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // Routes
+app.use('/auth',       authRoutes);
 app.use('/users',      userRoutes);
 app.use('/servers',    serverRoutes);
 app.use('/officers',   officerRoutes);

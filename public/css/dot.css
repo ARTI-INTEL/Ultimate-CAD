@@ -1,5 +1,5 @@
 /* ============================================================
-   DOT CAD — dot-cad.css
+   DOT CAD  dot-cad.css
    All layout and visual rules specific to dot-cad.html.
    Relies on shared design tokens and components in styles.css.
    ============================================================ */
@@ -7,67 +7,67 @@
 .dot-navbar {
   position: absolute;
   left: 0; top: 0;
-  width: 1920px; height: 89px;
+  width: 120rem; height: 5.5625rem;
   background: #eec007;
   display: flex;
   align-items: center;
-  padding: 0 20px;
-  gap: 8px;
+  padding: 0 1.25rem;
+  gap: 0.5rem;
   flex-shrink: 0;
 }
 
 /* ── Navbar button positions ──────────────────────────────── */
-#dot-nav-clockout    { left: 20px;   width: 183px; }
-#dot-nav-home        { left: 217px;  width: 111px; }
-#dot-nav-map         { left: 340px;  width: 79px;  }
-#dot-nav-cad         { left: 433px;  width: 79px;  }
-#dot-nav-search      { left: 525px;  width: 119px; }
-#dot-nav-reports     { left: 658px;  width: 133px; }
-#dot-nav-callhistory { left: 804px;  width: 196px; }
-#dot-nav-notepad     { left: 1013px; width: 150px; }
+#dot-nav-clockout    { left: 1.25rem;   width: 11.4375rem; }
+#dot-nav-home        { left: 13.5625rem;  width: 6.9375rem; }
+#dot-nav-map         { left: 21.25rem;  width: 4.9375rem;  }
+#dot-nav-cad         { left: 27.0625rem;  width: 4.9375rem;  }
+#dot-nav-search      { left: 32.8125rem;  width: 7.4375rem; }
+#dot-nav-reports     { left: 41.125rem;  width: 8.3125rem; }
+#dot-nav-callhistory { left: 50.25rem;  width: 12.25rem; }
+#dot-nav-notepad     { left: 63.3125rem; width: 9.375rem; }
 
 /* ── Status buttons ───────────────────────────────────────── */
 .dot-status-btn {
   position: absolute;
-  top: 21px;
-  width: 79px;
-  height: 47px;
+  top: 1.3125rem;
+  width: 4.9375rem;
+  height: 2.9375rem;
   border-radius: var(--radius-btn);
   border: none;
   color: var(--text-white);
   font-family: var(--font);
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 500;
   cursor: pointer;
   transition: opacity 0.15s;
 }
 .dot-status-btn:hover { opacity: 0.85; }
 
-#dot-status-available { left: 1431px; background: var(--status-green);  }
-#dot-status-offduty   { left: 1523px; background: var(--status-red);    }
-#dot-status-onscene   { left: 1615px; background: var(--status-blue);   }
-#dot-status-arrived   { left: 1707px; background: var(--status-green);  }
-#dot-status-busy      { left: 1799px; background: var(--status-yellow); }
+#dot-status-available { left: 89.4375rem; background: var(--status-green);  }
+#dot-status-offduty   { left: 95.1875rem; background: var(--status-red);    }
+#dot-status-onscene   { left: 100.9375rem; background: var(--status-blue);   }
+#dot-status-arrived   { left: 106.6875rem; background: var(--status-green);  }
+#dot-status-busy      { left: 112.4375rem; background: var(--status-yellow); }
 
 /* ── Panel: HOME ──────────────────────────────────────────── */
 .dot-welcome-text {
   position: absolute;
-  left: 41px;
-  top: 44px;
-  font-size: 32px;
+  left: 2.5625rem;
+  top: 2.75rem;
+  font-size: 2rem;
   font-weight: 500;
   color: var(--text-white);
-  width: 617px;
+  width: 38.5625rem;
   line-height: 1.6;
 }
 
 /* ── Panel: MAP ───────────────────────────────────────────── */
 .dot-map-placeholder {
   position: absolute;
-  left: 388px;
+  left: 24.25rem;
   top: 0;
-  width: 1143px;
-  height: 991px;
+  width: 71.4375rem;
+  height: 61.9375rem;
   background: #1a1a1a;
   display: flex;
   align-items: center;
@@ -75,63 +75,63 @@
 }
 
 .dot-map-inner   { text-align: center; color: rgba(255, 255, 255, 0.2); }
-.dot-map-icon    { font-size: 80px; }
-.dot-map-title   { font-size: 28px; font-weight: 700; margin-top: 16px; }
-.dot-map-subtitle { font-size: 18px; margin-top: 8px; }
+.dot-map-icon    { font-size: 5rem; }
+.dot-map-title   { font-size: 1.75rem; font-weight: 700; margin-top: 1rem; }
+.dot-map-subtitle { font-size: 1.125rem; margin-top: 0.5rem; }
 
-/* ── Panel: CAD — shared column positions ─────────────────── */
+/* ── Panel: CAD  shared column positions ─────────────────── */
 /* Reused in Call History header */
-.dot-col-callnum  { left: 17px;   }
-.dot-col-nature   { left: 131px;  }
-.dot-col-location { left: 503px;  }
-.dot-col-priority { left: 905px;  }
-.dot-col-unit     { left: 1236px; }
+.dot-col-callnum  { left: 1.0625rem;   }
+.dot-col-nature   { left: 8.1875rem;  }
+.dot-col-location { left: 31.4375rem;  }
+.dot-col-priority { left: 56.5625rem;  }
+.dot-col-unit     { left: 77.25rem; }
 
 .dot-calls-title {
   position: absolute;
-  left: 86px;
-  top: 22px;
+  left: 5.375rem;
+  top: 1.375rem;
 }
 
 .dot-calls-hdr {
-  left: 86px;
-  top: 64px;
-  width: 1748px;
-  height: 41px;
+  left: 5.375rem;
+  top: 4rem;
+  width: 109.25rem;
+  height: 2.5625rem;
 }
 
 #dot-calls-list {
-  left: 86px;
-  top: 105px;
-  width: 1748px;
-  min-height: 42px;
-  max-height: 130px;
+  left: 5.375rem;
+  top: 6.5625rem;
+  width: 109.25rem;
+  min-height: 2.625rem;
+  max-height: 8.125rem;
   overflow-y: auto;
 }
 
 #dot-btn-create-call {
-  left: 86px;
-  top: 162px;
-  width: 192px;
-  height: 44px;
+  left: 5.375rem;
+  top: 10.125rem;
+  width: 12rem;
+  height: 2.75rem;
 }
 
 /* ── Call row cells ───────────────────────────────────────── */
-.dot-cell          { font-size: 20px; font-weight: 700; color: var(--text-white); }
-.dot-cell-callnum  { width: 80px;  }
+.dot-cell          { font-size: 1.25rem; font-weight: 700; color: var(--text-white); }
+.dot-cell-callnum  { width: 5rem;  }
 .dot-cell-nature   { flex: 1;      }
-.dot-cell-loc      { width: 300px; }
-.dot-cell-pri      { width: 120px; }
-.dot-cell-unit     { width: 100px; }
+.dot-cell-loc      { width: 18.75rem; }
+.dot-cell-pri      { width: 7.5rem; }
+.dot-cell-unit     { width: 6.25rem; }
 
 .dot-close-call-btn {
   background: var(--status-red);
   border: none;
   color: var(--text-white);
-  border-radius: 8px;
-  padding: 3px 10px;
+  border-radius: 0.5rem;
+  padding: 0.1875rem 0.625rem;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 700;
   margin-left: auto;
   flex-shrink: 0;
@@ -140,21 +140,21 @@
 
 /* ── Panel: SEARCH ────────────────────────────────────────── */
 .dot-search-section     { position: absolute; }
-.dot-search-ped-section { left: 71px;  top: 89px; }
-.dot-search-car-section { left: 731px; top: 89px; }
+.dot-search-ped-section { left: 4.4375rem;  top: 5.5625rem; }
+.dot-search-car-section { left: 45.6875rem; top: 5.5625rem; }
 
 .dot-search-label {
-  font-size: 48px;
+  font-size: 3rem;
   font-weight: 700;
   color: var(--text-white);
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
 }
 
 .dot-search-input-wrap {
-  width: 458px;
-  height: 66px;
+  width: 28.625rem;
+  height: 4.125rem;
   background: var(--bg-panel);
-  border-radius: 15px;
+  border-radius: 0.9375rem;
   display: flex;
   align-items: center;
 }
@@ -164,84 +164,84 @@
   border: none;
   color: var(--text-white);
   font-family: var(--font);
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 700;
   outline: none;
-  padding: 0 20px;
+  padding: 0 1.25rem;
   width: 100%;
 }
 .dot-search-input::placeholder { color: rgba(255, 255, 255, 0.4); }
 
 /* PED results table */
 .dot-ped-results-hdr {
-  left: 14px;
-  top: 333px;
-  width: 644px;
-  height: 41px;
+  left: 0.875rem;
+  top: 20.8125rem;
+  width: 40.25rem;
+  height: 2.5625rem;
 }
-.dot-ped-col-fn { left: 23px;  }
-.dot-ped-col-ln { left: 344px; }
+.dot-ped-col-fn { left: 1.4375rem;  }
+.dot-ped-col-ln { left: 21.5rem; }
 
 #dot-ped-results {
-  left: 14px;
-  top: 374px;
-  width: 644px;
-  min-height: 42px;
-  max-height: 200px;
+  left: 0.875rem;
+  top: 23.375rem;
+  width: 40.25rem;
+  min-height: 2.625rem;
+  max-height: 12.5rem;
   overflow-y: auto;
 }
 
 /* Car results table */
 .dot-car-results-hdr {
-  left: 673px;
-  top: 333px;
-  width: 811px;
-  height: 41px;
+  left: 42.0625rem;
+  top: 20.8125rem;
+  width: 50.6875rem;
+  height: 2.5625rem;
 }
-.dot-car-col-owner   { left: 19px;  }
-.dot-car-col-plate   { left: 322px; }
-.dot-car-col-vehicle { left: 489px; }
-.dot-car-col-color   { left: 729px; }
+.dot-car-col-owner   { left: 1.1875rem;  }
+.dot-car-col-plate   { left: 20.125rem; }
+.dot-car-col-vehicle { left: 30.5625rem; }
+.dot-car-col-color   { left: 45.5625rem; }
 
 #dot-car-results {
-  left: 673px;
-  top: 374px;
-  width: 811px;
-  min-height: 42px;
-  max-height: 200px;
+  left: 42.0625rem;
+  top: 23.375rem;
+  width: 50.6875rem;
+  min-height: 2.625rem;
+  max-height: 12.5rem;
   overflow-y: auto;
 }
 
 /* PED Detail modal box */
 .dot-ped-detail-box {
-  left: 86px;
-  top: 540px;
-  width: 1748px;
-  height: 357px;
-  padding: 16px;
+  left: 5.375rem;
+  top: 33.75rem;
+  width: 109.25rem;
+  height: 22.3125rem;
+  padding: 1rem;
 }
 
 .dot-ped-detail-fields {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .dot-detail-field {
   background: #333;
-  border-radius: 10px;
-  padding: 8px 14px;
-  min-width: 160px;
+  border-radius: 0.625rem;
+  padding: 0.5rem 0.875rem;
+  min-width: 10rem;
 }
 
 .dot-detail-label {
-  font-size: 11px;
+  font-size: 0.6875rem;
   color: rgba(255, 255, 255, 0.55);
   font-weight: 700;
 }
 
 .dot-detail-value {
-  font-size: 17px;
+  font-size: 1.0625rem;
   color: var(--text-white);
   font-weight: 700;
 }
@@ -249,60 +249,60 @@
 /* ── Panel: REPORTS ───────────────────────────────────────── */
 .dot-report-tabs {
   position: absolute;
-  left: 20px;
-  top: 20px;
+  left: 1.25rem;
+  top: 1.25rem;
   display: flex;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
 .dot-report-area {
   position: absolute;
-  left: 86px;
-  top: 84px;
-  width: 1748px;
-  height: 880px;
+  left: 5.375rem;
+  top: 5.25rem;
+  width: 109.25rem;
+  height: 55rem;
   background: var(--bg-panel);
-  border-radius: 15px;
+  border-radius: 0.9375rem;
   overflow-y: auto;
-  padding: 20px;
+  padding: 1.25rem;
 }
 
 /* Report form inner helpers */
 .dot-report-section-title {
   display: block;
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.6);
-  margin-bottom: 10px;
+  margin-bottom: 0.625rem;
 }
 
 .dot-report-section-title + .dot-report-section-title,
 .dot-report-section-title.mt {
-  margin-top: 14px;
+  margin-top: 0.875rem;
 }
 
 /* ── Panel: CALL HISTORY ──────────────────────────────────── */
 .dot-history-title {
   position: absolute;
-  left: 102px;
-  top: 37px;
+  left: 6.375rem;
+  top: 2.3125rem;
 }
 
 .dot-history-hdr {
-  left: 86px;
-  top: 90px;
-  width: 1748px;
-  height: 41px;
+  left: 5.375rem;
+  top: 5.625rem;
+  width: 109.25rem;
+  height: 2.5625rem;
 }
 
 .dot-history-search-wrap {
   position: absolute;
   right: 0;
-  top: 5px;
-  width: 213px;
-  height: 30px;
+  top: 0.3125rem;
+  width: 13.3125rem;
+  height: 1.875rem;
   background: #111;
-  border-radius: 10px;
+  border-radius: 0.625rem;
   display: flex;
   align-items: center;
 }
@@ -312,79 +312,79 @@
   border: none;
   color: var(--text-white);
   font-family: var(--font);
-  font-size: 15px;
+  font-size: 0.9375rem;
   outline: none;
-  padding: 0 12px;
+  padding: 0 0.75rem;
   width: 100%;
 }
 .dot-history-search-input::placeholder { color: rgba(255, 255, 255, 0.35); }
 
 #dot-history-list {
-  left: 86px;
-  top: 131px;
-  width: 1748px;
-  min-height: 42px;
-  max-height: 820px;
+  left: 5.375rem;
+  top: 8.1875rem;
+  width: 109.25rem;
+  min-height: 2.625rem;
+  max-height: 51.25rem;
   overflow-y: auto;
-  border-radius: 0 0 15px 15px;
+  border-radius: 0 0 0.9375rem 0.9375rem;
 }
 
-.dot-hist-cell          { font-size: 20px; font-weight: 700; color: var(--text-white); }
-.dot-hist-cell-callnum  { width: 80px;  }
+.dot-hist-cell          { font-size: 1.25rem; font-weight: 700; color: var(--text-white); }
+.dot-hist-cell-callnum  { width: 5rem;  }
 .dot-hist-cell-nature   { flex: 1;      }
-.dot-hist-cell-location { width: 300px; }
-.dot-hist-cell-priority { width: 120px; }
+.dot-hist-cell-location { width: 18.75rem; }
+.dot-hist-cell-priority { width: 7.5rem; }
 
 /* ── Panel: NOTEPAD ───────────────────────────────────────── */
 .dot-notepad-title {
   position: absolute;
-  left: 86px;
-  top: 16px;
+  left: 5.375rem;
+  top: 1rem;
 }
 
 /* ── Modal: CREATE CALL ───────────────────────────────────── */
 .dot-call-modal-box {
-  left: 86px;
-  top: 568px;
-  width: 1748px;
-  height: 492px;
-  padding: 15px;
+  left: 5.375rem;
+  top: 35.5rem;
+  width: 109.25rem;
+  height: 30.75rem;
+  padding: 0.9375rem;
 }
 
 .dot-call-modal-fields {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 /* Individual field widths */
-.dot-fld-callid   { width: 129px; height: 57px; }
-.dot-fld-nature   { width: 185px; height: 57px; }
-.dot-fld-title    { width: 349px; height: 57px; }
-.dot-fld-location { width: 623px; height: 57px; }
-.dot-fld-select   { width: 185px; height: 57px; }
+.dot-fld-callid   { width: 8.0625rem; height: 3.5625rem; }
+.dot-fld-nature   { width: 11.5625rem; height: 3.5625rem; }
+.dot-fld-title    { width: 21.8125rem; height: 3.5625rem; }
+.dot-fld-location { width: 38.9375rem; height: 3.5625rem; }
+.dot-fld-select   { width: 11.5625rem; height: 3.5625rem; }
 
-.dot-fld-desc         { width: 100%; height: 332px; }
-.dot-fld-desc textarea { height: 290px; }
+.dot-fld-desc         { width: 100%; height: 20.75rem; }
+.dot-fld-desc textarea { height: 18.125rem; }
 
 .dot-callid-display {
   color: var(--text-white);
-  font-size: 17px;
+  font-size: 1.0625rem;
   font-weight: 700;
 }
 
-/* Option background — prevents white flash */
+/* Option background  prevents white flash */
 .fld select option { background: var(--bg-panel); }
 
 .dot-call-modal-create-btn {
   position: absolute;
-  left: 808px;
-  bottom: 12px;
-  width: 132px;
-  height: 44px;
-  font-size: 28px;
+  left: 50.5rem;
+  bottom: 0.75rem;
+  width: 8.25rem;
+  height: 2.75rem;
+  font-size: 1.75rem;
 }
 
 /* ── History body border-radius ───────────────────────────── */
-.dot-history-body { border-radius: 0 0 15px 15px; }
+.dot-history-body { border-radius: 0 0 0.9375rem 0.9375rem; }

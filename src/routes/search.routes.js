@@ -4,7 +4,7 @@ import { verifyUser, verifyMember } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
-// GET /search/:serverId?q= — search characters, vehicles, firearms
+// GET /search/:serverId?q=  search characters, vehicles, firearms
 router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
   const { q } = req.query;
   const { serverId } = req.params;

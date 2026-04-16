@@ -4,7 +4,7 @@ import { verifyUser, verifyMember, verifyOfficer } from '../middleware/auth.midd
 
 const router = Router();
 
-// GET /calls/:serverId — all active calls (any member can view)
+// GET /calls/:serverId  all active calls (any member can view)
 router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -23,7 +23,7 @@ router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
   }
 });
 
-// GET /calls/:serverId/history — closed calls (any member can view)
+// GET /calls/:serverId/history  closed calls (any member can view)
 router.get('/:serverId/history', verifyUser, verifyMember, async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -37,7 +37,7 @@ router.get('/:serverId/history', verifyUser, verifyMember, async (req, res) => {
   }
 });
 
-// POST /calls — create a call (must be clocked in)
+// POST /calls  create a call (must be clocked in)
 router.post('/', verifyUser, verifyOfficer, async (req, res) => {
   const { serverId, nature, location, priority } = req.body;
   if (!serverId || !nature || !location)
@@ -56,7 +56,7 @@ router.post('/', verifyUser, verifyOfficer, async (req, res) => {
   }
 });
 
-// PATCH /calls/:callId — update a call (must be clocked in)
+// PATCH /calls/:callId  update a call (must be clocked in)
 router.patch('/:callId', verifyUser, verifyOfficer, async (req, res) => {
   const { nature, location, priority, serverId } = req.body;
   try {
@@ -71,7 +71,7 @@ router.patch('/:callId', verifyUser, verifyOfficer, async (req, res) => {
   }
 });
 
-// PATCH /calls/:callId/close — CODE 4 (must be clocked in)
+// PATCH /calls/:callId/close  CODE 4 (must be clocked in)
 router.patch('/:callId/close', verifyUser, verifyOfficer, async (req, res) => {
   try {
     await pool.query(

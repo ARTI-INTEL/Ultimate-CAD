@@ -4,7 +4,7 @@ import { verifyUser, verifyMember } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
-// GET /firearms/:serverId — all firearms (any member)
+// GET /firearms/:serverId  all firearms (any member)
 router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -22,7 +22,7 @@ router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
   }
 });
 
-// GET /firearms/:serverId/mine — firearms belonging to my characters
+// GET /firearms/:serverId/mine  firearms belonging to my characters
 router.get('/:serverId/mine', verifyUser, verifyMember, async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -57,7 +57,7 @@ router.get('/:serverId/character/:charId', verifyUser, verifyMember, async (req,
   }
 });
 
-// POST /firearms — register firearm
+// POST /firearms  register firearm
 router.post('/', verifyUser, async (req, res) => {
   const { serverId, ownerId, serial, name, type } = req.body;
 

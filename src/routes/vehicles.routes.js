@@ -4,7 +4,7 @@ import { verifyUser, verifyMember } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
-// GET /vehicles/:serverId — all vehicles (any member)
+// GET /vehicles/:serverId  all vehicles (any member)
 router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -22,7 +22,7 @@ router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
   }
 });
 
-// GET /vehicles/:serverId/mine — vehicles belonging to my characters
+// GET /vehicles/:serverId/mine  vehicles belonging to my characters
 router.get('/:serverId/mine', verifyUser, verifyMember, async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -57,7 +57,7 @@ router.get('/:serverId/character/:charId', verifyUser, verifyMember, async (req,
   }
 });
 
-// POST /vehicles — create vehicle
+// POST /vehicles  create vehicle
 router.post('/', verifyUser, async (req, res) => {
   const {
     serverId, ownerId, plate, vin, model, color,

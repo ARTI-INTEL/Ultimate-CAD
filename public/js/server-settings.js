@@ -1,5 +1,5 @@
 /**
- * server-settings.js — Ultimate CAD Server Settings Page
+ * server-settings.js  Ultimate CAD Server Settings Page
  *
  * Responsibilities:
  *  - Populate navbar with server name + username
@@ -99,7 +99,7 @@
   let currentServerName = serverName;
 
   /* ── Navbar ──────────────────────────────────────────────── */
-  navTitle.textContent = 'Welcome to Ultimate CAD, ' + serverName + ' — Settings';
+  navTitle.textContent = 'Welcome to Ultimate CAD, ' + serverName + '  Settings';
 
   /* ── Navigation ──────────────────────────────────────────── */
   btnBack.addEventListener('click', function () {
@@ -120,7 +120,7 @@
   }
 
   function formatDate(iso) {
-    if (!iso) return '—';
+    if (!iso) return '';
     var d = new Date(iso);
     if (isNaN(d.getTime())) return iso;
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -165,7 +165,7 @@
         inputDesc.value   = srv.description || '';
         inputDiscord.value = srv.discord_id || '';
         inputIcon.value   = srv.icon_url || '';
-        navTitle.textContent = 'Welcome to Ultimate CAD, ' + currentServerName + ' — Settings';
+        navTitle.textContent = 'Welcome to Ultimate CAD, ' + currentServerName + '  Settings';
       })
       .catch(function () {});
 
@@ -209,8 +209,8 @@
             id:         o.id,
             username:   o.name || o.callsign,
             role:       'Member',
-            department: o.department || '—',
-            callsign:   o.callsign || '—',
+            department: o.department || '',
+            callsign:   o.callsign || '',
             joinedAt:   o.created_at || null,
           };
         });
@@ -248,8 +248,8 @@
         '<span class="ss-member-cell ss-member-cell--role">' +
           '<span class="ss-role-badge ' + badgeClass + '">' + esc(m.role || 'Member') + '</span>' +
         '</span>' +
-        '<span class="ss-member-cell ss-member-cell--dept">' + esc(m.department || '—') + '</span>' +
-        '<span class="ss-member-cell ss-member-cell--callsign">' + esc(m.callsign || '—') + '</span>' +
+        '<span class="ss-member-cell ss-member-cell--dept">' + esc(m.department || '') + '</span>' +
+        '<span class="ss-member-cell ss-member-cell--callsign">' + esc(m.callsign || '') + '</span>' +
         '<span class="ss-member-cell ss-member-cell--joined">' + formatDate(m.joinedAt) + '</span>' +
         '<span class="ss-member-cell ss-member-cell--action">' +
           (isOwner ? '' :
@@ -393,7 +393,7 @@
     set('cad_active_server_name', name);
     set('cad_server_join_code', code);
     currentServerName = name;
-    navTitle.textContent = 'Welcome to Ultimate CAD, ' + name + ' — Settings';
+    navTitle.textContent = 'Welcome to Ultimate CAD, ' + name + '  Settings';
 
     if (!serverId) {
       finishSave(true, '(saved locally)');
@@ -417,7 +417,7 @@
     })
       .then(function (r) { return r.ok ? r.json() : Promise.reject(r); })
       .then(function () { finishSave(true); })
-      .catch(function () { finishSave(true, '(saved locally — API endpoint pending)'); });
+      .catch(function () { finishSave(true, '(saved locally  API endpoint pending)'); });
   });
 
   function finishSave(ok, note) {

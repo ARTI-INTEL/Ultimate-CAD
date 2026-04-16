@@ -4,7 +4,7 @@ import { verifyUser, verifyMember, verifyOfficer } from '../middleware/auth.midd
 
 const router = Router();
 
-// GET /reports/:serverId — all reports (any member can view)
+// GET /reports/:serverId  all reports (any member can view)
 router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -18,7 +18,7 @@ router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
   }
 });
 
-// POST /reports — submit a report (must be clocked in)
+// POST /reports  submit a report (must be clocked in)
 router.post('/', verifyUser, verifyOfficer, async (req, res) => {
   const { serverId, callId, type, subjectName, subjectPlate, details } = req.body;
   if (!serverId || !type || !details)

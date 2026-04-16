@@ -4,7 +4,7 @@ import { verifyUser } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
-// GET /users/login/:discordId — check if user exists
+// GET /users/login/:discordId  check if user exists
 router.get('/login/:discordId', async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -18,7 +18,7 @@ router.get('/login/:discordId', async (req, res) => {
   }
 });
 
-// POST /users/register — create or return existing user
+// POST /users/register  create or return existing user
 router.post('/register', async (req, res) => {
   const { discordId, username } = req.body;
   if (!discordId || !username)
@@ -56,7 +56,7 @@ router.get('/getUserByDiscordId/:discordId', async (req, res) => {
   }
 });
 
-// PATCH /users/update — update username
+// PATCH /users/update  update username
 router.patch('/update', verifyUser, async (req, res) => {
   const { username } = req.body;
   if (!username) return res.status(400).json({ error: 'username is required' });

@@ -1,5 +1,5 @@
 /**
- * civilian.js — Ultimate CAD Civilian Page
+ * civilian.js  Ultimate CAD Civilian Page
  * Full API integration for characters, vehicles, and firearms.
  */
 
@@ -27,12 +27,12 @@
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
   function calcAge(dobStr) {
-    if (!dobStr) return '—';
+    if (!dobStr) return '';
     const parts = dobStr.split('/');
     const dob = parts.length === 3
       ? new Date(parts[2], parts[0] - 1, parts[1])
       : new Date(dobStr);
-    if (isNaN(dob)) return '—';
+    if (isNaN(dob)) return '';
     return Math.floor((Date.now() - dob) / (365.25 * 24 * 3600 * 1000));
   }
 
@@ -135,7 +135,7 @@
   function populateOwnerDropdown(selectId) {
     const sel = $(selectId);
     if (!sel) return;
-    sel.innerHTML = '<option value="">— Select Character —</option>';
+    sel.innerHTML = '<option value=""> Select Character </option>';
     characters.forEach(function (c) {
       const opt = document.createElement('option');
       opt.value = c.id;
@@ -156,13 +156,13 @@
     list.innerHTML = characters.map(function (c, i) {
       return (
         '<div class="civ-row" data-idx="' + i + '">' +
-          '<span style="width:220px">'  + esc(c.first_name)              + '</span>' +
-          '<span style="width:220px">'  + esc(c.last_name)               + '</span>' +
-          '<span style="width:180px">'  + esc(c.dob || '—')              + '</span>' +
-          '<span style="width:100px">'  + esc(calcAge(c.dob))            + '</span>' +
-          '<span style="width:170px">'  + esc(c.gender || '—')           + '</span>' +
-          '<span style="width:230px">'  + esc(c.occupation || '—')       + '</span>' +
-          '<span class="civ-col-flex">' + esc(c.address || '—')          + '</span>' +
+          '<span style="width:13.75rem">'  + esc(c.first_name)              + '</span>' +
+          '<span style="width:13.75rem">'  + esc(c.last_name)               + '</span>' +
+          '<span style="width:11.25rem">'  + esc(c.dob || '')              + '</span>' +
+          '<span style="width:6.25rem">'  + esc(calcAge(c.dob))            + '</span>' +
+          '<span style="width:10.625rem">'  + esc(c.gender || '')           + '</span>' +
+          '<span style="width:14.375rem">'  + esc(c.occupation || '')       + '</span>' +
+          '<span class="civ-col-flex">' + esc(c.address || '')          + '</span>' +
         '</div>'
       );
     }).join('');
@@ -197,13 +197,13 @@
       const insClass = v.insurance_status === 'Expired' ? 'civ-ins-expired' : 'civ-ins-active';
       return (
         '<div class="civ-row">' +
-          '<span style="width:240px">'  + esc(v.owner_name || '—')       + '</span>' +
-          '<span style="width:170px">'  + esc(v.plate)                   + '</span>' +
-          '<span style="width:270px">'  + esc(v.model)                   + '</span>' +
-          '<span style="width:150px">'  + esc(v.color || '—')            + '</span>' +
-          '<span style="width:230px">'  + esc(v.vin || '—')              + '</span>' +
-          '<span style="width:180px">'  + esc(v.registration_expiry || '—') + '</span>' +
-          '<span class="' + insClass + ' civ-col-flex">' + esc(v.insurance_status || '—') + '</span>' +
+          '<span style="width:15rem">'  + esc(v.owner_name || '')       + '</span>' +
+          '<span style="width:10.625rem">'  + esc(v.plate)                   + '</span>' +
+          '<span style="width:16.875rem">'  + esc(v.model)                   + '</span>' +
+          '<span style="width:9.375rem">'  + esc(v.color || '')            + '</span>' +
+          '<span style="width:14.375rem">'  + esc(v.vin || '')              + '</span>' +
+          '<span style="width:11.25rem">'  + esc(v.registration_expiry || '') + '</span>' +
+          '<span class="' + insClass + ' civ-col-flex">' + esc(v.insurance_status || '') + '</span>' +
         '</div>'
       );
     }).join('');
@@ -226,9 +226,9 @@
     list.innerHTML = data.map(function (f) {
       return (
         '<div class="civ-row">' +
-          '<span style="width:260px">'  + esc(f.owner_name || '—') + '</span>' +
-          '<span style="width:360px">'  + esc(f.serial)            + '</span>' +
-          '<span style="width:360px">'  + esc(f.name || '—')       + '</span>' +
+          '<span style="width:16.25rem">'  + esc(f.owner_name || '') + '</span>' +
+          '<span style="width:22.5rem">'  + esc(f.serial)            + '</span>' +
+          '<span style="width:22.5rem">'  + esc(f.name || '')       + '</span>' +
           '<span class="civ-col-flex">' + esc(f.type)              + '</span>' +
         '</div>'
       );
@@ -246,14 +246,14 @@
       const insClass = v.insurance_status === 'Expired' ? 'civ-ins-expired' : 'civ-ins-active';
       return (
         '<div class="civ-row">' +
-          '<span style="width:240px">'  + esc(v.owner_name || '—')          + '</span>' +
-          '<span style="width:170px">'  + esc(v.plate)                      + '</span>' +
-          '<span style="width:270px">'  + esc(v.model)                      + '</span>' +
-          '<span style="width:150px">'  + esc(v.color || '—')               + '</span>' +
-          '<span style="width:220px">'  + esc(v.vin || '—')                 + '</span>' +
-          '<span style="width:170px">'  + esc(v.registration_expiry || '—') + '</span>' +
-          '<span class="' + insClass + '" style="width:180px">' + esc(v.insurance_status || '—') + '</span>' +
-          '<span class="civ-col-flex">' + esc(v.insurance_expiry || '—')    + '</span>' +
+          '<span style="width:15rem">'  + esc(v.owner_name || '')          + '</span>' +
+          '<span style="width:10.625rem">'  + esc(v.plate)                      + '</span>' +
+          '<span style="width:16.875rem">'  + esc(v.model)                      + '</span>' +
+          '<span style="width:9.375rem">'  + esc(v.color || '')               + '</span>' +
+          '<span style="width:13.75rem">'  + esc(v.vin || '')                 + '</span>' +
+          '<span style="width:10.625rem">'  + esc(v.registration_expiry || '') + '</span>' +
+          '<span class="' + insClass + '" style="width:11.25rem">' + esc(v.insurance_status || '') + '</span>' +
+          '<span class="civ-col-flex">' + esc(v.insurance_expiry || '')    + '</span>' +
         '</div>'
       );
     }).join('');
@@ -269,9 +269,9 @@
     list.innerHTML = firearms.map(function (f) {
       return (
         '<div class="civ-row">' +
-          '<span style="width:260px">'  + esc(f.owner_name || '—') + '</span>' +
-          '<span style="width:360px">'  + esc(f.serial)            + '</span>' +
-          '<span style="width:360px">'  + esc(f.name || '—')       + '</span>' +
+          '<span style="width:16.25rem">'  + esc(f.owner_name || '') + '</span>' +
+          '<span style="width:22.5rem">'  + esc(f.serial)            + '</span>' +
+          '<span style="width:22.5rem">'  + esc(f.name || '')       + '</span>' +
           '<span class="civ-col-flex">' + esc(f.type)              + '</span>' +
         '</div>'
       );

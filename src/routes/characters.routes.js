@@ -4,7 +4,7 @@ import { verifyUser, verifyMember } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
-// GET /characters/:serverId — all characters (any member can view)
+// GET /characters/:serverId  all characters (any member can view)
 router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -18,7 +18,7 @@ router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
   }
 });
 
-// GET /characters/:serverId/mine — my characters only
+// GET /characters/:serverId/mine  my characters only
 router.get('/:serverId/mine', verifyUser, verifyMember, async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -32,7 +32,7 @@ router.get('/:serverId/mine', verifyUser, verifyMember, async (req, res) => {
   }
 });
 
-// POST /characters — create character (must be a member)
+// POST /characters  create character (must be a member)
 router.post('/', verifyUser, async (req, res) => {
   const {
     serverId, firstName, lastName, dob, gender, occupation,
@@ -63,7 +63,7 @@ router.post('/', verifyUser, async (req, res) => {
   }
 });
 
-// PATCH /characters/:id — update (owner only)
+// PATCH /characters/:id  update (owner only)
 router.patch('/:id', verifyUser, async (req, res) => {
   const {
     firstName, lastName, dob, gender, occupation,

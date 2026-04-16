@@ -1,5 +1,5 @@
 /**
- * leo.js — Law Enforcement CAD
+ * leo.js  Law Enforcement CAD
  * Full API integration: calls, BOLOs, search, reports.
  * Polls active calls and BOLOs every 12 seconds.
  */
@@ -27,6 +27,7 @@
   /* ── Helpers ─────────────────────────────────────────────── */
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const toRem = value => (value / 16) + 'rem';
 
   function priClass(p) {
     return { Low: 'pri-low', Medium: 'pri-medium', High: 'pri-high', Critical: 'pri-critical' }[p] || '';
@@ -136,7 +137,7 @@
      ACTIVE CALLS
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
   let leoCalls  = [];
-  let leoNextId = '—';
+  let leoNextId = '';
 
   function fetchCalls() {
     apiFetch('/calls/' + serverId)
@@ -153,11 +154,11 @@
     el.innerHTML = leoCalls.map(function (c) {
       return (
         '<div class="tbl-row">' +
-          '<span style="font-size:20px;font-weight:700;color:#fff;width:80px">'  + esc(c.id)       + '</span>' +
-          '<span style="font-size:20px;font-weight:700;color:#fff;flex:1">'      + esc(c.nature)   + '</span>' +
-          '<span style="font-size:20px;font-weight:700;color:#fff;width:300px">' + esc(c.location) + '</span>' +
-          '<span style="font-size:20px;font-weight:700;width:120px" class="' + priClass(c.priority) + '">' + esc(c.priority) + '</span>' +
-          '<span style="font-size:20px;font-weight:700;color:#fff;width:100px">' + esc(c.units || '—') + '</span>' +
+          '<span style="font-size:1.25rem;font-weight:700;color:#fff;width:5rem">'  + esc(c.id)       + '</span>' +
+          '<span style="font-size:1.25rem;font-weight:700;color:#fff;flex:1">'      + esc(c.nature)   + '</span>' +
+          '<span style="font-size:1.25rem;font-weight:700;color:#fff;width:18.75rem">' + esc(c.location) + '</span>' +
+          '<span style="font-size:1.25rem;font-weight:700;width:7.5rem" class="' + priClass(c.priority) + '">' + esc(c.priority) + '</span>' +
+          '<span style="font-size:1.25rem;font-weight:700;color:#fff;width:6.25rem">' + esc(c.units || '') + '</span>' +
           '<button class="leo-code4-btn" data-id="' + c.id + '">CODE 4</button>' +
         '</div>'
       );
@@ -207,8 +208,8 @@
     el.innerHTML = bolos.map(function (b) {
       return (
         '<div class="tbl-row">' +
-          '<span style="font-size:20px;font-weight:700;color:#fff;width:200px">' + esc(b.type) + '</span>' +
-          '<span style="font-size:20px;font-weight:700;color:#fff;flex:1">' + esc(b.description.substring(0, 80)) + (b.description.length > 80 ? '…' : '') + '</span>' +
+          '<span style="font-size:1.25rem;font-weight:700;color:#fff;width:12.5rem">' + esc(b.type) + '</span>' +
+          '<span style="font-size:1.25rem;font-weight:700;color:#fff;flex:1">' + esc(b.description.substring(0, 80)) + (b.description.length > 80 ? '…' : '') + '</span>' +
           '<button class="leo-remove-btn" data-id="' + b.id + '">Remove</button>' +
         '</div>'
       );
@@ -229,7 +230,7 @@
   $('btn-submit-bolo').addEventListener('click', function () {
     const type = $('lb-type').value;
     const desc = $('lb-desc').value.trim();
-    const loc  = $('lb-location').value.trim() || '—';
+    const loc  = $('lb-location').value.trim() || '';
     if (!desc) { alert('Description is required.'); return; }
 
     apiFetch('/bolos', {
@@ -251,13 +252,13 @@
     return (
       '<div class="leo-detail-chip">' +
         '<span class="leo-detail-chip-label">' + esc(label) + '</span>' +
-        '<span class="leo-detail-chip-value' + (red ? ' leo-detail-chip-value--red' : '') + '">' + esc(value || '—') + '</span>' +
+        '<span class="leo-detail-chip-value' + (red ? ' leo-detail-chip-value--red' : '') + '">' + esc(value || '') + '</span>' +
       '</div>'
     );
   }
 
   function calcAge(dobStr) {
-    if (!dobStr) return '—';
+    if (!dobStr) return '';
     const parts = dobStr.split('/');
     const dob = parts.length === 3 ? new Date(parts[2], parts[0] - 1, parts[1]) : new Date(dobStr);
     if (isNaN(dob)) return dobStr;
@@ -281,8 +282,8 @@
         ? chars.map(function (c) {
             return (
               '<div class="tbl-row leo-ped-row" data-char="' + encodeURIComponent(JSON.stringify(c)) + '">' +
-                '<span style="font-size:19px;color:#fff;flex:1">' + esc(c.first_name) + '</span>' +
-                '<span style="font-size:19px;color:#fff">'        + esc(c.last_name)  + '</span>' +
+                '<span style="font-size:1.1875rem;color:#fff;flex:1">' + esc(c.first_name) + '</span>' +
+                '<span style="font-size:1.1875rem;color:#fff">'        + esc(c.last_name)  + '</span>' +
               '</div>'
             );
           }).join('')
@@ -310,10 +311,10 @@
         .then(function (vehs) {
           $('leo-ped-vehicles').innerHTML = vehs.length
             ? vehs.map(function (v) {
-                return '<div class="tbl-row"><span style="font-size:17px;color:#fff;width:180px">' + esc(v.owner_name || '—') + '</span>' +
-                  '<span style="font-size:17px;color:#fff;width:100px">' + esc(v.plate) + '</span>' +
-                  '<span style="font-size:17px;color:#fff;flex:1">' + esc(v.model) + '</span>' +
-                  '<span style="font-size:17px;color:#fff">' + esc(v.color || '—') + '</span></div>';
+                return '<div class="tbl-row"><span style="font-size:1.0625rem;color:#fff;width:11.25rem">' + esc(v.owner_name || '') + '</span>' +
+                  '<span style="font-size:1.0625rem;color:#fff;width:6.25rem">' + esc(v.plate) + '</span>' +
+                  '<span style="font-size:1.0625rem;color:#fff;flex:1">' + esc(v.model) + '</span>' +
+                  '<span style="font-size:1.0625rem;color:#fff">' + esc(v.color || '') + '</span></div>';
               }).join('')
             : '<div class="leo-sub-empty">No vehicles registered</div>';
         })
@@ -323,8 +324,8 @@
         .then(function (fas) {
           $('leo-ped-firearms').innerHTML = fas.length
             ? fas.map(function (f) {
-                return '<div class="tbl-row"><span style="font-size:17px;color:#fff;flex:1">' + esc(f.owner_name || '—') + '</span>' +
-                  '<span style="font-size:17px;color:#fff">' + esc(f.serial) + '</span></div>';
+                return '<div class="tbl-row"><span style="font-size:1.0625rem;color:#fff;flex:1">' + esc(f.owner_name || '') + '</span>' +
+                  '<span style="font-size:1.0625rem;color:#fff">' + esc(f.serial) + '</span></div>';
               }).join('')
             : '<div class="leo-sub-empty">No firearms registered</div>';
         })
@@ -344,10 +345,10 @@
         ? vehs.map(function (v) {
             return (
               '<div class="tbl-row leo-car-row" data-veh="' + encodeURIComponent(JSON.stringify(v)) + '">' +
-                '<span style="font-size:19px;color:#fff;width:180px">' + esc(v.owner_name || '—') + '</span>' +
-                '<span style="font-size:19px;color:#fff;width:100px">' + esc(v.plate) + '</span>' +
-                '<span style="font-size:19px;color:#fff;flex:1">'      + esc(v.model) + '</span>' +
-                '<span style="font-size:19px;color:#fff">'             + esc(v.color || '—') + '</span>' +
+                '<span style="font-size:1.1875rem;color:#fff;width:11.25rem">' + esc(v.owner_name || '') + '</span>' +
+                '<span style="font-size:1.1875rem;color:#fff;width:6.25rem">' + esc(v.plate) + '</span>' +
+                '<span style="font-size:1.1875rem;color:#fff;flex:1">'      + esc(v.model) + '</span>' +
+                '<span style="font-size:1.1875rem;color:#fff">'             + esc(v.color || '') + '</span>' +
               '</div>'
             );
           }).join('')
@@ -381,8 +382,8 @@
         ? fas.map(function (f) {
             return (
               '<div class="tbl-row leo-gun-row" data-fa="' + encodeURIComponent(JSON.stringify(f)) + '">' +
-                '<span style="font-size:19px;color:#fff;flex:1">' + esc(f.owner_name || '—') + '</span>' +
-                '<span style="font-size:19px;color:#fff">'        + esc(f.serial)             + '</span>' +
+                '<span style="font-size:1.1875rem;color:#fff;flex:1">' + esc(f.owner_name || '') + '</span>' +
+                '<span style="font-size:1.1875rem;color:#fff">'        + esc(f.serial)             + '</span>' +
               '</div>'
             );
           }).join('')
@@ -408,7 +409,7 @@
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
   function fldRow(fields) {
     return '<div class="leo-report-fld-row">' + fields.map(function (f) {
-      return '<div class="leo-report-fld" style="width:' + f[1] + 'px"><label>' + esc(f[0]) + '</label>' +
+      return '<div class="leo-report-fld" style="width:' + toRem(f[1]) + '"><label>' + esc(f[0]) + '</label>' +
              '<input id="' + f[2] + '" placeholder="' + esc(f[0]) + '" autocomplete="off"></div>';
     }).join('') + '</div>';
   }
@@ -420,7 +421,7 @@
   };
 
   const vehicleBlock = function (optional) {
-    return '<span class="leo-report-section-label">Vehicle Information' + (optional ? ' <small style="font-size:14px;opacity:.6">(Optional)</small>' : '') + '</span>' +
+    return '<span class="leo-report-section-label">Vehicle Information' + (optional ? ' <small style="font-size:0.875rem;opacity:.6">(Optional)</small>' : '') + '</span>' +
       fldRow([['Brand Model',350,'r-vbrand'],['Color',350,'r-vcolor'],['Plate',185,'r-vplate'],['VIN',185,'r-vvin'],['Reg Expiry',185,'r-vreg'],['Owner',395,'r-vowner']]) +
       fldRow([['Insurance Status',350,'r-vins'],['Insurance Expiry',350,'r-vinsexp']]);
   };
@@ -431,7 +432,7 @@
   };
 
   const descArea = function (ph, h) {
-    return '<textarea class="leo-report-textarea" style="height:' + (h || 165) + 'px" placeholder="' + (ph || 'Description...') + '"></textarea>';
+    return '<textarea class="leo-report-textarea" style="height:' + toRem(h || 165) + '" placeholder="' + (ph || 'Description...') + '"></textarea>';
   };
 
   const submitBtn = function (type) {
@@ -496,11 +497,11 @@
     el.innerHTML = list.map(function (c) {
       return (
         '<div class="tbl-row">' +
-          '<span style="font-size:20px;font-weight:700;color:#fff;width:80px">'   + esc(c.id)       + '</span>' +
-          '<span style="font-size:20px;font-weight:700;color:#fff;flex:1">'       + esc(c.nature)   + '</span>' +
-          '<span style="font-size:20px;font-weight:700;color:#fff;width:350px">'  + esc(c.location) + '</span>' +
-          '<span style="font-size:20px;font-weight:700;width:120px" class="' + priClass(c.priority) + '">' + esc(c.priority) + '</span>' +
-          '<span style="font-size:20px;font-weight:700;color:#fff">' + esc(c.units || '—') + '</span>' +
+          '<span style="font-size:1.25rem;font-weight:700;color:#fff;width:5rem">'   + esc(c.id)       + '</span>' +
+          '<span style="font-size:1.25rem;font-weight:700;color:#fff;flex:1">'       + esc(c.nature)   + '</span>' +
+          '<span style="font-size:1.25rem;font-weight:700;color:#fff;width:21.875rem">'  + esc(c.location) + '</span>' +
+          '<span style="font-size:1.25rem;font-weight:700;width:7.5rem" class="' + priClass(c.priority) + '">' + esc(c.priority) + '</span>' +
+          '<span style="font-size:1.25rem;font-weight:700;color:#fff">' + esc(c.units || '') + '</span>' +
         '</div>'
       );
     }).join('');

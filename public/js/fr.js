@@ -1,5 +1,5 @@
 /**
- * fr.js — Fire & Rescue CAD
+ * fr.js  Fire & Rescue CAD
  * Full API integration: calls, search, reports.
  */
 
@@ -28,6 +28,7 @@
 
   function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
   function priColor(p) { return { Low: '#00ff2f', Medium: '#ffbb00', High: '#ff8800', Critical: '#ff0004' }[p] || '#fff'; }
+  function toRem(value) { return (value / 16) + 'rem'; }
 
   /* ── Panel switching ─────────────────────────────────────── */
   const PANELS = ['home', 'map', 'cad', 'search', 'reports', 'callhistory', 'notepad'];
@@ -63,7 +64,7 @@
     const btn = document.getElementById(id);
     if (!btn) return;
     btn.addEventListener('click', function () {
-      btn.style.outline = '3px solid #fff';
+      btn.style.outline = '0.1875rem solid #fff';
       setTimeout(function () { btn.style.outline = ''; }, 600);
     });
   });
@@ -88,7 +89,7 @@
 
   function renderFRCalls() {
     const el = document.getElementById('fr-calls-list');
-    if (!frCalls.length) { el.innerHTML = '<div style="height:42px;color:rgba(255,255,255,0.3);padding:12px 17px;">No active calls.</div>'; return; }
+    if (!frCalls.length) { el.innerHTML = '<div style="height:2.625rem;color:rgba(255,255,255,0.3);padding:0.75rem 1.0625rem;">No active calls.</div>'; return; }
     el.innerHTML = frCalls.map(function (c) {
       return (
         '<div class="tbl-row">' +
@@ -96,7 +97,7 @@
           '<span class="fr-cell fr-cell-nature">'  + esc(c.nature) + '</span>' +
           '<span class="fr-cell fr-cell-loc">'     + esc(c.location) + '</span>' +
           '<span class="fr-cell fr-cell-pri" style="color:' + priColor(c.priority) + '">' + esc(c.priority) + '</span>' +
-          '<span class="fr-cell fr-cell-unit">—</span>' +
+          '<span class="fr-cell fr-cell-unit"></span>' +
           '<button class="fr-close-call-btn" data-id="' + c.id + '">CODE 4</button>' +
         '</div>'
       );
@@ -141,7 +142,7 @@
   }
 
   function calcAge(dob) {
-    if (!dob) return '—';
+    if (!dob) return '';
     const p = dob.split('/');
     const d = p.length === 3 ? new Date(p[2], p[0]-1, p[1]) : new Date(dob);
     return isNaN(d) ? dob : Math.floor((Date.now() - d) / (365.25*24*3600*1000));
@@ -155,11 +156,11 @@
       el.innerHTML = chars.length
         ? chars.map(function (c) {
             return '<div class="tbl-row fr-ped-row" data-char="' + encodeURIComponent(JSON.stringify(c)) + '">' +
-              '<span style="font-size:19px;color:#fff;flex:1;">' + esc(c.first_name) + '</span>' +
-              '<span style="font-size:19px;color:#fff;">'        + esc(c.last_name)  + '</span>' +
+              '<span style="font-size:1.1875rem;color:#fff;flex:1;">' + esc(c.first_name) + '</span>' +
+              '<span style="font-size:1.1875rem;color:#fff;">'        + esc(c.last_name)  + '</span>' +
               '</div>';
           }).join('')
-        : '<div style="height:42px;"></div>';
+        : '<div style="height:2.625rem;"></div>';
 
       el.querySelectorAll('.fr-ped-row').forEach(function (row) {
         row.addEventListener('click', function () {
@@ -177,13 +178,13 @@
       el.innerHTML = vehs.length
         ? vehs.map(function (v) {
             return '<div class="tbl-row">' +
-              '<span style="font-size:19px;color:#fff;width:180px;">' + esc(v.owner_name || '—') + '</span>' +
-              '<span style="font-size:19px;color:#fff;width:100px;">' + esc(v.plate)              + '</span>' +
-              '<span style="font-size:19px;color:#fff;flex:1;">'      + esc(v.model)              + '</span>' +
-              '<span style="font-size:19px;color:#fff;">'             + esc(v.color || '—')       + '</span>' +
+              '<span style="font-size:1.1875rem;color:#fff;width:11.25rem;">' + esc(v.owner_name || '') + '</span>' +
+              '<span style="font-size:1.1875rem;color:#fff;width:6.25rem;">' + esc(v.plate)              + '</span>' +
+              '<span style="font-size:1.1875rem;color:#fff;flex:1;">'      + esc(v.model)              + '</span>' +
+              '<span style="font-size:1.1875rem;color:#fff;">'             + esc(v.color || '')       + '</span>' +
               '</div>';
           }).join('')
-        : '<div style="height:42px;"></div>';
+        : '<div style="height:2.625rem;"></div>';
     });
   });
 
@@ -196,18 +197,18 @@
     ];
     document.getElementById('fr-ped-detail-content').innerHTML = fields.map(function (f) {
       return '<div class="fr-detail-field"><div class="fr-detail-label">' + esc(f[0]) + '</div>' +
-             '<div class="fr-detail-value">' + esc(f[1] || '—') + '</div></div>';
+             '<div class="fr-detail-value">' + esc(f[1] || '') + '</div></div>';
     }).join('');
     openModal('fr-ped-detail');
   }
 
   /* ── Reports ─────────────────────────────────────────────── */
   function fldRow(fields) {
-    return '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">' +
+    return '<div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.5rem;">' +
       fields.map(function (f) {
-        return '<div style="background:#333;border-radius:10px;padding:6px 12px;width:' + f[1] + 'px;flex-shrink:0;">' +
-               '<div style="font-size:11px;color:rgba(255,255,255,.55);font-weight:700;">' + f[0] + '</div>' +
-               '<input id="' + f[2] + '" style="background:transparent;border:none;color:#fff;font-family:Inter,sans-serif;font-size:16px;font-weight:700;outline:none;width:100%;margin-top:2px;" placeholder="' + f[0] + '"></div>';
+        return '<div style="background:#333;border-radius:0.625rem;padding:0.375rem 0.75rem;width:' + toRem(f[1]) + ';flex-shrink:0;">' +
+               '<div style="font-size:0.6875rem;color:rgba(255,255,255,.55);font-weight:700;">' + f[0] + '</div>' +
+               '<input id="' + f[2] + '" style="background:transparent;border:none;color:#fff;font-family:Inter,sans-serif;font-size:1rem;font-weight:700;outline:none;width:100%;margin-top:0.125rem;" placeholder="' + f[0] + '"></div>';
       }).join('') + '</div>';
   }
 
@@ -219,23 +220,23 @@
   function callInfo() {
     return '<span class="fr-report-section-title">Call Information</span>' +
       fldRow([['CALL ID',129,'fr-rc-id'],['OSC',184,'fr-rc-osc'],['Call Title',348,'fr-rc-title'],['Location',620,'fr-rc-loc'],['Priority',185,'fr-rc-prio'],['Status',184,'fr-rc-stat']]) +
-      '<div style="margin:8px 0;"><p style="font-size:13px;font-weight:700;color:rgba(255,255,255,.55);margin-bottom:4px;">Units</p>' +
-      '<div style="background:#333;border-radius:10px;height:56px;padding:0 12px;display:flex;align-items:center;">' +
-      '<input style="background:transparent;border:none;color:#fff;font-family:Inter,sans-serif;font-size:17px;font-weight:700;outline:none;width:100%;" placeholder="Unit callsigns..."></div></div>';
+      '<div style="margin:0.5rem 0;"><p style="font-size:0.8125rem;font-weight:700;color:rgba(255,255,255,.55);margin-bottom:0.25rem;">Units</p>' +
+      '<div style="background:#333;border-radius:0.625rem;height:3.5rem;padding:0 0.75rem;display:flex;align-items:center;">' +
+      '<input style="background:transparent;border:none;color:#fff;font-family:Inter,sans-serif;font-size:1.0625rem;font-weight:700;outline:none;width:100%;" placeholder="Unit callsigns..."></div></div>';
   }
 
   function descArea(ph, h) {
-    return '<textarea style="width:100%;height:' + (h||180) + 'px;background:#333;border:none;border-radius:12px;color:#fff;font-family:Inter,sans-serif;font-size:17px;padding:12px;outline:none;resize:none;" placeholder="' + (ph||'Details...') + '"></textarea>';
+    return '<textarea style="width:100%;height:' + toRem(h || 180) + ';background:#333;border:none;border-radius:0.75rem;color:#fff;font-family:Inter,sans-serif;font-size:1.0625rem;padding:0.75rem;outline:none;resize:none;" placeholder="' + (ph||'Details...') + '"></textarea>';
   }
 
   function submitBtn(type) {
-    return '<button class="act-btn act-btn-red fr-report-submit-btn" data-rtype="' + type + '" style="position:relative;margin-top:12px;width:200px;height:44px;font-size:24px;">Submit</button>';
+    return '<button class="act-btn act-btn-red fr-report-submit-btn" data-rtype="' + type + '" style="position:relative;margin-top:0.75rem;width:12.5rem;height:2.75rem;font-size:1.5rem;">Submit</button>';
   }
 
   var FR_TEMPLATES = {
-    incident: function () { return callInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:12px;">Details</span>' + descArea('Incident details...') + submitBtn('incident'); },
-    medical:  function () { return callInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:12px;">Patient Information</span>' + personInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:12px;">Medical Procedure</span>' + descArea('Medical actions taken...') + submitBtn('medical'); },
-    death:    function () { return callInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:12px;">Patient Information</span>' + personInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:12px;">Cause of Death</span>' + descArea('Cause of death / actions taken...') + submitBtn('death'); },
+    incident: function () { return callInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:0.75rem;">Details</span>' + descArea('Incident details...') + submitBtn('incident'); },
+    medical:  function () { return callInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:0.75rem;">Patient Information</span>' + personInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:0.75rem;">Medical Procedure</span>' + descArea('Medical actions taken...') + submitBtn('medical'); },
+    death:    function () { return callInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:0.75rem;">Patient Information</span>' + personInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:0.75rem;">Cause of Death</span>' + descArea('Cause of death / actions taken...') + submitBtn('death'); },
   };
 
   function frShowReport(type) {
@@ -273,14 +274,14 @@
 
   function frRenderHistory(list) {
     const el = document.getElementById('fr-history-list');
-    if (!list.length) { el.innerHTML = '<div style="padding:20px;color:rgba(255,255,255,.3);">No calls found</div>'; return; }
+    if (!list.length) { el.innerHTML = '<div style="padding:1.25rem;color:rgba(255,255,255,.3);">No calls found</div>'; return; }
     el.innerHTML = list.map(function (c) {
       return '<div class="tbl-row">' +
         '<span class="fr-hist-cell fr-hist-cell-callnum">'  + esc(c.id)       + '</span>' +
         '<span class="fr-hist-cell fr-hist-cell-nature">'   + esc(c.nature)   + '</span>' +
         '<span class="fr-hist-cell fr-hist-cell-location">' + esc(c.location) + '</span>' +
         '<span class="fr-hist-cell fr-hist-cell-priority" style="color:' + priColor(c.priority) + '">' + esc(c.priority) + '</span>' +
-        '<span class="fr-hist-cell">—</span></div>';
+        '<span class="fr-hist-cell"></span></div>';
     }).join('');
   }
 

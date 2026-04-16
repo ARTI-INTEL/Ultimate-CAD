@@ -1,5 +1,5 @@
 /**
- * server-page.js — Ultimate CAD Server Page
+ * server-page.js  Ultimate CAD Server Page
  *
  * Responsibilities:
  *  - Populate the welcome greeting (server name + username)
@@ -77,7 +77,7 @@
         }
       })
       .catch(function () {
-        // Network unavailable or dev mode — silently skip owner check
+        // Network unavailable or dev mode  silently skip owner check
       });
   })();
 
@@ -147,7 +147,7 @@
     }
 
     if (!serverId) {
-      showError(dept.prefix, 'No active server — please return to the dashboard.');
+      showError(dept.prefix, 'No active server  please return to the dashboard.');
       return;
     }
 

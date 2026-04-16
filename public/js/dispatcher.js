@@ -1,5 +1,5 @@
 /**
- * dispatcher.js — Ultimate CAD Dispatcher
+ * dispatcher.js  Ultimate CAD Dispatcher
  * Full API integration: calls, BOLOs, active units, search, history.
  * Polls live data every 10 seconds.
  */
@@ -112,11 +112,11 @@
     if (!calls.length) { el.innerHTML = '<div class="d-empty">No active calls.</div>'; return; }
     el.innerHTML = calls.map(function (c) {
       return '<div class="tbl-row">' +
-        '<span class="d-row-cell" style="width:100px">' + esc(c.id)       + '</span>' +
+        '<span class="d-row-cell" style="width:6.25rem">' + esc(c.id)       + '</span>' +
         '<span class="d-row-cell" style="flex:1">'      + esc(c.nature)   + '</span>' +
-        '<span class="d-row-cell" style="width:300px">' + esc(c.location) + '</span>' +
-        '<span class="d-row-cell ' + priClass(c.priority) + '" style="width:120px">' + esc(c.priority) + '</span>' +
-        '<span class="d-row-cell" style="width:120px">' + esc(c.units || '—') + '</span>' +
+        '<span class="d-row-cell" style="width:18.75rem">' + esc(c.location) + '</span>' +
+        '<span class="d-row-cell ' + priClass(c.priority) + '" style="width:7.5rem">' + esc(c.priority) + '</span>' +
+        '<span class="d-row-cell" style="width:7.5rem">' + esc(c.units || '') + '</span>' +
         '<button class="d-code4-btn" data-id="' + c.id + '">CODE 4</button>' +
         '</div>';
     }).join('');
@@ -165,8 +165,8 @@
     el.innerHTML = bolos.map(function (b) {
       const desc = b.description || '';
       return '<div class="tbl-row">' +
-        '<span class="d-row-cell" style="width:220px">' + esc(b.type) + '</span>' +
-        '<span class="d-row-cell" style="width:350px">' + esc(b.reason) + '</span>' +
+        '<span class="d-row-cell" style="width:13.75rem">' + esc(b.type) + '</span>' +
+        '<span class="d-row-cell" style="width:21.875rem">' + esc(b.reason) + '</span>' +
         '<span class="d-row-cell" style="flex:1">'      + esc(desc.substring(0,80)) + (desc.length>80?'…':'') + '</span>' +
         '<button class="d-remove-btn" data-id="' + b.id + '">Remove</button>' +
         '</div>';
@@ -186,7 +186,7 @@
 
   $('btn-submit-bolo').addEventListener('click', function () {
     const type = $('d-bolo-type').value;
-    const loc  = $('d-bolo-loc').value.trim()  || '—';
+    const loc  = $('d-bolo-loc').value.trim()  || '';
     const desc = $('d-bolo-desc').value.trim();
     if (!desc) { alert('Description is required.'); return; }
 
@@ -222,10 +222,10 @@
       const statusColor = u.status === 'AVAILABLE' ? 'd-row-cell--green' : '';
 
       return '<div class="tbl-row">' +
-        '<span class="d-row-cell" style="width:120px">'  + esc(u.callsign)    + '</span>' +
-        '<span class="d-row-cell ' + typeClass + '" style="width:160px">' + esc(typeLabel) + '</span>' +
+        '<span class="d-row-cell" style="width:7.5rem">'  + esc(u.callsign)    + '</span>' +
+        '<span class="d-row-cell ' + typeClass + '" style="width:10rem">' + esc(typeLabel) + '</span>' +
         '<span class="d-row-cell" style="flex:1">'       + esc(u.department)  + '</span>' +
-        '<span class="d-row-cell" style="width:300px">'  + esc(u.location || '—') + '</span>' +
+        '<span class="d-row-cell" style="width:18.75rem">'  + esc(u.location || '') + '</span>' +
         '<span class="d-row-cell ' + statusColor + '">'  + esc(u.status)      + '</span>' +
         '</div>';
     }).join('');
@@ -262,10 +262,10 @@
       el.innerHTML = vehs.length
         ? vehs.map(function (v) {
             return '<div class="tbl-row">' +
-              '<span class="d-row-cell" style="width:190px">' + esc(v.owner_name || '—') + '</span>' +
-              '<span class="d-row-cell" style="width:130px">' + esc(v.plate) + '</span>' +
+              '<span class="d-row-cell" style="width:11.875rem">' + esc(v.owner_name || '') + '</span>' +
+              '<span class="d-row-cell" style="width:8.125rem">' + esc(v.plate) + '</span>' +
               '<span class="d-row-cell" style="flex:1">'      + esc(v.model) + '</span>' +
-              '<span class="d-row-cell">'                     + esc(v.color || '—') + '</span></div>';
+              '<span class="d-row-cell">'                     + esc(v.color || '') + '</span></div>';
           }).join('')
         : makeEmpty('No results.');
     });
@@ -278,7 +278,7 @@
       const fas = data.firearms || [];
       el.innerHTML = fas.length
         ? fas.map(function (f) {
-            return '<div class="tbl-row"><span class="d-row-cell" style="flex:1">' + esc(f.owner_name || '—') + '</span><span class="d-row-cell">' + esc(f.serial) + '</span></div>';
+            return '<div class="tbl-row"><span class="d-row-cell" style="flex:1">' + esc(f.owner_name || '') + '</span><span class="d-row-cell">' + esc(f.serial) + '</span></div>';
           }).join('')
         : makeEmpty('No results.');
     });
@@ -300,11 +300,11 @@
     if (!list.length) { el.innerHTML = '<div class="d-empty">No calls found.</div>'; return; }
     el.innerHTML = list.map(function (c) {
       return '<div class="tbl-row">' +
-        '<span class="d-row-cell" style="width:100px">' + esc(c.id)       + '</span>' +
+        '<span class="d-row-cell" style="width:6.25rem">' + esc(c.id)       + '</span>' +
         '<span class="d-row-cell" style="flex:1">'      + esc(c.nature)   + '</span>' +
-        '<span class="d-row-cell" style="width:300px">' + esc(c.location) + '</span>' +
-        '<span class="d-row-cell ' + priClass(c.priority) + '" style="width:120px">' + esc(c.priority) + '</span>' +
-        '<span class="d-row-cell">' + esc(c.units || '—') + '</span>' +
+        '<span class="d-row-cell" style="width:18.75rem">' + esc(c.location) + '</span>' +
+        '<span class="d-row-cell ' + priClass(c.priority) + '" style="width:7.5rem">' + esc(c.priority) + '</span>' +
+        '<span class="d-row-cell">' + esc(c.units || '') + '</span>' +
         '</div>';
     }).join('');
   }

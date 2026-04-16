@@ -4,7 +4,7 @@ import { verifyUser, verifyMember, verifyOfficer } from '../middleware/auth.midd
 
 const router = Router();
 
-// GET /bolos/:serverId — all active BOLOs (any member can view)
+// GET /bolos/:serverId  all active BOLOs (any member can view)
 router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -18,7 +18,7 @@ router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
   }
 });
 
-// POST /bolos — create a BOLO (must be clocked in)
+// POST /bolos  create a BOLO (must be clocked in)
 router.post('/', verifyUser, verifyOfficer, async (req, res) => {
   const { serverId, type, reason, description } = req.body;
   if (!serverId || !type || !reason || !description)
@@ -37,7 +37,7 @@ router.post('/', verifyUser, verifyOfficer, async (req, res) => {
   }
 });
 
-// PATCH /bolos/:boloId — update a BOLO (must be clocked in)
+// PATCH /bolos/:boloId  update a BOLO (must be clocked in)
 router.patch('/:boloId', verifyUser, verifyOfficer, async (req, res) => {
   const { type, reason, description } = req.body;
   try {
@@ -52,7 +52,7 @@ router.patch('/:boloId', verifyUser, verifyOfficer, async (req, res) => {
   }
 });
 
-// DELETE /bolos/:boloId — end a BOLO (must be clocked in)
+// DELETE /bolos/:boloId  end a BOLO (must be clocked in)
 router.delete('/:boloId', verifyUser, verifyOfficer, async (req, res) => {
   try {
     await pool.query('UPDATE bolos SET active = 0 WHERE id = ?', [req.params.boloId]);

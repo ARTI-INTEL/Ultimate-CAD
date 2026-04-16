@@ -1,5 +1,5 @@
 /**
- * dashboard.js — Ultimate CAD Dashboard
+ * dashboard.js  Ultimate CAD Dashboard
  * Loads real server list from API, handles create + join server.
  */
 
@@ -54,7 +54,7 @@
             id:      s.idserver,
             name:    s.name,
             members: 0,           // member count not stored; placeholder
-            owner:   s.owner_id === Number(userId) ? username : '—',
+            owner:   s.owner_id === Number(userId) ? username : '',
             role:    s.owner_id === Number(userId) ? 'Owner' : 'Member',
           };
         });
@@ -164,7 +164,7 @@
 
     // Tab bar
     const tabBar = document.createElement('div');
-    tabBar.style.cssText = 'display:flex;gap:8px;margin-bottom:16px;';
+    tabBar.style.cssText = 'display:flex;gap:0.5rem;margin-bottom:1rem;';
 
     const tabCreate = document.createElement('button');
     tabCreate.textContent = 'Create Server';
@@ -183,7 +183,7 @@
     // Join code row (hidden by default)
     const joinRow = document.createElement('div');
     joinRow.id = 'join-row';
-    joinRow.style.cssText = 'display:none;margin-top:8px;';
+    joinRow.style.cssText = 'display:none;margin-top:0.5rem;';
     joinRow.innerHTML = `
       <div class="db-field" style="flex:1;">
         <label class="db-field-label" for="field-join-existing">Join Code</label>
@@ -193,8 +193,8 @@
     box.appendChild(joinRow);
 
     function getTabStyle(active) {
-      return `height:36px;padding:0 20px;border:none;border-radius:10px;cursor:pointer;
-              font-family:Inter,sans-serif;font-size:14px;font-weight:700;
+      return `height:2.25rem;padding:0 1.25rem;border:none;border-radius:0.625rem;cursor:pointer;
+              font-family:Inter,sans-serif;font-size:0.875rem;font-weight:700;
               background:${active ? '#2954c3' : '#444'};color:#fff;transition:background .15s;`;
     }
 
