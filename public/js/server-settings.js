@@ -183,7 +183,7 @@
   /* ── Load members ────────────────────────────────────────── */
   (function loadMembers() {
     var demos = [
-      { id: 'm1', username: 'ChiefOfficer22',  role: 'Owner',     department: 'LSPD Command',       callsign: 'CMD-1',  joinedAt: '2024-01-01' },
+      { id: 'm1', username: 'ChiefUnit22',  role: 'Owner',     department: 'LSPD Command',       callsign: 'CMD-1',  joinedAt: '2024-01-01' },
       { id: 'm2', username: 'Detective_1990',  role: 'Admin',     department: 'BCSO Investigations', callsign: 'INV-3',  joinedAt: '2024-01-15' },
       { id: 'm3', username: 'RookiePatrol',    role: 'Member',    department: 'LSPD Patrol Div.',    callsign: 'L-14',   joinedAt: '2024-03-22' },
       { id: 'm4', username: 'FireChief_99',    role: 'Moderator', department: 'Sandy Shores Fire',   callsign: 'F-01',   joinedAt: '2024-02-10' },
@@ -197,8 +197,8 @@
     renderMembers();
 
     if (!serverId) return;
-    // Attempt real fetch (officers endpoint gives clocked-in members)
-    fetch(API_BASE + '/officers/' + serverId, {
+    // Attempt real fetch (units endpoint gives clocked-in members)
+    fetch(API_BASE + '/units/' + serverId, {
       headers: { 'x-user-id': userId || '' }
     })
       .then(function (r) { return r.ok ? r.json() : null; })
@@ -426,35 +426,104 @@
     if (ok) showSuccess('Settings saved.' + (note ? ' ' + note : ''));
   }
 
-  /* ── Delete server ───────────────────────────────────────── */
+  /* ── API helper ──────────────────────────────────────────────── */
+  function apiFetch(url, opts) {
+    return fetch(API_BASE + url, Object.assign({
+      headers: { 'Content-Type': 'application/json', 'x-user-id': userId || '' },
+    }, opts || {}))
+      .then(function (r) {
+        if (!r.ok) return r.json().then(function (e) { throw new Error(e.error || 'API error'); });
+        return r.json();
+      });
+  }
+
+  /* ── Delete server ───────────────────────────────────── */
+  const deleteSendError  = document.getElementById('delete-send-error');
+  const deleteError      = document.getElementById('delete-error');
+  const deleteStep1      = document.getElementById('delete-step-1');
+  const deleteStep2      = document.getElementById('delete-step-2');
+  const btnDeleteSendCode = document.getElementById('btn-delete-send-code');
+  const inputDeleteCode  = document.getElementById('input-delete-code');
+  const deleteCodeDesc   = document.getElementById('delete-code-desc');
+
   btnDeleteSrv.addEventListener('click', function () {
-    inputConfirm.value = '';
-    deleteError.textContent = '';
+    // Reset modal state
+    deleteStep1.style.display    = '';
+    deleteStep2.style.display    = 'none';
+    deleteSendError.textContent  = '';
+    deleteError.textContent      = '';
+    inputConfirm.value           = '';
+    if (inputDeleteCode) inputDeleteCode.value = '';
     openModal(modalDelete);
+  });
+
+  btnDeleteSendCode.addEventListener('click', function () {
+    deleteSendError.textContent      = '';
+    btnDeleteSendCode.textContent    = 'Sending…';
+    btnDeleteSendCode.disabled       = true;
+
+    apiFetch('/verification/send', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'delete_server_' + serverId }),
+    })
+      .then(function (data) {
+        deleteCodeDesc.textContent   = 'Enter the 6-digit code sent to ' + data.maskedEmail + ', then type the server name to confirm.';
+        deleteStep1.style.display    = 'none';
+        deleteStep2.style.display    = '';
+        if (inputDeleteCode) inputDeleteCode.focus();
+      })
+      .catch(function (err) {
+        deleteSendError.textContent  = err.message;
+      })
+      .finally(function () {
+        btnDeleteSendCode.textContent = 'Send Code';
+        btnDeleteSendCode.disabled    = false;
+      });
   });
 
   btnDeleteConf.addEventListener('click', function () {
     deleteError.textContent = '';
-    var typed = inputConfirm.value.trim();
+
+    const code  = inputDeleteCode ? inputDeleteCode.value.trim() : '';
+    const typed = inputConfirm.value.trim();
+
+    if (!code || code.length !== 6) { deleteError.textContent = 'Enter the 6-digit verification code.'; return; }
     if (typed.toLowerCase() !== currentServerName.toLowerCase()) {
       deleteError.textContent = 'Server name does not match. Please try again.';
       return;
     }
-    // Clear all server-related storage
-    remove('cad_active_server');
-    remove('cad_active_server_name');
-    remove('cad_server_join_code');
-    remove('cad_officer_id');
-    remove('cad_officer_dept');
-    try {
-      var servers = JSON.parse(localStorage.getItem('cad_servers') || '[]');
-      servers = servers.filter(function (s) { return String(s.id) !== String(serverId); });
-      localStorage.setItem('cad_servers', JSON.stringify(servers));
-    } catch (_) {}
-    window.location.href = 'dashboard.html';
+
+    btnDeleteConf.textContent = 'Verifying…';
+    btnDeleteConf.disabled    = true;
+
+    apiFetch('/verification/verify', {
+      method: 'POST',
+      body: JSON.stringify({ code, action: 'delete_server_' + serverId }),
+    })
+      .then(function () {
+        // Verified — now clear storage and redirect
+        remove('cad_active_server');
+        remove('cad_active_server_name');
+        remove('cad_server_join_code');
+        remove('cad_officer_id');
+        remove('cad_officer_dept');
+        try {
+          let servers = JSON.parse(localStorage.getItem('cad_servers') || '[]');
+          servers = servers.filter(function (s) { return String(s.id) !== String(serverId); });
+          localStorage.setItem('cad_servers', JSON.stringify(servers));
+        } catch (_) {}
+        window.location.href = 'dashboard.html';
+      })
+      .catch(function (err) {
+        deleteError.textContent   = err.message;
+        btnDeleteConf.textContent = 'Delete Forever';
+        btnDeleteConf.disabled    = false;
+      });
   });
 
-  btnDeleteCanc.addEventListener('click', function () { closeModal(modalDelete); });
+  const btnDeleteCanc2 = document.getElementById('btn-delete-cancel-2');
+  btnDeleteCanc.addEventListener('click',  function () { closeModal(modalDelete); });
+  if (btnDeleteCanc2) btnDeleteCanc2.addEventListener('click', function () { closeModal(modalDelete); });
   btnDeleteClose.addEventListener('click', function () { closeModal(modalDelete); });
 
   /* ── Modal helpers ───────────────────────────────────────── */

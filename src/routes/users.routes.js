@@ -74,4 +74,35 @@ router.patch('/update', verifyUser, async (req, res) => {
   }
 });
 
+// PATCH /users/email  update email address
+router.patch('/email', verifyUser, async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'email is required' });
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    return res.status(400).json({ error: 'Invalid email format' });
+
+  try {
+    await pool.query('UPDATE users SET email = ? WHERE iduser = ?', [email, req.user.iduser]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// GET /users/me  get current user's full profile (including email)
+router.get('/me', verifyUser, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      'SELECT iduser, discord_id, username, email, created_at FROM users WHERE iduser = ?',
+      [req.user.iduser]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'User not found' });
+    res.json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
 export default router;

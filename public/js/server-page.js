@@ -6,7 +6,7 @@
  *  - Detect if the current user is the server owner and show
  *    the "Server Settings" button accordingly
  *  - Validate and submit clock-in for each department (LEO / F&R / DOT)
- *    via POST /officers/clock-in
+ *    via POST /units/clock-in
  *  - Navigate to the appropriate CAD page on success
  *  - Wire Civilian/Character and Dispatcher bottom buttons
  *
@@ -31,7 +31,7 @@
   /* ── Cached values ───────────────────────────────────────── */
   const serverId   = get('cad_active_server');
   const serverName = get('cad_active_server_name') || 'Unknown Server';
-  const username   = get('cad_username')           || 'Officer';
+  const username   = get('cad_username')           || 'Unit';
   const userId     = get('cad_user_id');            // internal DB id (iduser)
 
   /* ── Element refs ────────────────────────────────────────── */
@@ -128,7 +128,7 @@
 
   /**
    * Attempt to clock in, then navigate to the CAD page.
-   * Matches POST /officers/clock-in  (officers.routes.js)
+   * Matches POST /units/clock-in  (units.routes.js)
    * Body: { serverId, name, callsign, department }
    * Header: x-user-id
    */
@@ -156,7 +156,7 @@
     btn.classList.add('sp-loading');
     btn.textContent = 'Joining…';
 
-    fetch(API_BASE + '/officers/clock-in', {
+    fetch(API_BASE + '/units/clock-in', {
       method:  'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -173,10 +173,10 @@
         if (!r.ok) return r.json().then(function (e) { throw new Error(e.error || 'Server error'); });
         return r.json();
       })
-      .then(function (officer) {
-        /* Persist the officer session id for the CAD page */
-        set('cad_officer_id', officer.id);
-        set('cad_officer_dept', dept.prefix);
+      .then(function (unit) {
+        /* Persist the unit session id for the CAD page */
+        set('cad_unit_id', unit.id);
+        set('cad_unit_dept', dept.prefix);
         window.location.href = dept.cadUrl;
       })
       .catch(function (err) {

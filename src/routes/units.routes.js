@@ -4,15 +4,15 @@ import { verifyUser, verifyMember } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
-// GET /officers/:serverId  all on-duty officers (any member can view)
+// GET /units/:serverId  all on-duty units (any member can view)
 router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
   try {
     const [rows] = await pool.query(
       `SELECT o.*
-       FROM officers o
+       FROM units o
        INNER JOIN (
          SELECT MAX(id) AS id
-         FROM officers
+         FROM units
          WHERE server_id = ?
          GROUP BY user_id
        ) latest ON latest.id = o.id
@@ -26,7 +26,7 @@ router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
   }
 });
 
-// POST /officers/clock-in (must be a server member)
+// POST /units/clock-in (must be a server member)
 router.post('/clock-in', verifyUser, async (req, res) => {
   const { serverId, name, callsign, department } = req.body;
   if (!serverId || !name || !callsign || !department)
@@ -35,37 +35,37 @@ router.post('/clock-in', verifyUser, async (req, res) => {
   try {
     const [existing] = await pool.query(
       `SELECT *
-       FROM officers
+       FROM units
        WHERE user_id = ? AND server_id = ?
        ORDER BY id DESC
        LIMIT 1`,
       [req.user.iduser, serverId]
     );
 
-    let officerId;
+    let unitId;
     if (existing.length) {
-      officerId = existing[0].id;
+      unitId = existing[0].id;
       await pool.query(
-        'DELETE FROM officers WHERE user_id = ? AND server_id = ? AND id <> ?',
-        [req.user.iduser, serverId, officerId]
+        'DELETE FROM units WHERE user_id = ? AND server_id = ? AND id <> ?',
+        [req.user.iduser, serverId, unitId]
       );
       await pool.query(
-        `UPDATE officers
+        `UPDATE units
          SET name = ?, callsign = ?, department = ?, status = 'AVAILABLE',
              location = '', current_call = NULL, clocked_in = CURRENT_TIMESTAMP
          WHERE id = ?`,
-        [name, callsign, department, officerId]
+        [name, callsign, department, unitId]
       );
     } else {
       const [result] = await pool.query(
-        `INSERT INTO officers (user_id, server_id, name, callsign, department)
+        `INSERT INTO units (user_id, server_id, name, callsign, department)
          VALUES (?, ?, ?, ?, ?)`,
         [req.user.iduser, serverId, name, callsign, department]
       );
-      officerId = result.insertId;
+      unitId = result.insertId;
     }
 
-    const [rows] = await pool.query('SELECT * FROM officers WHERE id = ?', [officerId]);
+    const [rows] = await pool.query('SELECT * FROM units WHERE id = ?', [unitId]);
     res.json(rows[0]);
   } catch (err) {
     console.error(err);
@@ -73,19 +73,19 @@ router.post('/clock-in', verifyUser, async (req, res) => {
   }
 });
 
-// DELETE /officers/clock-out/:officerId (must be the same user)
-router.delete('/clock-out/:officerId', verifyUser, async (req, res) => {
+// DELETE /units/clock-out/:unitId (must be the same user)
+router.delete('/clock-out/:unitId', verifyUser, async (req, res) => {
   try {
-    // Ensure the officer session belongs to the requesting user
+    // Ensure the unit session belongs to the requesting user
     const [rows] = await pool.query(
-      'SELECT * FROM officers WHERE id = ? AND user_id = ?',
-      [req.params.officerId, req.user.iduser]
+      'SELECT * FROM units WHERE id = ? AND user_id = ?',
+      [req.params.unitId, req.user.iduser]
     );
     if (rows.length === 0)
-      return res.status(403).json({ error: 'Forbidden: not your officer session' });
+      return res.status(403).json({ error: 'Forbidden: not your unit session' });
 
     await pool.query(
-      'DELETE FROM officers WHERE user_id = ? AND server_id = ?',
+      'DELETE FROM units WHERE user_id = ? AND server_id = ?',
       [req.user.iduser, rows[0].server_id]
     );
     res.json({ success: true });
@@ -95,20 +95,20 @@ router.delete('/clock-out/:officerId', verifyUser, async (req, res) => {
   }
 });
 
-// PATCH /officers/:officerId/status (must be the same user)
-router.patch('/:officerId/status', verifyUser, async (req, res) => {
+// PATCH /units/:unitId/status (must be the same user)
+router.patch('/:unitId/status', verifyUser, async (req, res) => {
   const { status, location, currentCall } = req.body;
   try {
     const [rows] = await pool.query(
-      'SELECT * FROM officers WHERE id = ? AND user_id = ?',
-      [req.params.officerId, req.user.iduser]
+      'SELECT * FROM units WHERE id = ? AND user_id = ?',
+      [req.params.unitId, req.user.iduser]
     );
     if (rows.length === 0)
-      return res.status(403).json({ error: 'Forbidden: not your officer session' });
+      return res.status(403).json({ error: 'Forbidden: not your unit session' });
 
     await pool.query(
-      'UPDATE officers SET status = ?, location = ?, current_call = ? WHERE id = ?',
-      [status, location ?? '', currentCall ?? null, req.params.officerId]
+      'UPDATE units SET status = ?, location = ?, current_call = ? WHERE id = ?',
+      [status, location ?? '', currentCall ?? null, req.params.unitId]
     );
     res.json({ success: true });
   } catch (err) {

@@ -14,7 +14,7 @@
 
   /* ── Auth guard ─────────────────────────────────────────── */
   const userId   = get('cad_user_id');
-  const username = get('cad_username') || 'Officer';
+  const username = get('cad_username') || 'Unit';
 
   if (!userId) {
     window.location.href = 'index.html';

@@ -1,13 +1,11 @@
 # TODO:
-Fix online users tracking(change officers to something else since its not only officers)
+Get email from discord when user first joins.
 Server Settings Page
 Account Settings Page
 Link to ERLC
-Email Verfication Code for Danger Zone Actions(delete account/server etc)
-
 
 # FIX:
-
+Turn Lisences Table into Reports Table
 
 # BUGS(dont know fix yet):
 

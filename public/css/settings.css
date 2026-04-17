@@ -538,9 +538,8 @@ body.index-bg { background: #222; }
 /* ── Panel header (column labels row) ──────────────────────── */
 .st-panel-header {
   position: absolute;
-  left: 3.5rem;
   top: 8.125rem;
-  width: 113rem;
+  width: 123.3999999999999999999rem;
   height: 5.625rem;
   background: var(--bg-panel-header);
   border-radius: var(--radius-panel) var(--radius-panel) 0 0;
@@ -561,10 +560,9 @@ body.index-bg { background: #222; }
 /* ── Panel body ─────────────────────────────────────────────── */
 .st-panel-body {
   position: absolute;
-  left: 3.5rem;
-  top: 13.75rem;
-  width: 113rem;
-  height: 46rem;
+  top: 13rem;
+  width: auto;
+  height: auto;
   background: var(--bg-panel);
   border-radius: 0 0 var(--radius-panel) var(--radius-panel);
   overflow-y: auto;

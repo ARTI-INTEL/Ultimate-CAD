@@ -37,7 +37,7 @@ router.get('/discord/login', (req, res) => {
   if (!ensureDiscordConfig(res, req)) return;
 
   const redirectUri = buildRedirectUri(req);
-  const scope = encodeURIComponent('identify guilds');
+  const scope = encodeURIComponent('identify guilds email');
   const clientId = encodeURIComponent(process.env.DISCORD_CLIENT_ID);
   const encodedRedirectUri = encodeURIComponent(redirectUri);
 

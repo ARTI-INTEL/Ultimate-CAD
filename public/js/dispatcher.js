@@ -13,7 +13,7 @@
 
   const userId    = get('cad_user_id');
   const serverId  = get('cad_active_server');
-  const officerId = get('cad_officer_id');
+  const unitId = get('cad_unit_id');
 
   if (!userId || !serverId) { window.location.href = 'server-page.html'; return; }
 
@@ -54,7 +54,7 @@
   });
 
   $('btn-clockout').addEventListener('click', function () {
-    if (officerId) apiFetch('/officers/clock-out/' + officerId, { method: 'DELETE' }).catch(function () {});
+    if (unitId) apiFetch('/units/clock-out/' + unitId, { method: 'DELETE' }).catch(function () {});
     window.location.href = 'server-page.html';
   });
 
@@ -203,10 +203,10 @@
   });
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     ACTIVE UNITS (real officers on duty)
+     ACTIVE UNITS (real units on duty)
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
   function fetchUnits() {
-    apiFetch('/officers/' + serverId)
+    apiFetch('/units/' + serverId)
       .then(function (rows) { renderUnits(rows); })
       .catch(function () {});
   }

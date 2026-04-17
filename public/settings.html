@@ -60,6 +60,14 @@
           </div>
 
           <div class="st-field-block">
+            <label class="st-field-label" for="input-email">Email Address</label>
+            <div class="st-field-box" id="email-field-box">
+              <input class="st-field-input" id="input-email"
+                    type="email" placeholder="your@email.com" autocomplete="off">
+            </div>
+          </div>
+
+          <div class="st-field-block">
             <label class="st-field-label" for="input-discord-id">Discord ID</label>
             <div class="st-field-box st-field-box--readonly">
               <input class="st-field-input" id="input-discord-id" placeholder="" readonly>
@@ -118,6 +126,43 @@
       <div class="st-confirm-actions">
         <button class="st-save-btn st-save-btn--red"  id="btn-confirm-yes">Confirm</button>
         <button class="st-save-btn st-save-btn--grey" id="btn-confirm-no">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== VERIFICATION MODAL ======== -->
+  <div class="modal-overlay" id="modal-verify">
+    <div class="modal-box st-confirm-box">
+      <button class="close-btn" id="btn-verify-close">✕</button>
+      <p class="st-confirm-title" id="verify-modal-title">Security Verification</p>
+
+      <!-- Step 1: send the code -->
+      <div id="verify-step-1">
+        <p class="st-confirm-desc" id="verify-step-1-desc">
+          For your security, a 6-digit code will be sent to your registered email address.
+        </p>
+        <p class="st-error-msg" id="verify-step-1-error"></p>
+        <div class="st-confirm-actions">
+          <button class="st-save-btn st-save-btn--blue" id="btn-send-code">Send Code</button>
+          <button class="st-save-btn st-save-btn--grey" id="btn-verify-cancel-1">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Step 2: enter the code -->
+      <div id="verify-step-2" style="display:none">
+        <p class="st-confirm-desc" id="verify-step-2-desc">
+          Enter the 6-digit code sent to your email:
+        </p>
+        <div class="st-field-box" style="margin-bottom:0.875rem">
+          <input class="st-field-input" id="input-verify-code"
+                placeholder="0  0  0  0  0  0" maxlength="6" autocomplete="off"
+                style="font-size:1.75rem;letter-spacing:0.5em;text-align:center">
+        </div>
+        <p class="st-error-msg" id="verify-step-2-error"></p>
+        <div class="st-confirm-actions">
+          <button class="st-save-btn st-save-btn--red" id="btn-submit-verify-code">Confirm</button>
+          <button class="st-save-btn st-save-btn--grey" id="btn-verify-cancel-2">Cancel</button>
+        </div>
       </div>
     </div>
   </div>

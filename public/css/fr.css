@@ -732,12 +732,7 @@ body.index-bg { background: #222; }
   font-weight: 700;
 }
 
-.fr-licenses-section {
-  position: absolute;
-  left: 1.375rem;
-  bottom: 0.75rem;
-  width: 18.75rem;
-}
+
 
 .fr-subsection-label {
   font-size: 0.8125rem;
@@ -746,23 +741,8 @@ body.index-bg { background: #222; }
   margin-bottom: 0.25rem;
 }
 
-.fr-licenses-hdr {
-  position: relative;
-  width: 18.75rem;
-  height: 2.5625rem;
-  border-radius: 0.5rem 0.5rem 0 0;
-}
-.fr-lic-col { left: 0.875rem; }
 
-.fr-licenses-body {
-  position: relative;
-  width: 18.75rem;
-  min-height: 2.625rem;
-  border-radius: 0 0 0.5rem 0.5rem;
-  padding: 0.625rem 0.875rem;
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.4);
-}
+.fr-lic-col { left: 0.875rem; }
 
 /* ── Panel: REPORTS ───────────────────────────────────────── */
 .fr-report-tabs {

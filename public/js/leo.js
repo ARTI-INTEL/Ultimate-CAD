@@ -15,7 +15,7 @@
   /* ── Session context ────────────────────────────────────── */
   const userId    = get('cad_user_id');
   const serverId  = get('cad_active_server');
-  const officerId = get('cad_officer_id');
+  const unitId = get('cad_unit_id');
 
   if (!userId || !serverId) {
     window.location.href = 'server-page.html';
@@ -64,8 +64,8 @@
   });
 
   $('btn-clockout').addEventListener('click', function () {
-    if (officerId) {
-      apiFetch('/officers/clock-out/' + officerId, { method: 'DELETE' }).catch(function () {});
+    if (unitId) {
+      apiFetch('/units/clock-out/' + unitId, { method: 'DELETE' }).catch(function () {});
     }
     window.location.href = 'server-page.html';
   });
@@ -86,8 +86,8 @@
 
         // Persist status to API
         const statusMap = { '10-8': 'AVAILABLE', '10-7': 'UNAVAILABLE', '10-97': 'ON SCENE', '10-23': 'ENROUTE', '10-6': 'BUSY' };
-        if (officerId) {
-          apiFetch('/officers/' + officerId + '/status', {
+        if (unitId) {
+          apiFetch('/units/' + unitId + '/status', {
             method: 'PATCH',
             body: JSON.stringify({ status: statusMap[btn.dataset.code] || 'AVAILABLE', serverId: Number(serverId) }),
           }).catch(function () {});

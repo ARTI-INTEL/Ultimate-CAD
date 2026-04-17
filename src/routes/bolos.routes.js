@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import pool from '../db.js';
-import { verifyUser, verifyMember, verifyOfficer } from '../middleware/auth.middleware.js';
+import { verifyUser, verifyMember, verifyUnit } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
@@ -19,7 +19,7 @@ router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
 });
 
 // POST /bolos  create a BOLO (must be clocked in)
-router.post('/', verifyUser, verifyOfficer, async (req, res) => {
+router.post('/', verifyUser, verifyUnit, async (req, res) => {
   const { serverId, type, reason, description } = req.body;
   if (!serverId || !type || !reason || !description)
     return res.status(400).json({ error: 'All fields are required' });
@@ -38,7 +38,7 @@ router.post('/', verifyUser, verifyOfficer, async (req, res) => {
 });
 
 // PATCH /bolos/:boloId  update a BOLO (must be clocked in)
-router.patch('/:boloId', verifyUser, verifyOfficer, async (req, res) => {
+router.patch('/:boloId', verifyUser, verifyUnit, async (req, res) => {
   const { type, reason, description } = req.body;
   try {
     await pool.query(
@@ -53,7 +53,7 @@ router.patch('/:boloId', verifyUser, verifyOfficer, async (req, res) => {
 });
 
 // DELETE /bolos/:boloId  end a BOLO (must be clocked in)
-router.delete('/:boloId', verifyUser, verifyOfficer, async (req, res) => {
+router.delete('/:boloId', verifyUser, verifyUnit, async (req, res) => {
   try {
     await pool.query('UPDATE bolos SET active = 0 WHERE id = ?', [req.params.boloId]);
     res.json({ success: true });

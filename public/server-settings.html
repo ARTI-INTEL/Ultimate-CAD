@@ -152,18 +152,39 @@
     <div class="modal-box ss-modal-box ss-modal-box--wide">
       <button class="close-btn" id="btn-delete-close">✕</button>
       <p class="ss-modal-title ss-modal-title--danger">Delete this server?</p>
-      <p class="ss-modal-desc">
-        All data, members, calls, BOLOs, and reports will be permanently deleted.
-        Type the server name to confirm.
-      </p>
-      <div class="ss-field-box ss-field-box--confirm">
-        <input class="ss-field-input" id="input-confirm-name"
-               placeholder="Type server name here..." autocomplete="off">
+
+      <!-- Step 1: send verification code -->
+      <div id="delete-step-1">
+        <p class="ss-modal-desc">
+          All data, members, calls, BOLOs, and reports will be permanently deleted.
+          For your security, a verification code will be sent to your registered email.
+        </p>
+        <p class="ss-error-msg" id="delete-send-error"></p>
+        <div class="ss-modal-actions">
+          <button class="ss-save-btn ss-save-btn--blue" id="btn-delete-send-code">Send Code</button>
+          <button class="ss-save-btn ss-save-btn--grey" id="btn-delete-cancel">Cancel</button>
+        </div>
       </div>
-      <p class="ss-error-msg" id="delete-error"></p>
-      <div class="ss-modal-actions">
-        <button class="ss-save-btn ss-save-btn--red"  id="btn-delete-confirm">Delete Forever</button>
-        <button class="ss-save-btn ss-save-btn--grey" id="btn-delete-cancel">Cancel</button>
+
+      <!-- Step 2: enter code + type server name -->
+      <div id="delete-step-2" style="display:none">
+        <p class="ss-modal-desc" id="delete-code-desc">
+          Enter the 6-digit code sent to your email, then type the server name to confirm.
+        </p>
+        <div class="ss-field-box ss-field-box--confirm" style="margin-bottom:0.5rem">
+          <input class="ss-field-input" id="input-delete-code"
+                placeholder="6-digit verification code" maxlength="6" autocomplete="off"
+                style="letter-spacing:0.35em;text-align:center">
+        </div>
+        <div class="ss-field-box ss-field-box--confirm">
+          <input class="ss-field-input" id="input-confirm-name"
+                placeholder="Type server name here..." autocomplete="off">
+        </div>
+        <p class="ss-error-msg" id="delete-error"></p>
+        <div class="ss-modal-actions">
+          <button class="ss-save-btn ss-save-btn--red"  id="btn-delete-confirm">Delete Forever</button>
+          <button class="ss-save-btn ss-save-btn--grey" id="btn-delete-cancel-2">Cancel</button>
+        </div>
       </div>
     </div>
   </div>

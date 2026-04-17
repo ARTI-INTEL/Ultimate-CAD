@@ -59,13 +59,13 @@ export async function verifyMember(req, res, next) {
 }
 
 /**
- * verifyOfficer
- * Checks that the user has an active clocked-in officer session on this server.
+ * verifyUnit
+ * Checks that the user has an active clocked-in unit session on this server.
  * Requires verifyUser to run first.
- * Attaches req.officer for downstream use.
+ * Attaches req.unit for downstream use.
  * Expects serverId in req.params or req.body.
  */
-export async function verifyOfficer(req, res, next) {
+export async function verifyUnit(req, res, next) {
   const serverId = req.params.serverId || req.body.serverId;
 
   if (!serverId)
@@ -74,7 +74,7 @@ export async function verifyOfficer(req, res, next) {
   try {
     const [rows] = await pool.query(
       `SELECT *
-       FROM officers
+       FROM units
        WHERE user_id = ? AND server_id = ?
        ORDER BY id DESC
        LIMIT 1`,
@@ -83,7 +83,7 @@ export async function verifyOfficer(req, res, next) {
     if (rows.length === 0)
       return res.status(403).json({ error: 'Forbidden: you are not clocked in on this server' });
 
-    req.officer = rows[0]; // attach officer session to request
+    req.unit = rows[0]; // attach unit session to request
     next();
   } catch (err) {
     console.error(err);

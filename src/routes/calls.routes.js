@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import pool from '../db.js';
-import { verifyUser, verifyMember, verifyOfficer } from '../middleware/auth.middleware.js';
+import { verifyUser, verifyMember, verifyUnit } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
@@ -10,7 +10,7 @@ router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
     const [rows] = await pool.query(
       `SELECT c.*, GROUP_CONCAT(o.callsign SEPARATOR ', ') AS units
        FROM calls c
-       LEFT JOIN officers o ON o.current_call = c.id
+       LEFT JOIN units o ON o.current_call = c.id
        WHERE c.server_id = ? AND c.status = 'ACTIVE'
        GROUP BY c.id
        ORDER BY c.created_at DESC`,
@@ -38,7 +38,7 @@ router.get('/:serverId/history', verifyUser, verifyMember, async (req, res) => {
 });
 
 // POST /calls  create a call (must be clocked in)
-router.post('/', verifyUser, verifyOfficer, async (req, res) => {
+router.post('/', verifyUser, verifyUnit, async (req, res) => {
   const { serverId, nature, location, priority } = req.body;
   if (!serverId || !nature || !location)
     return res.status(400).json({ error: 'serverId, nature, and location are required' });
@@ -57,7 +57,7 @@ router.post('/', verifyUser, verifyOfficer, async (req, res) => {
 });
 
 // PATCH /calls/:callId  update a call (must be clocked in)
-router.patch('/:callId', verifyUser, verifyOfficer, async (req, res) => {
+router.patch('/:callId', verifyUser, verifyUnit, async (req, res) => {
   const { nature, location, priority, serverId } = req.body;
   try {
     await pool.query(
@@ -72,14 +72,14 @@ router.patch('/:callId', verifyUser, verifyOfficer, async (req, res) => {
 });
 
 // PATCH /calls/:callId/close  CODE 4 (must be clocked in)
-router.patch('/:callId/close', verifyUser, verifyOfficer, async (req, res) => {
+router.patch('/:callId/close', verifyUser, verifyUnit, async (req, res) => {
   try {
     await pool.query(
       `UPDATE calls SET status = 'CLOSED', closed_at = NOW() WHERE id = ?`,
       [req.params.callId]
     );
     await pool.query(
-      'UPDATE officers SET current_call = NULL WHERE current_call = ?',
+      'UPDATE units SET current_call = NULL WHERE current_call = ?',
       [req.params.callId]
     );
     res.json({ success: true });

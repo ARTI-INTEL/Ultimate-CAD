@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import pool from '../db.js';
-import { verifyUser, verifyMember, verifyOfficer } from '../middleware/auth.middleware.js';
+import { verifyUser, verifyMember, verifyUnit } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
@@ -128,7 +128,7 @@ router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
 });
 
 // POST /reports  submit a report (must be clocked in)
-router.post('/', verifyUser, verifyOfficer, async (req, res) => {
+router.post('/', verifyUser, verifyUnit, async (req, res) => {
   const { serverId, callId, type, details } = req.body;
   if (!serverId || !type || !details || typeof details !== 'object')
     return res.status(400).json({ error: 'serverId, type, and details are required' });
@@ -137,9 +137,9 @@ router.post('/', verifyUser, verifyOfficer, async (req, res) => {
     const subjectName = pickFirstString([req.body.subjectName, buildSubjectName(details)]);
     const subjectPlate = pickFirstString([req.body.subjectPlate, buildSubjectPlate(details)]);
     const [result] = await pool.query(
-      `INSERT INTO reports (server_id, officer_id, call_id, type, subject_name, subject_plate, details)
+      `INSERT INTO reports (server_id, unit_id, call_id, type, subject_name, subject_plate, details)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [serverId, req.officer.id, callId || null, type, subjectName || null, subjectPlate || null, JSON.stringify(details)]
+      [serverId, req.unit.id, callId || null, type, subjectName || null, subjectPlate || null, JSON.stringify(details)]
     );
     res.json({ success: true, reportId: result.insertId });
   } catch (err) {
