@@ -8,7 +8,15 @@ const router = Router();
 router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
   try {
     const [rows] = await pool.query(
-      'SELECT * FROM officers WHERE server_id = ?',
+      `SELECT o.*
+       FROM officers o
+       INNER JOIN (
+         SELECT MAX(id) AS id
+         FROM officers
+         WHERE server_id = ?
+         GROUP BY user_id
+       ) latest ON latest.id = o.id
+       ORDER BY o.department ASC, o.callsign ASC`,
       [req.params.serverId]
     );
     res.json(rows);
@@ -25,12 +33,39 @@ router.post('/clock-in', verifyUser, async (req, res) => {
     return res.status(400).json({ error: 'All fields are required' });
 
   try {
-    const [result] = await pool.query(
-      `INSERT INTO officers (user_id, server_id, name, callsign, department)
-       VALUES (?, ?, ?, ?, ?)`,
-      [req.user.iduser, serverId, name, callsign, department]
+    const [existing] = await pool.query(
+      `SELECT *
+       FROM officers
+       WHERE user_id = ? AND server_id = ?
+       ORDER BY id DESC
+       LIMIT 1`,
+      [req.user.iduser, serverId]
     );
-    const [rows] = await pool.query('SELECT * FROM officers WHERE id = ?', [result.insertId]);
+
+    let officerId;
+    if (existing.length) {
+      officerId = existing[0].id;
+      await pool.query(
+        'DELETE FROM officers WHERE user_id = ? AND server_id = ? AND id <> ?',
+        [req.user.iduser, serverId, officerId]
+      );
+      await pool.query(
+        `UPDATE officers
+         SET name = ?, callsign = ?, department = ?, status = 'AVAILABLE',
+             location = '', current_call = NULL, clocked_in = CURRENT_TIMESTAMP
+         WHERE id = ?`,
+        [name, callsign, department, officerId]
+      );
+    } else {
+      const [result] = await pool.query(
+        `INSERT INTO officers (user_id, server_id, name, callsign, department)
+         VALUES (?, ?, ?, ?, ?)`,
+        [req.user.iduser, serverId, name, callsign, department]
+      );
+      officerId = result.insertId;
+    }
+
+    const [rows] = await pool.query('SELECT * FROM officers WHERE id = ?', [officerId]);
     res.json(rows[0]);
   } catch (err) {
     console.error(err);
@@ -49,7 +84,10 @@ router.delete('/clock-out/:officerId', verifyUser, async (req, res) => {
     if (rows.length === 0)
       return res.status(403).json({ error: 'Forbidden: not your officer session' });
 
-    await pool.query('DELETE FROM officers WHERE id = ?', [req.params.officerId]);
+    await pool.query(
+      'DELETE FROM officers WHERE user_id = ? AND server_id = ?',
+      [req.user.iduser, rows[0].server_id]
+    );
     res.json({ success: true });
   } catch (err) {
     console.error(err);

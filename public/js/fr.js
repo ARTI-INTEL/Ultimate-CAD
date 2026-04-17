@@ -141,6 +141,87 @@
     apiFetch('/search/' + serverId + '?q=' + encodeURIComponent(q)).then(cb).catch(function () { cb({ characters: [], vehicles: [] }); });
   }
 
+  function fetchExactCharacter(firstName, lastName) {
+    const first = String(firstName || '').trim();
+    const last = String(lastName || '').trim();
+    if (!first || !last) return Promise.resolve(null);
+
+    return apiFetch('/search/' + serverId + '?q=' + encodeURIComponent(first + ' ' + last))
+      .then(function (data) {
+        const chars = data.characters || [];
+        return chars.find(function (character) {
+          return String(character.first_name || '').trim().toLowerCase() === first.toLowerCase() &&
+                 String(character.last_name || '').trim().toLowerCase() === last.toLowerCase();
+        }) || null;
+      })
+      .catch(function () { return null; });
+  }
+
+  function fillInput(id, value) {
+    const input = document.getElementById(id);
+    if (input) input.value = value == null ? '' : value;
+  }
+
+  function attachCharacterAutofill(area) {
+    if (!area || area.dataset.characterAutofillBound === 'true') return;
+
+    const firstNameInput = area.querySelector('#r-fn');
+    const lastNameInput = area.querySelector('#r-ln');
+    if (!firstNameInput || !lastNameInput) return;
+
+    let lookupToken = 0;
+    const tryAutofill = function () {
+      const firstName = firstNameInput.value.trim();
+      const lastName = lastNameInput.value.trim();
+      if (!firstName || !lastName) return;
+
+      lookupToken += 1;
+      const currentToken = lookupToken;
+      fetchExactCharacter(firstName, lastName).then(function (character) {
+        if (currentToken !== lookupToken || !character) return;
+        fillInput('r-dob', character.dob);
+        fillInput('r-age', calcAge(character.dob));
+        fillInput('r-gen', character.gender);
+        fillInput('r-occ', character.occupation);
+        fillInput('r-h', character.height);
+        fillInput('r-w', character.weight);
+        fillInput('r-skin', character.skin_tone);
+        fillInput('r-hair', character.hair_tone);
+        fillInput('r-eye', character.eye_color);
+        fillInput('r-addr', character.address);
+      });
+    };
+
+    firstNameInput.addEventListener('blur', tryAutofill);
+    lastNameInput.addEventListener('blur', tryAutofill);
+    area.dataset.characterAutofillBound = 'true';
+  }
+
+  function serializeReportFields(area) {
+    const details = {};
+    if (!area) return details;
+
+    area.querySelectorAll('input[id], select[id], textarea[id]').forEach(function (field) {
+      details[field.id] = field.value.trim();
+    });
+
+    return details;
+  }
+
+  function renderReportList(rows, emptyMessage) {
+    if (!rows || !rows.length) {
+      return '<div style="padding:0.875rem 0;color:rgba(255,255,255,.5);font-weight:700;">' + esc(emptyMessage || 'No reports found') + '</div>';
+    }
+
+    return rows.map(function (row) {
+      return '<div class="tbl-row">' +
+        '<span style="font-size:0.95rem;color:#fff;width:10.5rem;">' + esc(row.type) + '</span>' +
+        '<span style="font-size:0.95rem;color:#fff;width:8.5rem;">' + esc(new Date(row.createdAt).toLocaleDateString()) + '</span>' +
+        '<span style="font-size:0.95rem;color:#fff;flex:1;">' + esc(row.summary || 'No summary provided') + '</span>' +
+        '</div>';
+    }).join('');
+  }
+
   function calcAge(dob) {
     if (!dob) return '';
     const p = dob.split('/');
@@ -198,8 +279,22 @@
     document.getElementById('fr-ped-detail-content').innerHTML = fields.map(function (f) {
       return '<div class="fr-detail-field"><div class="fr-detail-label">' + esc(f[0]) + '</div>' +
              '<div class="fr-detail-value">' + esc(f[1] || '') + '</div></div>';
-    }).join('');
-    openModal('fr-ped-detail');
+    }).join('') +
+      '<div style="width:100%;margin-top:1rem;">' +
+        '<div class="fr-subsection-label" style="margin-bottom:0.5rem;">Reports</div>' +
+        '<div id="fr-ped-reports"></div>' +
+      '</div>';
+
+    apiFetch('/reports/' + serverId + '/character?firstName=' + encodeURIComponent(p.first_name || '') + '&lastName=' + encodeURIComponent(p.last_name || ''))
+      .then(function (reports) {
+        document.getElementById('fr-ped-reports').innerHTML = renderReportList(reports, 'No reports on record');
+      })
+      .catch(function () {
+        document.getElementById('fr-ped-reports').innerHTML = '<div style="padding:0.875rem 0;color:rgba(255,255,255,.5);font-weight:700;">Unable to load reports</div>';
+      })
+      .finally(function () {
+        openModal('fr-ped-detail');
+      });
   }
 
   /* ── Reports ─────────────────────────────────────────────── */
@@ -222,11 +317,11 @@
       fldRow([['CALL ID',129,'fr-rc-id'],['OSC',184,'fr-rc-osc'],['Call Title',348,'fr-rc-title'],['Location',620,'fr-rc-loc'],['Priority',185,'fr-rc-prio'],['Status',184,'fr-rc-stat']]) +
       '<div style="margin:0.5rem 0;"><p style="font-size:0.8125rem;font-weight:700;color:rgba(255,255,255,.55);margin-bottom:0.25rem;">Units</p>' +
       '<div style="background:#333;border-radius:0.625rem;height:3.5rem;padding:0 0.75rem;display:flex;align-items:center;">' +
-      '<input style="background:transparent;border:none;color:#fff;font-family:Inter,sans-serif;font-size:1.0625rem;font-weight:700;outline:none;width:100%;" placeholder="Unit callsigns..."></div></div>';
+      '<input id="fr-rc-units" style="background:transparent;border:none;color:#fff;font-family:Inter,sans-serif;font-size:1.0625rem;font-weight:700;outline:none;width:100%;" placeholder="Unit callsigns..."></div></div>';
   }
 
-  function descArea(ph, h) {
-    return '<textarea style="width:100%;height:' + toRem(h || 180) + ';background:#333;border:none;border-radius:0.75rem;color:#fff;font-family:Inter,sans-serif;font-size:1.0625rem;padding:0.75rem;outline:none;resize:none;" placeholder="' + (ph||'Details...') + '"></textarea>';
+  function descArea(id, ph, h) {
+    return '<textarea id="' + id + '" style="width:100%;height:' + toRem(h || 180) + ';background:#333;border:none;border-radius:0.75rem;color:#fff;font-family:Inter,sans-serif;font-size:1.0625rem;padding:0.75rem;outline:none;resize:none;" placeholder="' + (ph||'Details...') + '"></textarea>';
   }
 
   function submitBtn(type) {
@@ -234,9 +329,9 @@
   }
 
   var FR_TEMPLATES = {
-    incident: function () { return callInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:0.75rem;">Details</span>' + descArea('Incident details...') + submitBtn('incident'); },
-    medical:  function () { return callInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:0.75rem;">Patient Information</span>' + personInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:0.75rem;">Medical Procedure</span>' + descArea('Medical actions taken...') + submitBtn('medical'); },
-    death:    function () { return callInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:0.75rem;">Patient Information</span>' + personInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:0.75rem;">Cause of Death</span>' + descArea('Cause of death / actions taken...') + submitBtn('death'); },
+    incident: function () { return callInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:0.75rem;">Details</span>' + descArea('fr-report-details', 'Incident details...') + submitBtn('incident'); },
+    medical:  function () { return callInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:0.75rem;">Patient Information</span>' + personInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:0.75rem;">Medical Procedure</span>' + descArea('fr-medical-actions', 'Medical actions taken...') + submitBtn('medical'); },
+    death:    function () { return callInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:0.75rem;">Patient Information</span>' + personInfo() + '<span class="fr-report-section-title" style="display:block;margin-top:0.75rem;">Cause of Death</span>' + descArea('fr-death-cause', 'Cause of death / actions taken...') + submitBtn('death'); },
   };
 
   function frShowReport(type) {
@@ -246,12 +341,21 @@
 
     const area = document.getElementById('fr-report-area');
     area.innerHTML = FR_TEMPLATES[type] ? FR_TEMPLATES[type]() : '';
+    attachCharacterAutofill(area);
 
     area.querySelectorAll('.fr-report-submit-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
+        const details = serializeReportFields(area);
+        const subjectName = [details['r-fn'], details['r-ln']].filter(Boolean).join(' ').trim();
         apiFetch('/reports', {
           method: 'POST',
-          body: JSON.stringify({ serverId: Number(serverId), type: btn.dataset.rtype, details: {} }),
+          body: JSON.stringify({
+            serverId: Number(serverId),
+            callId: Number(details['fr-rc-id']) || null,
+            type: btn.dataset.rtype,
+            subjectName: subjectName || null,
+            details: details,
+          }),
         })
           .then(function () { alert(type.charAt(0).toUpperCase() + type.slice(1) + ' Report submitted!'); })
           .catch(function () { alert('Report submitted (offline).'); });

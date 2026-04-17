@@ -272,6 +272,87 @@
       .catch(function () { callback({ characters: [], vehicles: [], firearms: [] }); });
   }
 
+  function fetchExactCharacter(firstName, lastName) {
+    const first = String(firstName || '').trim();
+    const last = String(lastName || '').trim();
+    if (!first || !last) return Promise.resolve(null);
+
+    return apiFetch('/search/' + serverId + '?q=' + encodeURIComponent(first + ' ' + last))
+      .then(function (data) {
+        const chars = data.characters || [];
+        return chars.find(function (character) {
+          return String(character.first_name || '').trim().toLowerCase() === first.toLowerCase() &&
+                 String(character.last_name || '').trim().toLowerCase() === last.toLowerCase();
+        }) || null;
+      })
+      .catch(function () { return null; });
+  }
+
+  function fillInput(id, value) {
+    const input = $(id);
+    if (input) input.value = value == null ? '' : value;
+  }
+
+  function attachCharacterAutofill(area) {
+    if (!area || area.dataset.characterAutofillBound === 'true') return;
+
+    const firstNameInput = area.querySelector('#r-fn');
+    const lastNameInput = area.querySelector('#r-ln');
+    if (!firstNameInput || !lastNameInput) return;
+
+    let lookupToken = 0;
+    const tryAutofill = function () {
+      const firstName = firstNameInput.value.trim();
+      const lastName = lastNameInput.value.trim();
+      if (!firstName || !lastName) return;
+
+      lookupToken += 1;
+      const currentToken = lookupToken;
+      fetchExactCharacter(firstName, lastName).then(function (character) {
+        if (currentToken !== lookupToken || !character) return;
+        fillInput('r-dob', character.dob);
+        fillInput('r-age', calcAge(character.dob));
+        fillInput('r-gen', character.gender);
+        fillInput('r-occ', character.occupation);
+        fillInput('r-h', character.height);
+        fillInput('r-w', character.weight);
+        fillInput('r-skin', character.skin_tone);
+        fillInput('r-hair', character.hair_tone);
+        fillInput('r-eye', character.eye_color);
+        fillInput('r-addr', character.address);
+      });
+    };
+
+    firstNameInput.addEventListener('blur', tryAutofill);
+    lastNameInput.addEventListener('blur', tryAutofill);
+    area.dataset.characterAutofillBound = 'true';
+  }
+
+  function serializeReportFields(area) {
+    const details = {};
+    if (!area) return details;
+
+    area.querySelectorAll('input[id], select[id], textarea[id]').forEach(function (field) {
+      details[field.id] = field.value.trim();
+    });
+
+    return details;
+  }
+
+  function renderReportList(rows, emptyMessage) {
+    if (!rows || !rows.length) {
+      return '<div class="leo-sub-empty">' + esc(emptyMessage || 'No reports found') + '</div>';
+    }
+
+    return rows.map(function (row) {
+      return '<div class="tbl-row">' +
+        '<span style="font-size:1rem;color:#fff;width:13.75rem">' + esc(row.type) + '</span>' +
+        '<span style="font-size:1rem;color:#fff;width:10rem">' + esc(new Date(row.createdAt).toLocaleDateString()) + '</span>' +
+        '<span style="font-size:1rem;color:#fff;flex:1">' + esc(row.summary || 'No summary provided') + '</span>' +
+        '</div>';
+    }).join('');
+  }
+
   /* PED search */
   $('leo-ped-search').addEventListener('input', function () {
     const q  = this.value.trim();
@@ -330,6 +411,14 @@
             : '<div class="leo-sub-empty">No firearms registered</div>';
         })
         .catch(function () {});
+
+      apiFetch('/reports/' + serverId + '/character?firstName=' + encodeURIComponent(p.first_name || '') + '&lastName=' + encodeURIComponent(p.last_name || ''))
+        .then(function (reports) {
+          $('leo-ped-reports').innerHTML = renderReportList(reports, 'No reports on record');
+        })
+        .catch(function () {
+          $('leo-ped-reports').innerHTML = '<div class="leo-sub-empty">Unable to load reports</div>';
+        });
     }
 
     openModal('leo-ped-detail-modal');
@@ -431,8 +520,8 @@
       fldRow([['CALL ID',129,'r-cid'],['Nature Of Call',184,'r-cnat'],['Call Title',348,'r-ctitle'],['Location of Call',620,'r-cloc'],['Priority',185,'r-cprio'],['Status',184,'r-cstat']]);
   };
 
-  const descArea = function (ph, h) {
-    return '<textarea class="leo-report-textarea" style="height:' + toRem(h || 165) + '" placeholder="' + (ph || 'Description...') + '"></textarea>';
+  const descArea = function (id, ph, h) {
+    return '<textarea id="' + id + '" class="leo-report-textarea" style="height:' + toRem(h || 165) + '" placeholder="' + (ph || 'Description...') + '"></textarea>';
   };
 
   const submitBtn = function (type) {
@@ -441,26 +530,31 @@
 
   const REPORT_TEMPLATES = {
     warning:  function () { return suspectBlock() + callBlock() + '<span class="leo-report-section-label">Warning Information</span>' + fldRow([['Reason of Written Warning',620,'r-wwreason']]) + submitBtn('Written Warning'); },
-    citation: function () { return suspectBlock() + vehicleBlock(true) + callBlock() + '<span class="leo-report-section-label">Citation Information</span>' + fldRow([['Charges',348,'r-charges']]) + descArea() + submitBtn('Citation'); },
-    arrest:   function () { return suspectBlock() + vehicleBlock(true) + fldRow([['Car Impounded?',403,'r-impound']]) + callBlock() + '<span class="leo-report-section-label">Arrest Information</span>' + fldRow([['Charges',348,'r-charges']]) + descArea() + submitBtn('Arrest'); },
-    incident: function () { return suspectBlock() + vehicleBlock(true) + callBlock() + descArea('Description…', 180) + submitBtn('Incident Report'); },
-    warrant:  function () { return suspectBlock() + vehicleBlock(true) + '<span class="leo-report-section-label">Warrant Information</span>' + fldRow([['Charges',348,'r-wcharges'],['Type',620,'r-wtype'],['Address',706,'r-waddr']]) + descArea() + submitBtn('Warrant'); },
+    citation: function () { return suspectBlock() + vehicleBlock(true) + callBlock() + '<span class="leo-report-section-label">Citation Information</span>' + fldRow([['Charges',348,'r-charges']]) + descArea('r-desc', 'Description...') + submitBtn('Citation'); },
+    arrest:   function () { return suspectBlock() + vehicleBlock(true) + fldRow([['Car Impounded?',403,'r-impound']]) + callBlock() + '<span class="leo-report-section-label">Arrest Information</span>' + fldRow([['Charges',348,'r-charges']]) + descArea('r-desc', 'Description...') + submitBtn('Arrest'); },
+    incident: function () { return suspectBlock() + vehicleBlock(true) + callBlock() + descArea('r-desc', 'Description...', 180) + submitBtn('Incident Report'); },
+    warrant:  function () { return suspectBlock() + vehicleBlock(true) + '<span class="leo-report-section-label">Warrant Information</span>' + fldRow([['Charges',348,'r-wcharges'],['Type',620,'r-wtype'],['Address',706,'r-waddr']]) + descArea('r-desc', 'Description...') + submitBtn('Warrant'); },
   };
 
   function loadReport(type) {
     const area = $('leo-report-area');
     area.innerHTML = REPORT_TEMPLATES[type] ? REPORT_TEMPLATES[type]() : '';
     area.scrollTop = 0;
+    attachCharacterAutofill(area);
     const btn = area.querySelector('.leo-report-submit');
     if (btn) {
       btn.addEventListener('click', function () {
-        // POST to /reports
+        const details = serializeReportFields(area);
+        const subjectName = [details['r-fn'], details['r-ln']].filter(Boolean).join(' ').trim();
         apiFetch('/reports', {
           method: 'POST',
           body: JSON.stringify({
             serverId: Number(serverId),
+            callId: Number(details['r-cid']) || null,
             type: btn.dataset.rtype,
-            details: {},
+            subjectName: subjectName || null,
+            subjectPlate: details['r-vplate'] || null,
+            details: details,
           }),
         })
           .then(function () { alert(btn.dataset.rtype + ' submitted successfully!'); })

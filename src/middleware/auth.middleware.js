@@ -6,10 +6,14 @@ import pool from '../db.js';
  * Attach to any route that requires a logged-in user.
  */
 export async function verifyUser(req, res, next) {
-  const userId = req.headers['x-user-id'];
+  const userId =
+    req.headers['x-user-id'] ||
+    req.params.userId ||
+    req.query.userId ||
+    req.body?.userId;
 
   if (!userId)
-    return res.status(401).json({ error: 'Unauthorised: missing x-user-id header' });
+    return res.status(401).json({ error: 'Unauthorised: missing user id' });
 
   try {
     const [rows] = await pool.query(
@@ -69,7 +73,11 @@ export async function verifyOfficer(req, res, next) {
 
   try {
     const [rows] = await pool.query(
-      'SELECT * FROM officers WHERE user_id = ? AND server_id = ?',
+      `SELECT *
+       FROM officers
+       WHERE user_id = ? AND server_id = ?
+       ORDER BY id DESC
+       LIMIT 1`,
       [req.user.iduser, serverId]
     );
     if (rows.length === 0)

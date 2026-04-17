@@ -38,13 +38,57 @@
   /* ── State ───────────────────────────────────────────────── */
   let servers     = [];
   let filterQuery = '';
+  let discordGuildsLoaded = false;
 
   /* ── Greeting ────────────────────────────────────────────── */
   greeting.textContent = 'Welcome to Ultimate CAD, ' + username;
 
+  function populateDiscordServers(guilds) {
+    fieldDiscord.innerHTML = '';
+
+    var placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = guilds.length ? 'Select Discord Server' : 'No owned Discord servers found';
+    fieldDiscord.appendChild(placeholder);
+
+    guilds.forEach(function (guild) {
+      var opt = document.createElement('option');
+      opt.value = guild.id;
+      opt.textContent = guild.name;
+      fieldDiscord.appendChild(opt);
+    });
+  }
+
+  function loadDiscordServers() {
+    if (discordGuildsLoaded) return Promise.resolve();
+
+    fieldDiscord.disabled = true;
+    populateDiscordServers([]);
+    fieldDiscord.options[0].textContent = 'Loading Discord servers...';
+
+    return fetch(API_BASE + '/auth/discord/owner-guilds?userId=' + encodeURIComponent(localStorage.getItem('cad_discord_id')), {
+      headers: { 'x-user-id': userId },
+    })
+      .then(function (r) {
+        if (!r.ok) return r.json().then(function (e) { throw new Error(e.error || 'Failed to load Discord servers'); });
+        return r.json();
+      })
+      .then(function (guilds) {
+        populateDiscordServers(Array.isArray(guilds) ? guilds : []);
+        discordGuildsLoaded = true;
+      })
+      .catch(function () {
+        populateDiscordServers([]);
+        fieldDiscord.options[0].textContent = 'Could not load Discord servers';
+      })
+      .finally(function () {
+        fieldDiscord.disabled = false;
+      });
+  }
+
   /* ── Load servers from API ───────────────────────────────── */
   function loadServers() {
-    fetch(API_BASE + '/servers/my-servers/' + userId, {
+    fetch(API_BASE + '/servers/my-servers/' + encodeURIComponent(userId) + '?userId=' + encodeURIComponent(userId), {
       headers: { 'x-user-id': userId },
     })
       .then(function (r) { return r.ok ? r.json() : []; })
@@ -136,6 +180,7 @@
   function openModal() {
     modal.classList.add('active');
     fieldCode.value = generateJoinCode();
+    loadDiscordServers();
 
     // Switch modal Create button to handle tabs (Create vs Join)
     document.getElementById('btn-modal-create').textContent = 'Create';
@@ -233,6 +278,7 @@
     const name    = fieldName.value.trim();
     const code    = fieldCode.value.trim().toUpperCase() || generateJoinCode();
     const desc    = fieldDesc.value.trim();
+    const discordId = fieldDiscord.value || null;
 
     if (!name) { setError(fieldName); return; }
 
@@ -245,7 +291,7 @@
         'Content-Type': 'application/json',
         'x-user-id': userId,
       },
-      body: JSON.stringify({ name, joinCode: code, description: desc }),
+      body: JSON.stringify({ name, joinCode: code, description: desc, discordId: discordId }),
     })
       .then(function (r) {
         if (!r.ok) return r.json().then(function (e) { throw new Error(e.error); });

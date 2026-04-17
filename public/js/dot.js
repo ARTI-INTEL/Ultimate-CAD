@@ -137,6 +137,31 @@
     apiFetch('/search/' + serverId + '?q=' + encodeURIComponent(q)).then(cb).catch(function () { cb({ characters: [], vehicles: [] }); });
   }
 
+  function renderReportList(rows, emptyMessage) {
+    if (!rows || !rows.length) {
+      return '<div style="padding:0.875rem 0;color:rgba(255,255,255,.5);font-weight:700;">' + esc(emptyMessage || 'No reports found') + '</div>';
+    }
+
+    return rows.map(function (row) {
+      return '<div class="tbl-row">' +
+        '<span style="font-size:0.95rem;color:#fff;width:10.5rem;">' + esc(row.type) + '</span>' +
+        '<span style="font-size:0.95rem;color:#fff;width:8.5rem;">' + esc(new Date(row.createdAt).toLocaleDateString()) + '</span>' +
+        '<span style="font-size:0.95rem;color:#fff;flex:1;">' + esc(row.summary || 'No summary provided') + '</span>' +
+        '</div>';
+    }).join('');
+  }
+
+  function serializeReportFields(area) {
+    const details = {};
+    if (!area) return details;
+
+    area.querySelectorAll('input[id], select[id], textarea[id]').forEach(function (field) {
+      details[field.id] = field.value.trim();
+    });
+
+    return details;
+  }
+
   function calcAge(dob) {
     if (!dob) return '';
     const p = dob.split('/');
@@ -194,8 +219,22 @@
     document.getElementById('dot-ped-detail-content').innerHTML = fields.map(function (f) {
       return '<div class="dot-detail-field"><div class="dot-detail-label">' + esc(f[0]) + '</div>' +
              '<div class="dot-detail-value">' + esc(f[1] || '') + '</div></div>';
-    }).join('');
-    openModal('dot-ped-detail');
+    }).join('') +
+      '<div style="width:100%;margin-top:1rem;">' +
+        '<div class="dot-report-section-title mt" style="margin-top:0;">Reports</div>' +
+        '<div id="dot-ped-reports"></div>' +
+      '</div>';
+
+    apiFetch('/reports/' + serverId + '/character?firstName=' + encodeURIComponent(p.first_name || '') + '&lastName=' + encodeURIComponent(p.last_name || ''))
+      .then(function (reports) {
+        document.getElementById('dot-ped-reports').innerHTML = renderReportList(reports, 'No reports on record');
+      })
+      .catch(function () {
+        document.getElementById('dot-ped-reports').innerHTML = '<div style="padding:0.875rem 0;color:rgba(255,255,255,.5);font-weight:700;">Unable to load reports</div>';
+      })
+      .finally(function () {
+        openModal('dot-ped-detail');
+      });
   }
 
   /* ── Reports ─────────────────────────────────────────────── */
@@ -213,11 +252,11 @@
       fldRow([['CALL ID',129,'dot-rc-id'],['OSC',184,'dot-rc-osc'],['Call Title',348,'dot-rc-title'],['Location',620,'dot-rc-loc'],['Priority',185,'dot-rc-prio'],['Status',184,'dot-rc-stat']]) +
       '<div style="margin:0.5rem 0;"><p style="font-size:0.8125rem;font-weight:700;color:rgba(255,255,255,.55);margin-bottom:0.25rem;">Units</p>' +
       '<div style="background:#333;border-radius:0.625rem;height:3.5rem;padding:0 0.75rem;display:flex;align-items:center;">' +
-      '<input style="background:transparent;border:none;color:#fff;font-family:Inter,sans-serif;font-size:1.0625rem;font-weight:700;outline:none;width:100%;" placeholder="Unit callsigns..."></div></div>';
+      '<input id="dot-rc-units" style="background:transparent;border:none;color:#fff;font-family:Inter,sans-serif;font-size:1.0625rem;font-weight:700;outline:none;width:100%;" placeholder="Unit callsigns..."></div></div>';
   }
 
-  function descArea(ph, h) {
-    return '<textarea style="width:100%;height:' + toRem(h || 180) + ';background:#333;border:none;border-radius:0.75rem;color:#fff;font-family:Inter,sans-serif;font-size:1.0625rem;padding:0.75rem;outline:none;resize:none;" placeholder="' + (ph||'Details...') + '"></textarea>';
+  function descArea(id, ph, h) {
+    return '<textarea id="' + id + '" style="width:100%;height:' + toRem(h || 180) + ';background:#333;border:none;border-radius:0.75rem;color:#fff;font-family:Inter,sans-serif;font-size:1.0625rem;padding:0.75rem;outline:none;resize:none;" placeholder="' + (ph||'Details...') + '"></textarea>';
   }
 
   function submitBtn(type) {
@@ -225,12 +264,13 @@
   }
 
   const DOT_TEMPLATES = {
-    incident: function () { return callInfo() + '<span class="dot-report-section-title mt">Details</span>' + descArea('Incident details...') + submitBtn('incident'); },
+    incident: function () { return callInfo() + '<span class="dot-report-section-title mt">Details</span>' + descArea('dot-report-details', 'Incident details...') + submitBtn('incident'); },
     tow: function () {
       return callInfo() +
         '<span class="dot-report-section-title mt">Vehicle Information</span>' +
         fldRow([['Brand Model',349,'tow-brand'],['Color',348,'tow-color'],['Plate',185,'tow-plate'],['VIN',185,'tow-vin'],['Reg Expiry',185,'tow-reg'],['Owner',393,'tow-owner']]) +
         fldRow([['Insurance Status',349,'tow-ins'],['Insurance Expiry',348,'tow-insexp']]) +
+        descArea('tow-reason', 'Tow details...') +
         submitBtn('tow');
     },
   };
@@ -245,9 +285,17 @@
 
     area.querySelectorAll('.dot-report-submit-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
+        const details = serializeReportFields(area);
         apiFetch('/reports', {
           method: 'POST',
-          body: JSON.stringify({ serverId: Number(serverId), type: btn.dataset.rtype, details: {} }),
+          body: JSON.stringify({
+            serverId: Number(serverId),
+            callId: Number(details['dot-rc-id']) || null,
+            type: btn.dataset.rtype,
+            subjectName: details['tow-owner'] || null,
+            subjectPlate: details['tow-plate'] || null,
+            details: details,
+          }),
         })
           .then(function () { alert(btn.dataset.rtype + ' Report submitted!'); })
           .catch(function () { alert('Report submitted (offline).'); });

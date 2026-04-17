@@ -1,12 +1,14 @@
 import { Router } from 'express';
 import pool from '../db.js';
 import { configDotenv } from 'dotenv';
+import { verifyUser } from '../middleware/auth.middleware.js';
 
 configDotenv();
 
 const router = Router();
 
 const DISCORD_API_BASE = 'https://discord.com/api/v10';
+const discordTokenStore = new Map();
 
 function buildRedirectUri(req) {
   if (process.env.DISCORD_REDIRECT_URI) return process.env.DISCORD_REDIRECT_URI;
@@ -35,7 +37,7 @@ router.get('/discord/login', (req, res) => {
   if (!ensureDiscordConfig(res, req)) return;
 
   const redirectUri = buildRedirectUri(req);
-  const scope = encodeURIComponent('identify');
+  const scope = encodeURIComponent('identify guilds');
   const clientId = encodeURIComponent(process.env.DISCORD_CLIENT_ID);
   const encodedRedirectUri = encodeURIComponent(redirectUri);
 
@@ -96,6 +98,12 @@ router.get('/discord/callback', async (req, res) => {
     const discordId = discordUser.id;
     const username = discordUser.global_name || discordUser.username;
 
+    discordTokenStore.set(discordId, {
+      accessToken: tokenPayload.access_token,
+      refreshToken: tokenPayload.refresh_token || null,
+      expiresAt: Date.now() + ((Number(tokenPayload.expires_in) || 0) * 1000),
+    });
+
     const [existingRows] = await pool.query('SELECT * FROM users WHERE discord_id = ?', [discordId]);
 
     let userRecord = existingRows[0];
@@ -124,6 +132,50 @@ router.get('/discord/callback', async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.redirect('/index.html?auth_error=discord_oauth_failed');
+  }
+});
+
+router.get('/discord/owner-guilds', verifyUser, async (req, res) => {
+  const discordId = req.user.discord_id;
+  const tokenRecord = discordTokenStore.get(discordId);
+
+  if (!discordId || !tokenRecord?.accessToken) {
+    return res.status(401).json({
+      error: 'Discord guild access is unavailable. Please sign in with Discord again.',
+    });
+  }
+
+  try {
+    const guildsResponse = await fetch(`${DISCORD_API_BASE}/users/@me/guilds`, {
+      headers: {
+        Authorization: `Bearer ${tokenRecord.accessToken}`,
+      },
+    });
+
+    if (!guildsResponse.ok) {
+      if (guildsResponse.status === 401 || guildsResponse.status === 403) {
+        discordTokenStore.delete(discordId);
+        return res.status(401).json({
+          error: 'Discord guild access expired. Please sign in with Discord again.',
+        });
+      }
+
+      throw new Error(`Discord guild fetch failed with status ${guildsResponse.status}`);
+    }
+
+    const guilds = await guildsResponse.json();
+    const ownerGuilds = guilds
+      .filter((guild) => guild.owner)
+      .map((guild) => ({
+        id: guild.id,
+        name: guild.name,
+        icon: guild.icon,
+      }));
+
+    res.json(ownerGuilds);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to load Discord servers' });
   }
 });
 
