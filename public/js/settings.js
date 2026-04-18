@@ -1,5 +1,7 @@
 /**
  * settings.js  Ultimate CAD Account Settings Page
+ * Loads server memberships from the API rather than localStorage.
+ * Leave server calls DELETE /servers/:id/leave (with email verification).
  */
 
 (function () {
@@ -14,6 +16,8 @@
   const userId    = get('cad_user_id');
   const username  = get('cad_username') || 'Unknown User';
   const discordId = get('cad_discord_id') || '';
+
+  if (!userId) { window.location.href = 'index.html'; return; }
 
   /* ── API helper ──────────────────────────────────────────── */
   function apiFetch(url, opts) {
@@ -48,7 +52,7 @@
   const btnLeaveAll     = document.getElementById('btn-leave-all');
   const btnDeleteAcct   = document.getElementById('btn-delete-account');
 
-  /* ── Confirm modal (general) ─────────────────────────────── */
+  /* ── Confirm modal ───────────────────────────────────────── */
   const modalConfirm    = document.getElementById('modal-confirm');
   const confirmTitle    = document.getElementById('confirm-title');
   const confirmDesc     = document.getElementById('confirm-desc');
@@ -61,7 +65,6 @@
   const modalVerify       = document.getElementById('modal-verify');
   const verifyModalTitle  = document.getElementById('verify-modal-title');
   const verifyStep1       = document.getElementById('verify-step-1');
-  const verifyStep1Desc   = document.getElementById('verify-step-1-desc');
   const verifyStep1Error  = document.getElementById('verify-step-1-error');
   const verifyStep2       = document.getElementById('verify-step-2');
   const verifyStep2Desc   = document.getElementById('verify-step-2-desc');
@@ -76,6 +79,9 @@
   let pendingVerifyAction   = null;
   let pendingVerifyCallback = null;
 
+  // Track server data for leave-all
+  let serverData = [];
+
   /* ── Utility ─────────────────────────────────────────────── */
   function formatDate(isoString) {
     if (!isoString) return '';
@@ -84,37 +90,30 @@
     return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   }
 
-  function fmtNum(n) {
-    if (typeof n !== 'number') return '';
-    return n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : String(n);
-  }
-
   function esc(str) {
     return String(str)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;')
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  /* ── Navbar title ────────────────────────────────────────── */
+  /* ── Navbar ──────────────────────────────────────────────── */
   navTitle.textContent = 'Welcome to Ultimate CAD, ' + username;
 
   /* ── Populate info row ───────────────────────────────────── */
   function populateInfoRow(user) {
     cellUsername.textContent  = user.username || username;
-    cellRole.textContent      = user.role || 'Member';
+    cellRole.textContent      = 'Member';
     cellDiscordId.textContent = user.discord_id || discordId;
     cellJoinDate.textContent  = formatDate(user.created_at);
   }
 
   /* ── Load user from API ──────────────────────────────────── */
   (function loadUser() {
-    const localUser = { username, discord_id: discordId, role: 'Member', created_at: get('cad_join_date') };
+    const localUser = { username, discord_id: discordId, created_at: get('cad_join_date') };
     populateInfoRow(localUser);
     inputUsername.value  = localUser.username;
     inputDiscordId.value = localUser.discord_id;
     inputJoinDate.value  = formatDate(localUser.created_at);
-
-    if (!userId) return;
 
     apiFetch('/users/me')
       .then(function (user) {
@@ -125,29 +124,28 @@
         if (user.email) inputEmail.value = user.email;
         if (user.created_at) set('cad_join_date', user.created_at);
       })
+      .catch(function () {});
+  })();
+
+  /* ── Load server memberships from API ────────────────────── */
+  function loadServers() {
+    serversList.innerHTML = '<div class="st-empty-servers" style="color:rgba(255,255,255,0.3);">Loading…</div>';
+
+    apiFetch('/servers/my-servers/' + encodeURIComponent(userId))
+      .then(function (rows) {
+        serverData = rows || [];
+        renderServers(serverData);
+        cellServerCount.textContent = serverData.length;
+      })
       .catch(function () {
-        // Offline – cached values remain
-        if (discordId) {
-          fetch(API_BASE + '/users/getUserByDiscordId/' + discordId)
-            .then(function (r) { return r.ok ? r.json() : null; })
-            .then(function (user) {
-              if (!user) return;
-              populateInfoRow(Object.assign({}, localUser, user));
-              if (user.email) inputEmail.value = user.email;
-            })
-            .catch(function () {});
-        }
+        // Fallback to localStorage if API is unavailable
+        try { serverData = JSON.parse(localStorage.getItem('cad_servers') || '[]'); } catch (_) { serverData = []; }
+        renderServers(serverData);
+        cellServerCount.textContent = serverData.length;
       });
-  })();
+  }
 
-  /* ── Load server memberships ─────────────────────────────── */
-  (function loadServers() {
-    let servers = [];
-    try { servers = JSON.parse(localStorage.getItem('cad_servers') || '[]'); } catch (_) {}
-
-    renderServers(servers);
-    cellServerCount.textContent = servers.length;
-  })();
+  loadServers();
 
   /* ── Render server rows ──────────────────────────────────── */
   function renderServers(list) {
@@ -162,24 +160,36 @@
     }
 
     list.forEach(function (srv, idx) {
-      const row = document.createElement('div');
-      row.className = 'st-srv-row';
+      const row       = document.createElement('div');
+      row.className   = 'st-srv-row';
       row.style.animationDelay = (idx * 40) + 'ms';
-      const roleLower   = (srv.role || 'member').toLowerCase();
-      const badgeClass  = roleLower === 'owner' ? 'st-role-badge--owner'
-                        : roleLower === 'admin' ? 'st-role-badge--admin'
-                        : 'st-role-badge--member';
+
+      // Normalize field names from API response
+      const srvId     = srv.id || srv.idserver;
+      const srvName   = srv.name || '';
+      const srvRole   = srv.role || 'Member';
+      const joinedAt  = srv.joined_at || srv.joinedAt || null;
+      const roleLower = srvRole.toLowerCase();
+
+      const badgeClass = roleLower === 'owner' ? 'st-role-badge--owner'
+                       : roleLower === 'admin'  ? 'st-role-badge--admin'
+                       : 'st-role-badge--member';
+
+      // Owners can't leave their own server
+      const leaveBtn = roleLower === 'owner'
+        ? '<span style="font-size:0.875rem;color:rgba(255,255,255,0.3);font-weight:600;">Owner</span>'
+        : '<button class="st-leave-btn" data-server-id="' + esc(String(srvId)) + '" data-server-name="' + esc(srvName) + '">Leave</button>';
+
       row.innerHTML = [
-        '<span class="st-srv-cell" style="--col-w:30rem">'                   + esc(srv.name)                           + '</span>',
-        '<span class="st-srv-cell st-srv-cell--members" style="--col-w:12.5rem">' + fmtNum(srv.members)                + '</span>',
+        '<span class="st-srv-cell" style="--col-w:30rem">'                         + esc(srvName)              + '</span>',
+        '<span class="st-srv-cell st-srv-cell--members" style="--col-w:12.5rem">'  + ''                        + '</span>',
         '<span class="st-srv-cell st-srv-cell--role" style="--col-w:12.5rem">',
-          '<span class="st-role-badge ' + badgeClass + '">' + esc(srv.role || 'Member') + '</span>',
+          '<span class="st-role-badge ' + badgeClass + '">' + esc(srvRole) + '</span>',
         '</span>',
-        '<span class="st-srv-cell st-srv-cell--date" style="--col-w:15rem">'  + formatDate(srv.joinedAt || null)        + '</span>',
-        '<span class="st-srv-cell" style="--col-w:10rem">',
-          '<button class="st-leave-btn" data-server-id="' + esc(String(srv.id)) + '" data-server-name="' + esc(srv.name) + '">Leave</button>',
-        '</span>',
+        '<span class="st-srv-cell st-srv-cell--date" style="--col-w:15rem">' + formatDate(joinedAt) + '</span>',
+        '<span class="st-srv-cell" style="--col-w:10rem">' + leaveBtn + '</span>',
       ].join('');
+
       serversList.appendChild(row);
     });
   }
@@ -189,24 +199,29 @@
     const btn = e.target.closest('.st-leave-btn');
     if (!btn) return;
     const serverName = btn.getAttribute('data-server-name');
-    const serverId   = btn.getAttribute('data-server-id');
+    const srvId      = btn.getAttribute('data-server-id');
+
     startVerification(
       'Leave "' + serverName + '"?',
-      'leave_server_' + serverId,
-      function () { leaveServer(serverId, btn); }
+      'leave_server_' + srvId,
+      function () { doLeaveServer(srvId, serverName); }
     );
   });
 
-  /* ── Leave server ─────────────────────────────────────────── */
-  function leaveServer(serverId, btnEl) {
-    if (btnEl) { btnEl.textContent = '…'; btnEl.disabled = true; }
-    try {
-      let servers = JSON.parse(localStorage.getItem('cad_servers') || '[]');
-      servers = servers.filter(function (s) { return String(s.id) !== String(serverId); });
-      localStorage.setItem('cad_servers', JSON.stringify(servers));
-      renderServers(servers);
-      cellServerCount.textContent = servers.length;
-    } catch (_) {}
+  function doLeaveServer(srvId, serverName) {
+    apiFetch('/servers/' + srvId + '/leave', { method: 'DELETE' })
+      .then(function () {
+        serverData = serverData.filter(function (s) {
+          return String(s.id || s.idserver) !== String(srvId);
+        });
+        renderServers(serverData);
+        cellServerCount.textContent = serverData.length;
+      })
+      .catch(function (err) {
+        alert('Could not leave server: ' + err.message);
+        // Still refresh the list from the server
+        loadServers();
+      });
   }
 
   /* ── Save username + email ───────────────────────────────── */
@@ -228,23 +243,20 @@
     navTitle.textContent     = 'Welcome to Ultimate CAD, ' + newName;
     cellUsername.textContent = newName;
 
-    const saves = [];
+    const saves = [
+      apiFetch('/users/update', {
+        method: 'PATCH',
+        body: JSON.stringify({ username: newName }),
+      }).catch(function () {}),
+    ];
 
-    if (userId) {
+    if (newEmail) {
       saves.push(
-        apiFetch('/users/update', {
+        apiFetch('/users/email', {
           method: 'PATCH',
-          body: JSON.stringify({ username: newName }),
+          body: JSON.stringify({ email: newEmail }),
         }).catch(function () {})
       );
-      if (newEmail) {
-        saves.push(
-          apiFetch('/users/email', {
-            method: 'PATCH',
-            body: JSON.stringify({ email: newEmail }),
-          }).catch(function () {})
-        );
-      }
     }
 
     Promise.all(saves).then(function () {
@@ -260,13 +272,20 @@
 
   /* ── Danger zone ─────────────────────────────────────────── */
   btnLeaveAll.addEventListener('click', function () {
+    const leavable = serverData.filter(function (s) {
+      return (s.role || '').toLowerCase() !== 'owner';
+    });
+    if (!leavable.length) {
+      alert('You have no servers to leave (you are the owner of all your servers).');
+      return;
+    }
     startVerification(
       'Leave All Servers?',
       'leave_all_servers',
       function () {
-        set('cad_servers', '[]');
-        renderServers([]);
-        cellServerCount.textContent = '0';
+        Promise.all(leavable.map(function (s) {
+          return apiFetch('/servers/' + (s.id || s.idserver) + '/leave', { method: 'DELETE' }).catch(function () {});
+        })).then(function () { loadServers(); });
       }
     );
   });
@@ -361,7 +380,7 @@
     if (e.target === modalVerify) closeVerifyModal();
   });
 
-  /* ── Confirm modal (general — kept for non-danger confirmations) ── */
+  /* ── Confirm modal ───────────────────────────────────────── */
   function openConfirm(title, desc, onConfirm) {
     confirmTitle.textContent = title;
     confirmDesc.textContent  = desc;

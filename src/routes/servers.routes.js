@@ -53,7 +53,7 @@ router.get('/join-code/:serverId', async (req, res) => {
   }
 });
 
-// GET /servers/members/:serverId/:userId
+// GET /servers/members/:serverId/:userId  (legacy single-user check)
 router.get('/members/:serverId/:userId', async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -61,6 +61,100 @@ router.get('/members/:serverId/:userId', async (req, res) => {
       [req.params.serverId, req.params.userId]
     );
     res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// ── NEW: GET /servers/:serverId/members  list all members ──────────────────
+router.get('/:serverId/members', verifyUser, async (req, res) => {
+  const { serverId } = req.params;
+  try {
+    // Caller must be a member of the server
+    const [membership] = await pool.query(
+      'SELECT id FROM server_members WHERE server_id = ? AND user_id = ?',
+      [serverId, req.user.iduser]
+    );
+    if (!membership.length)
+      return res.status(403).json({ error: 'Forbidden: you are not a member of this server' });
+
+    const [rows] = await pool.query(
+      `SELECT
+         u.iduser,
+         u.username,
+         u.discord_id,
+         sm.joined_at,
+         CASE WHEN s.owner_id = u.iduser THEN 'Owner' ELSE 'Member' END AS role
+       FROM server_members sm
+       JOIN users u    ON u.iduser    = sm.user_id
+       JOIN servers s  ON s.idserver  = sm.server_id
+       WHERE sm.server_id = ?
+       ORDER BY
+         CASE WHEN s.owner_id = u.iduser THEN 0 ELSE 1 END,
+         sm.joined_at ASC`,
+      [serverId]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// ── NEW: DELETE /servers/:serverId/members/:memberId  kick (owner only) ────
+router.delete('/:serverId/members/:memberId', verifyUser, async (req, res) => {
+  const { serverId, memberId } = req.params;
+  try {
+    const [servers] = await pool.query(
+      'SELECT owner_id FROM servers WHERE idserver = ?',
+      [serverId]
+    );
+    if (!servers.length)
+      return res.status(404).json({ error: 'Server not found' });
+    if (String(servers[0].owner_id) !== String(req.user.iduser))
+      return res.status(403).json({ error: 'Forbidden: only the server owner can kick members' });
+    if (String(memberId) === String(req.user.iduser))
+      return res.status(400).json({ error: 'You cannot kick yourself' });
+
+    await pool.query(
+      'DELETE FROM server_members WHERE server_id = ? AND user_id = ?',
+      [serverId, memberId]
+    );
+    // Also clock out any active unit session for that user
+    await pool.query(
+      'DELETE FROM units WHERE server_id = ? AND user_id = ?',
+      [serverId, memberId]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// ── NEW: DELETE /servers/:serverId/leave  leave a server (self) ─────────────
+router.delete('/:serverId/leave', verifyUser, async (req, res) => {
+  const { serverId } = req.params;
+  try {
+    const [servers] = await pool.query(
+      'SELECT owner_id FROM servers WHERE idserver = ?',
+      [serverId]
+    );
+    if (!servers.length)
+      return res.status(404).json({ error: 'Server not found' });
+    if (String(servers[0].owner_id) === String(req.user.iduser))
+      return res.status(400).json({ error: 'Owners cannot leave their own server. Delete it instead.' });
+
+    await pool.query(
+      'DELETE FROM server_members WHERE server_id = ? AND user_id = ?',
+      [serverId, req.user.iduser]
+    );
+    await pool.query(
+      'DELETE FROM units WHERE server_id = ? AND user_id = ?',
+      [serverId, req.user.iduser]
+    );
+    res.json({ success: true });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Database error' });
@@ -95,7 +189,7 @@ router.post('/join', verifyUser, async (req, res) => {
       [joinCode.trim().toUpperCase()]
     );
     if (!servers.length)
-      return res.status(404).json({ error: 'Invalid join code  server not found' });
+      return res.status(404).json({ error: 'Invalid join code – server not found' });
 
     const server = servers[0];
 
@@ -111,7 +205,7 @@ router.post('/join', verifyUser, async (req, res) => {
   }
 });
 
-// POST /servers/create  create a new server
+// POST /servers/create
 router.post('/create', verifyUser, async (req, res) => {
   const { name, description, iconUrl, joinCode, discordId } = req.body;
   if (!name) return res.status(400).json({ error: 'Server name is required' });
@@ -119,7 +213,6 @@ router.post('/create', verifyUser, async (req, res) => {
   const code = joinCode?.trim().toUpperCase() || generateJoinCode();
 
   try {
-    // Check discord_id uniqueness only if provided
     if (discordId) {
       const [existing] = await pool.query(
         'SELECT idserver FROM servers WHERE discord_id = ?',
@@ -135,7 +228,6 @@ router.post('/create', verifyUser, async (req, res) => {
       [name, description || null, iconUrl || null, code, discordId || null, req.user.iduser]
     );
 
-    // Auto-add creator as member
     await pool.query(
       'INSERT IGNORE INTO server_members (user_id, server_id) VALUES (?, ?)',
       [req.user.iduser, result.insertId]
@@ -168,13 +260,12 @@ router.get('/my-servers/:userId', verifyUser, async (req, res) => {
   }
 });
 
-// PATCH /servers/:serverId/update  update server settings
+// PATCH /servers/:serverId/update
 router.patch('/:serverId/update', verifyUser, async (req, res) => {
   const { name, description, joinCode, discordId, iconUrl } = req.body;
   const { serverId } = req.params;
 
   try {
-    // Only owner can update
     const [servers] = await pool.query(
       'SELECT * FROM servers WHERE idserver = ? AND owner_id = ?',
       [serverId, req.user.iduser]
@@ -183,17 +274,38 @@ router.patch('/:serverId/update', verifyUser, async (req, res) => {
 
     await pool.query(
       `UPDATE servers SET
-         name = COALESCE(?, name),
+         name      = COALESCE(?, name),
          description = COALESCE(?, description),
          join_code = COALESCE(?, join_code),
          discord_id = COALESCE(?, discord_id),
-         icon_url = COALESCE(?, icon_url)
+         icon_url  = COALESCE(?, icon_url)
        WHERE idserver = ?`,
       [name || null, description || null, joinCode || null, discordId || null, iconUrl || null, serverId]
     );
 
     const [rows] = await pool.query('SELECT * FROM servers WHERE idserver = ?', [serverId]);
     res.json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// DELETE /servers/:serverId  delete server (owner only) – used by server-settings
+router.delete('/:serverId', verifyUser, async (req, res) => {
+  const { serverId } = req.params;
+  try {
+    const [servers] = await pool.query(
+      'SELECT owner_id FROM servers WHERE idserver = ?',
+      [serverId]
+    );
+    if (!servers.length)
+      return res.status(404).json({ error: 'Server not found' });
+    if (String(servers[0].owner_id) !== String(req.user.iduser))
+      return res.status(403).json({ error: 'Forbidden: only the owner can delete this server' });
+
+    await pool.query('DELETE FROM servers WHERE idserver = ?', [serverId]);
+    res.json({ success: true });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Database error' });
