@@ -346,9 +346,9 @@
 
     return rows.map(function (row) {
       return '<div class="tbl-row">' +
-        '<span style="font-size:1rem;color:#fff;width:13.75rem">' + esc(row.type) + '</span>' +
-        '<span style="font-size:1rem;color:#fff;width:10rem">' + esc(new Date(row.createdAt).toLocaleDateString()) + '</span>' +
-        '<span style="font-size:1rem;color:#fff;flex:1">' + esc(row.summary || 'No summary provided') + '</span>' +
+        '<span style="font-size:1rem;color:#fff;padding:1rem;">' + esc(row.type) + '</span>' +
+        '<span style="font-size:1rem;color:#fff;padding:1rem;">' + esc(new Date(row.createdAt).toLocaleDateString()) + '</span>' +
+        '<span style="font-size:1rem;color:#fff;flex:1;padding:1rem;">' + esc(row.summary || 'No summary provided') + '</span>' +
         '</div>';
     }).join('');
   }

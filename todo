@@ -1,11 +1,12 @@
 # TODO:
-Get email from discord when user first joins.
-Server Settings Page
-Account Settings Page
+Get email and store from discord when user first joins.
+Make the server settings page functional, and better Ui like account settings.
+In Account settings page the server's table should be functional.
+
 Link to ERLC
 
 # FIX:
-Turn Lisences Table into Reports Table
+
 
 # BUGS(dont know fix yet):
 

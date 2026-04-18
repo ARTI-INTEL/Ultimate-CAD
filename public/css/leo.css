@@ -720,15 +720,20 @@ body.index-bg { background: #222; }
 .leo-sub-table-wrap {
   position: absolute;
   left: 1.25rem; bottom: 1.25rem;
-  width: 18.75rem;
+  /* width: 18.75rem; */
 }
 .leo-sub-table-wrap--vehicles {
-  left: 22.5rem; bottom: 1.25rem;
+  left: 31.5rem; bottom: 1.25rem;
   width: 50.6875rem;
 }
 .leo-sub-table-wrap--firearms {
   right: 1.25rem; bottom: 1.25rem;
   width: 25.3125rem;
+  left: auto;
+}
+.leo-sub-table-wrap--reports {
+  left: 1.25rem; bottom: 1.25rem;
+  width: 30rem;
   left: auto;
 }
 
@@ -754,6 +759,8 @@ body.index-bg { background: #222; }
 .leo-veh-sub-body { width: 50.6875rem; }
 .leo-fa-sub-hdr   { width: 25.3125rem; }
 .leo-fa-sub-body  { width: 25.3125rem; }
+.leo-r-sub-hdr   { width: 30rem; }
+.leo-r-sub-body  { width: 30rem; }
 
 .leo-sub-empty {
   padding: 0.5rem 0.875rem;

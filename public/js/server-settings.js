@@ -182,18 +182,7 @@
 
   /* ── Load members ────────────────────────────────────────── */
   (function loadMembers() {
-    var demos = [
-      { id: 'm1', username: 'ChiefUnit22',  role: 'Owner',     department: 'LSPD Command',       callsign: 'CMD-1',  joinedAt: '2024-01-01' },
-      { id: 'm2', username: 'Detective_1990',  role: 'Admin',     department: 'BCSO Investigations', callsign: 'INV-3',  joinedAt: '2024-01-15' },
-      { id: 'm3', username: 'RookiePatrol',    role: 'Member',    department: 'LSPD Patrol Div.',    callsign: 'L-14',   joinedAt: '2024-03-22' },
-      { id: 'm4', username: 'FireChief_99',    role: 'Moderator', department: 'Sandy Shores Fire',   callsign: 'F-01',   joinedAt: '2024-02-10' },
-      { id: 'm5', username: 'DOT_Ranger',      role: 'Member',    department: 'Dept of Transport',   callsign: 'D-07',   joinedAt: '2024-04-05' },
-      { id: 'm6', username: 'NightDispatch',   role: 'Member',    department: 'Dispatch Centre',     callsign: 'DSP-2',  joinedAt: '2024-05-18' },
-      { id: 'm7', username: 'SheriffHank',     role: 'Admin',     department: 'BCSO Sheriff',        callsign: 'SHF-1',  joinedAt: '2024-01-30' },
-      { id: 'm8', username: 'MedicResponse',   role: 'Member',    department: 'EMS Unit 4',          callsign: 'E-04',   joinedAt: '2024-06-01' },
-    ];
 
-    members = demos;
     renderMembers();
 
     if (!serverId) return;
@@ -439,7 +428,7 @@
 
   /* ── Delete server ───────────────────────────────────── */
   const deleteSendError  = document.getElementById('delete-send-error');
-  const deleteError      = document.getElementById('delete-error');
+  // const deleteError      = document.getElementById('delete-error');
   const deleteStep1      = document.getElementById('delete-step-1');
   const deleteStep2      = document.getElementById('delete-step-2');
   const btnDeleteSendCode = document.getElementById('btn-delete-send-code');

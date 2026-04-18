@@ -145,14 +145,6 @@
     let servers = [];
     try { servers = JSON.parse(localStorage.getItem('cad_servers') || '[]'); } catch (_) {}
 
-    if (!servers.length) {
-      servers = [
-        { id: 's1', name: 'Hardline Roleplay',       members: 6000, role: 'Owner',  joinedAt: '2024-01-15T00:00:00Z' },
-        { id: 's2', name: 'Los Santos Police Dept.',  members: 1240, role: 'Member', joinedAt: '2024-03-22T00:00:00Z' },
-        { id: 's3', name: 'Blaine County Sheriff',    members:  870, role: 'Member', joinedAt: '2024-06-01T00:00:00Z' },
-      ];
-    }
-
     renderServers(servers);
     cellServerCount.textContent = servers.length;
   })();

@@ -539,7 +539,7 @@ body.index-bg { background: #222; }
 .st-panel-header {
   position: absolute;
   top: 8.125rem;
-  width: 123.3999999999999999999rem;
+  width: 122.77rem;
   height: 5.625rem;
   background: var(--bg-panel-header);
   border-radius: var(--radius-panel) var(--radius-panel) 0 0;
