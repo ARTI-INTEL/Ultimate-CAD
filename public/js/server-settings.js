@@ -1,12 +1,6 @@
 /**
  * server-settings.js  Ultimate CAD Server Settings Page
- *
- * - Loads real member list from GET /servers/:id/members
- * - Save settings via PATCH /servers/:id/update
- * - Kick member via DELETE /servers/:id/members/:memberId (owner only, with confirm)
- * - Delete server via POST /verification/send + /verify then DELETE /servers/:id
- * - Logo upload: preview + clear (stored as base64 in localStorage for now)
- * - Join code: copy, regenerate
+ * Now includes ERLC server key management.
  */
 
 (function () {
@@ -14,21 +8,18 @@
 
   const API_BASE = '';
 
-  /* ── Storage helpers ─────────────────────────────────────── */
   function get(key)      { try { return localStorage.getItem(key); } catch (_) { return null; } }
   function set(key, val) { try { localStorage.setItem(key, val);   } catch (_) {} }
   function remove(key)   { try { localStorage.removeItem(key);     } catch (_) {} }
 
-  /* ── Session values ──────────────────────────────────────── */
   const serverId   = get('cad_active_server');
   const serverName = get('cad_active_server_name') || 'Unknown Server';
   const userId     = get('cad_user_id');
   const username   = get('cad_username') || 'Admin';
 
-  if (!userId) { window.location.href = 'index.html'; return; }
+  if (!userId)   { window.location.href = 'index.html';     return; }
   if (!serverId) { window.location.href = 'dashboard.html'; return; }
 
-  /* ── API helper ──────────────────────────────────────────── */
   function apiFetch(url, opts) {
     return fetch(API_BASE + url, Object.assign({
       headers: { 'Content-Type': 'application/json', 'x-user-id': userId },
@@ -39,7 +30,6 @@
       });
   }
 
-  /* ── Utility ─────────────────────────────────────────────── */
   function esc(str) {
     return String(str)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -58,24 +48,20 @@
     return Array.from({ length: len || 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
   }
 
-  /* ── Element refs ────────────────────────────────────────── */
+  /* ── Element refs ──────────────────────────────────────── */
   const navTitle      = document.getElementById('ss-nav-title');
   const btnBack       = document.getElementById('btn-back');
   const btnDashboard  = document.getElementById('btn-dashboard');
   const membersBody   = document.getElementById('ss-members-body');
   const memberCount   = document.getElementById('ss-member-count');
 
-  // Logo
-  const logoArea      = document.getElementById('ss-logo-area');
-  const logoFileInput = document.getElementById('logo-file-input');
-  const logoPreview   = document.getElementById('logo-preview');
-  const logoClearBtn  = document.getElementById('btn-logo-clear');
-
-  // Form fields
   const inputName     = document.getElementById('input-server-name');
   const inputCode     = document.getElementById('input-join-code');
   const inputDesc     = document.getElementById('input-server-desc');
   const inputDiscord  = document.getElementById('input-discord-id');
+  const inputErlcKey  = document.getElementById('input-erlc-key');
+  const btnTestErlc   = document.getElementById('btn-test-erlc');
+  const erlcStatus    = document.getElementById('erlc-status');
   const errorMsg      = document.getElementById('ss-error');
   const successMsg    = document.getElementById('ss-success');
 
@@ -84,7 +70,6 @@
   const btnSave       = document.getElementById('btn-save-settings');
   const btnDeleteSrv  = document.getElementById('btn-delete-server');
 
-  // Kick modal
   const modalKick      = document.getElementById('modal-kick');
   const kickTitle      = document.getElementById('kick-title');
   const kickDesc       = document.getElementById('kick-desc');
@@ -92,15 +77,12 @@
   const btnKickConfirm = document.getElementById('btn-kick-confirm');
   const btnKickCancel  = document.getElementById('btn-kick-cancel');
 
-  // Role modal
   const modalRole      = document.getElementById('modal-role');
-  const roleTitle      = document.getElementById('role-title');
   const roleGrid       = document.getElementById('role-grid');
   const btnRoleClose   = document.getElementById('btn-role-close');
   const btnRoleConfirm = document.getElementById('btn-role-confirm');
   const btnRoleCancel  = document.getElementById('btn-role-cancel');
 
-  // Delete modal
   const modalDelete        = document.getElementById('modal-delete');
   const deleteStep1        = document.getElementById('delete-step-1');
   const deleteStep2        = document.getElementById('delete-step-2');
@@ -115,20 +97,18 @@
   const btnDeleteCancel    = document.getElementById('btn-delete-cancel');
   const btnDeleteCancel2   = document.getElementById('btn-delete-cancel-2');
 
-  /* ── State ───────────────────────────────────────────────── */
-  let members             = [];
-  let currentServerName   = serverName;
-  let isOwner             = false;
-  let pendingKickMember   = null;  // { iduser, username }
+  let members           = [];
+  let currentServerName = serverName;
+  let isOwner           = false;
+  let pendingKickMember = null;
 
-  /* ── Navbar ──────────────────────────────────────────────── */
+  /* ── Navbar ────────────────────────────────────────────── */
   navTitle.textContent = 'Server Settings — ' + serverName;
 
-  /* ── Navigation ──────────────────────────────────────────── */
-  btnBack.addEventListener('click', function () { window.location.href = 'server-page.html'; });
+  btnBack.addEventListener('click',      function () { window.location.href = 'server-page.html'; });
   btnDashboard.addEventListener('click', function () { window.location.href = 'dashboard.html'; });
 
-  /* ── Modal helpers ───────────────────────────────────────── */
+  /* ── Modal helpers ─────────────────────────────────────── */
   function openModal(el)  { el.classList.add('open'); }
   function closeModal(el) { el.classList.remove('open'); }
 
@@ -139,7 +119,6 @@
     if (e.key === 'Escape') [modalKick, modalRole, modalDelete].forEach(closeModal);
   });
 
-  /* ── Status messages ─────────────────────────────────────── */
   function clearMessages() { errorMsg.textContent = ''; successMsg.textContent = ''; }
 
   function showError(msg) {
@@ -153,11 +132,10 @@
     setTimeout(function () { successMsg.textContent = ''; }, 3000);
   }
 
-  /* ── Load server info ────────────────────────────────────── */
+  /* ── Load server info ──────────────────────────────────── */
   function loadServerInfo() {
-    // Pre-fill from cache
-    inputName.value    = serverName;
-    inputCode.value    = get('cad_server_join_code') || '';
+    inputName.value = serverName;
+    inputCode.value = get('cad_server_join_code') || '';
 
     apiFetch('/servers/name/' + serverId)
       .then(function (srv) {
@@ -167,9 +145,15 @@
         inputDesc.value       = srv.description || '';
         inputDiscord.value    = srv.discord_id || '';
         navTitle.textContent  = 'Server Settings — ' + currentServerName;
-
-        // Check if current user is owner
         isOwner = String(srv.owner_id) === String(userId);
+
+        // Populate ERLC key field with masked value if set
+        if (srv.erlc_server_key && inputErlcKey) {
+          // Show only last 8 chars, rest masked
+          const key = srv.erlc_server_key;
+          inputErlcKey.placeholder = '••••••••' + key.slice(-8);
+          inputErlcKey.dataset.hasKey = 'true';
+        }
       })
       .catch(function () {});
 
@@ -185,7 +169,45 @@
 
   loadServerInfo();
 
-  /* ── Load members ────────────────────────────────────────── */
+  /* ── ERLC key test ─────────────────────────────────────── */
+  if (btnTestErlc && inputErlcKey && erlcStatus) {
+    btnTestErlc.addEventListener('click', function () {
+      const key = inputErlcKey.value.trim();
+      if (!key) {
+        erlcStatus.textContent = 'Enter a key to test.';
+        erlcStatus.style.color = '#ffbb00';
+        return;
+      }
+
+      btnTestErlc.textContent = 'Testing…';
+      btnTestErlc.disabled    = true;
+      erlcStatus.textContent  = '';
+
+      apiFetch('/erlc/' + serverId + '/validate-key', {
+        method: 'POST',
+        body: JSON.stringify({ key }),
+      })
+        .then(function (result) {
+          if (result.valid) {
+            erlcStatus.textContent = '✓ Key is valid and connected.';
+            erlcStatus.style.color = '#00ff2f';
+          } else {
+            erlcStatus.textContent = '✗ ' + (result.reason || 'Invalid key.');
+            erlcStatus.style.color = '#ff0004';
+          }
+        })
+        .catch(function (err) {
+          erlcStatus.textContent = '✗ ' + err.message;
+          erlcStatus.style.color = '#ff0004';
+        })
+        .finally(function () {
+          btnTestErlc.textContent = 'Test';
+          btnTestErlc.disabled    = false;
+        });
+    });
+  }
+
+  /* ── Load members ──────────────────────────────────────── */
   function loadMembers() {
     membersBody.innerHTML = '<div class="ss-members-empty" style="color:rgba(255,255,255,0.3);">Loading members…</div>';
 
@@ -194,7 +216,7 @@
         members = rows || [];
         renderMembers();
       })
-      .catch(function (err) {
+      .catch(function () {
         membersBody.innerHTML = '<div class="ss-members-empty">Could not load members.</div>';
         memberCount.textContent = '–';
       });
@@ -202,7 +224,6 @@
 
   loadMembers();
 
-  /* ── Render member rows ──────────────────────────────────── */
   function renderMembers() {
     membersBody.innerHTML = '';
     memberCount.textContent = members.length + ' member' + (members.length !== 1 ? 's' : '');
@@ -220,18 +241,21 @@
       row.className = 'ss-member-row';
       row.style.animationDelay = (idx * 35) + 'ms';
 
-      const roleLower  = (m.role || 'member').toLowerCase();
-      const badgeClass = 'ss-role-badge--' + roleLower;
+      const roleLower     = (m.role || 'member').toLowerCase();
+      const badgeClass    = 'ss-role-badge--' + roleLower;
       const isMemberOwner = roleLower === 'owner';
-      const isSelf     = String(m.iduser) === String(userId);
+      const isSelf        = String(m.iduser) === String(userId);
 
-      // Only show kick button for non-owners when viewer is the server owner
+      const robloxBadge = m.roblox_username
+        ? '<span style="font-size:0.7rem;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);border-radius:0.375rem;padding:0.125rem 0.5rem;margin-left:0.375rem;">🎮 ' + esc(m.roblox_username) + '</span>'
+        : '';
+
       const actionHtml = (isOwner && !isMemberOwner && !isSelf)
         ? '<button class="ss-row-btn ss-row-btn--kick" data-id="' + esc(String(m.iduser)) + '" data-name="' + esc(m.username) + '">Kick</button>'
         : (isSelf ? '<span style="font-size:0.75rem;color:rgba(255,255,255,0.3);">You</span>' : '');
 
       row.innerHTML =
-        '<span class="ss-member-cell ss-member-cell--name">' + esc(m.username) + '</span>' +
+        '<span class="ss-member-cell ss-member-cell--name">' + esc(m.username) + robloxBadge + '</span>' +
         '<span class="ss-member-cell ss-member-cell--role">' +
           '<span class="ss-role-badge ' + badgeClass + '">' + esc(m.role || 'Member') + '</span>' +
         '</span>' +
@@ -242,11 +266,10 @@
     });
   }
 
-  /* ── Kick: event delegation ──────────────────────────────── */
+  /* ── Kick delegation ───────────────────────────────────── */
   membersBody.addEventListener('click', function (e) {
     const kickBtn = e.target.closest('.ss-row-btn--kick');
     if (!kickBtn) return;
-
     pendingKickMember = {
       iduser:   kickBtn.getAttribute('data-id'),
       username: kickBtn.getAttribute('data-name'),
@@ -285,11 +308,8 @@
   btnKickCancel.addEventListener('click', function () { pendingKickMember = null; closeModal(modalKick); });
   btnKickClose.addEventListener('click',  function () { pendingKickMember = null; closeModal(modalKick); });
 
-  /* ── Role modal (UI only — no role column in DB yet) ─────── */
-  // Role changes are displayed but won't persist until a DB migration adds a role column.
-  // For now we just close the modal and show a message.
+  /* ── Role modal ────────────────────────────────────────── */
   let pendingRoleVal = null;
-
   roleGrid.addEventListener('click', function (e) {
     const btn = e.target.closest('.ss-role-btn');
     if (!btn) return;
@@ -297,36 +317,11 @@
     btn.classList.add('selected');
     pendingRoleVal = btn.getAttribute('data-role');
   });
-
-  btnRoleConfirm.addEventListener('click', function () {
-    closeModal(modalRole);
-    showSuccess('Role updated.');
-    pendingRoleVal = null;
-  });
+  btnRoleConfirm.addEventListener('click', function () { closeModal(modalRole); showSuccess('Role updated.'); pendingRoleVal = null; });
   btnRoleCancel.addEventListener('click', function () { closeModal(modalRole); pendingRoleVal = null; });
   btnRoleClose.addEventListener('click',  function () { closeModal(modalRole); pendingRoleVal = null; });
 
-  /* ── Logo upload ─────────────────────────────────────────── */
-  logoFileInput.addEventListener('change', function () {
-    const file = this.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      logoPreview.src = e.target.result;
-      logoArea.classList.add('has-image');
-    };
-    reader.readAsDataURL(file);
-  });
-
-  logoClearBtn.addEventListener('click', function (e) {
-    e.stopPropagation();
-    e.preventDefault();
-    logoPreview.src     = '';
-    logoFileInput.value = '';
-    logoArea.classList.remove('has-image');
-  });
-
-  /* ── Join code: copy ─────────────────────────────────────── */
+  /* ── Join code ─────────────────────────────────────────── */
   btnCopyCode.addEventListener('click', function () {
     const code = inputCode.value.trim();
     if (!code) return;
@@ -337,7 +332,6 @@
     }).catch(function () { inputCode.select(); });
   });
 
-  /* ── Join code: regenerate ───────────────────────────────── */
   btnRegenCode.addEventListener('click', function () {
     inputCode.value = generateCode(8);
     clearMessages();
@@ -347,7 +341,7 @@
     this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
   });
 
-  /* ── Save settings ───────────────────────────────────────── */
+  /* ── Save settings (includes ERLC key) ────────────────── */
   btnSave.addEventListener('click', function () {
     clearMessages();
 
@@ -355,6 +349,7 @@
     const code    = inputCode.value.trim();
     const desc    = inputDesc.value.trim();
     const discord = inputDiscord.value.trim() || null;
+    const erlcKey = inputErlcKey ? inputErlcKey.value.trim() || null : null;
 
     if (!name) { showError('Server name is required.'); return; }
     if (!code) { showError('Join code is required.'); return; }
@@ -362,14 +357,19 @@
     btnSave.classList.add('ss-loading');
     btnSave.textContent = 'Saving…';
 
+    const payload = {
+      name,
+      description: desc || null,
+      joinCode:    code,
+      discordId:   discord,
+    };
+
+    // Only include erlcServerKey in payload if user typed something new
+    if (erlcKey) payload.erlcServerKey = erlcKey;
+
     apiFetch('/servers/' + serverId + '/update', {
       method: 'PATCH',
-      body: JSON.stringify({
-        name,
-        description: desc || null,
-        joinCode:    code,
-        discordId:   discord,
-      }),
+      body: JSON.stringify(payload),
     })
       .then(function (srv) {
         currentServerName = srv.name || name;
@@ -377,6 +377,15 @@
         set('cad_active_server_name', currentServerName);
         set('cad_server_join_code', srv.join_code || code);
         if (srv.join_code) inputCode.value = srv.join_code;
+
+        // Clear ERLC key field and update placeholder after save
+        if (inputErlcKey && erlcKey) {
+          inputErlcKey.value = '';
+          inputErlcKey.placeholder = '••••••••' + erlcKey.slice(-8);
+          inputErlcKey.dataset.hasKey = 'true';
+          if (erlcStatus) { erlcStatus.textContent = ''; }
+        }
+
         showSuccess('Settings saved.');
       })
       .catch(function (err) {
@@ -388,7 +397,7 @@
       });
   });
 
-  /* ── Delete server ───────────────────────────────────────── */
+  /* ── Delete server ─────────────────────────────────────── */
   btnDeleteSrv.addEventListener('click', function () {
     deleteStep1.style.display   = '';
     deleteStep2.style.display   = 'none';
@@ -400,9 +409,9 @@
   });
 
   btnDeleteSendCode.addEventListener('click', function () {
-    deleteSendError.textContent      = '';
-    btnDeleteSendCode.textContent    = 'Sending…';
-    btnDeleteSendCode.disabled       = true;
+    deleteSendError.textContent   = '';
+    btnDeleteSendCode.textContent = 'Sending…';
+    btnDeleteSendCode.disabled    = true;
 
     apiFetch('/verification/send', {
       method: 'POST',
@@ -444,7 +453,6 @@
       body: JSON.stringify({ code, action: 'delete_server_' + serverId }),
     })
       .then(function () {
-        // Code verified — delete the server
         return apiFetch('/servers/' + serverId, { method: 'DELETE' });
       })
       .then(function () {
@@ -461,8 +469,8 @@
   });
 
   function closeDeleteModal() { closeModal(modalDelete); }
-  btnDeleteClose.addEventListener('click',   closeDeleteModal);
-  btnDeleteCancel.addEventListener('click',  closeDeleteModal);
+  btnDeleteClose.addEventListener('click',  closeDeleteModal);
+  btnDeleteCancel.addEventListener('click', closeDeleteModal);
   if (btnDeleteCancel2) btnDeleteCancel2.addEventListener('click', closeDeleteModal);
 
 })();

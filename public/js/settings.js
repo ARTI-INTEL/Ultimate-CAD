@@ -1,7 +1,6 @@
 /**
  * settings.js  Ultimate CAD Account Settings Page
- * Loads server memberships from the API rather than localStorage.
- * Leave server calls DELETE /servers/:id/leave (with email verification).
+ * Includes Roblox account linking via OAuth.
  */
 
 (function () {
@@ -19,7 +18,6 @@
 
   if (!userId) { window.location.href = 'index.html'; return; }
 
-  /* ── API helper ──────────────────────────────────────────── */
   function apiFetch(url, opts) {
     return fetch(API_BASE + url, Object.assign({
       headers: { 'Content-Type': 'application/json', 'x-user-id': userId || '' },
@@ -33,13 +31,11 @@
   /* ── Element refs ────────────────────────────────────────── */
   const navTitle        = document.getElementById('st-nav-title');
   const btnDashboard    = document.getElementById('btn-dashboard');
-
   const cellUsername    = document.getElementById('cell-username');
   const cellRole        = document.getElementById('cell-role');
   const cellServerCount = document.getElementById('cell-server-count');
   const cellJoinDate    = document.getElementById('cell-join-date');
   const cellDiscordId   = document.getElementById('cell-discord-id');
-
   const inputUsername   = document.getElementById('input-username');
   const inputEmail      = document.getElementById('input-email');
   const inputDiscordId  = document.getElementById('input-discord-id');
@@ -47,12 +43,17 @@
   const btnSave         = document.getElementById('btn-save-account');
   const errorMsg        = document.getElementById('account-error');
   const successMsg      = document.getElementById('account-success');
-
   const serversList     = document.getElementById('servers-list');
   const btnLeaveAll     = document.getElementById('btn-leave-all');
   const btnDeleteAcct   = document.getElementById('btn-delete-account');
 
-  /* ── Confirm modal ───────────────────────────────────────── */
+  // Roblox
+  const robloxCard    = document.getElementById('roblox-card');
+  const robloxSubText = document.getElementById('roblox-sub-text');
+  const btnRoblox     = document.getElementById('btn-roblox-link');
+  const robloxNotif   = document.getElementById('roblox-notif');
+
+  // Confirm modal
   const modalConfirm    = document.getElementById('modal-confirm');
   const confirmTitle    = document.getElementById('confirm-title');
   const confirmDesc     = document.getElementById('confirm-desc');
@@ -61,25 +62,23 @@
   const btnConfirmClose = document.getElementById('btn-confirm-close');
   let pendingConfirmAction = null;
 
-  /* ── Verification modal ──────────────────────────────────── */
-  const modalVerify       = document.getElementById('modal-verify');
-  const verifyModalTitle  = document.getElementById('verify-modal-title');
-  const verifyStep1       = document.getElementById('verify-step-1');
-  const verifyStep1Error  = document.getElementById('verify-step-1-error');
-  const verifyStep2       = document.getElementById('verify-step-2');
-  const verifyStep2Desc   = document.getElementById('verify-step-2-desc');
-  const verifyStep2Error  = document.getElementById('verify-step-2-error');
-  const inputVerifyCode   = document.getElementById('input-verify-code');
-  const btnSendCode       = document.getElementById('btn-send-code');
-  const btnSubmitCode     = document.getElementById('btn-submit-verify-code');
-  const btnVerifyClose    = document.getElementById('btn-verify-close');
-  const btnVerifyCancel1  = document.getElementById('btn-verify-cancel-1');
-  const btnVerifyCancel2  = document.getElementById('btn-verify-cancel-2');
-
+  // Verification modal
+  const modalVerify      = document.getElementById('modal-verify');
+  const verifyModalTitle = document.getElementById('verify-modal-title');
+  const verifyStep1      = document.getElementById('verify-step-1');
+  const verifyStep1Error = document.getElementById('verify-step-1-error');
+  const verifyStep2      = document.getElementById('verify-step-2');
+  const verifyStep2Desc  = document.getElementById('verify-step-2-desc');
+  const verifyStep2Error = document.getElementById('verify-step-2-error');
+  const inputVerifyCode  = document.getElementById('input-verify-code');
+  const btnSendCode      = document.getElementById('btn-send-code');
+  const btnSubmitCode    = document.getElementById('btn-submit-verify-code');
+  const btnVerifyClose   = document.getElementById('btn-verify-close');
+  const btnVerifyCancel1 = document.getElementById('btn-verify-cancel-1');
+  const btnVerifyCancel2 = document.getElementById('btn-verify-cancel-2');
   let pendingVerifyAction   = null;
   let pendingVerifyCallback = null;
 
-  // Track server data for leave-all
   let serverData = [];
 
   /* ── Utility ─────────────────────────────────────────────── */
@@ -99,7 +98,6 @@
   /* ── Navbar ──────────────────────────────────────────────── */
   navTitle.textContent = 'Welcome to Ultimate CAD, ' + username;
 
-  /* ── Populate info row ───────────────────────────────────── */
   function populateInfoRow(user) {
     cellUsername.textContent  = user.username || username;
     cellRole.textContent      = 'Member';
@@ -107,7 +105,7 @@
     cellJoinDate.textContent  = formatDate(user.created_at);
   }
 
-  /* ── Load user from API ──────────────────────────────────── */
+  /* ── Load user ───────────────────────────────────────────── */
   (function loadUser() {
     const localUser = { username, discord_id: discordId, created_at: get('cad_join_date') };
     populateInfoRow(localUser);
@@ -127,7 +125,7 @@
       .catch(function () {});
   })();
 
-  /* ── Load server memberships from API ────────────────────── */
+  /* ── Load servers ────────────────────────────────────────── */
   function loadServers() {
     serversList.innerHTML = '<div class="st-empty-servers" style="color:rgba(255,255,255,0.3);">Loading…</div>';
 
@@ -138,7 +136,6 @@
         cellServerCount.textContent = serverData.length;
       })
       .catch(function () {
-        // Fallback to localStorage if API is unavailable
         try { serverData = JSON.parse(localStorage.getItem('cad_servers') || '[]'); } catch (_) { serverData = []; }
         renderServers(serverData);
         cellServerCount.textContent = serverData.length;
@@ -147,35 +144,30 @@
 
   loadServers();
 
-  /* ── Render server rows ──────────────────────────────────── */
   function renderServers(list) {
     serversList.innerHTML = '';
-
     if (!list.length) {
       const empty = document.createElement('div');
-      empty.className = 'st-empty-servers';
+      empty.className   = 'st-empty-servers';
       empty.textContent = 'No server memberships found.';
       serversList.appendChild(empty);
       return;
     }
 
     list.forEach(function (srv, idx) {
-      const row       = document.createElement('div');
-      row.className   = 'st-srv-row';
+      const row     = document.createElement('div');
+      row.className = 'st-srv-row';
       row.style.animationDelay = (idx * 40) + 'ms';
 
-      // Normalize field names from API response
-      const srvId     = srv.id || srv.idserver;
-      const srvName   = srv.name || '';
-      const srvRole   = srv.role || 'Member';
-      const joinedAt  = srv.joined_at || srv.joinedAt || null;
+      const srvId    = srv.id || srv.idserver;
+      const srvName  = srv.name || '';
+      const srvRole  = srv.role || 'Member';
+      const joinedAt = srv.joined_at || srv.joinedAt || null;
       const roleLower = srvRole.toLowerCase();
-
       const badgeClass = roleLower === 'owner' ? 'st-role-badge--owner'
                        : roleLower === 'admin'  ? 'st-role-badge--admin'
                        : 'st-role-badge--member';
 
-      // Owners can't leave their own server
       const leaveBtn = roleLower === 'owner'
         ? '<span style="font-size:0.875rem;color:rgba(255,255,255,0.3);font-weight:600;">Owner</span>'
         : '<button class="st-leave-btn" data-server-id="' + esc(String(srvId)) + '" data-server-name="' + esc(srvName) + '">Leave</button>';
@@ -194,13 +186,11 @@
     });
   }
 
-  /* ── Event delegation: leave server buttons ──────────────── */
   serversList.addEventListener('click', function (e) {
     const btn = e.target.closest('.st-leave-btn');
     if (!btn) return;
     const serverName = btn.getAttribute('data-server-name');
     const srvId      = btn.getAttribute('data-server-id');
-
     startVerification(
       'Leave "' + serverName + '"?',
       'leave_server_' + srvId,
@@ -219,12 +209,11 @@
       })
       .catch(function (err) {
         alert('Could not leave server: ' + err.message);
-        // Still refresh the list from the server
         loadServers();
       });
   }
 
-  /* ── Save username + email ───────────────────────────────── */
+  /* ── Save account ────────────────────────────────────────── */
   btnSave.addEventListener('click', function () {
     errorMsg.textContent   = '';
     successMsg.textContent = '';
@@ -244,19 +233,11 @@
     cellUsername.textContent = newName;
 
     const saves = [
-      apiFetch('/users/update', {
-        method: 'PATCH',
-        body: JSON.stringify({ username: newName }),
-      }).catch(function () {}),
+      apiFetch('/users/update', { method: 'PATCH', body: JSON.stringify({ username: newName }) }).catch(function () {}),
     ];
 
     if (newEmail) {
-      saves.push(
-        apiFetch('/users/email', {
-          method: 'PATCH',
-          body: JSON.stringify({ email: newEmail }),
-        }).catch(function () {})
-      );
+      saves.push(apiFetch('/users/email', { method: 'PATCH', body: JSON.stringify({ email: newEmail }) }).catch(function () {}));
     }
 
     Promise.all(saves).then(function () {
@@ -266,6 +247,92 @@
       setTimeout(function () { successMsg.textContent = ''; }, 3000);
     });
   });
+
+  /* ── Roblox OAuth linking ─────────────────────────────────── */
+
+  // Check for OAuth return params in URL
+  (function handleRobloxReturn() {
+    const params = new URLSearchParams(window.location.search);
+    const robloxSuccess  = params.get('roblox_success');
+    const robloxUsername = params.get('roblox_username');
+    const robloxError    = params.get('roblox_error');
+
+    if (robloxSuccess) {
+      const name = robloxUsername ? decodeURIComponent(robloxUsername) : 'your account';
+      showRobloxNotif('✓ Roblox account linked: @' + name, 'success');
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (robloxError) {
+      const errorMap = {
+        denied:          'Roblox authorization was canceled.',
+        missing_params:  'OAuth parameters were missing.',
+        invalid_state:   'Session expired. Please try again.',
+        token_failed:    'Could not exchange the authorization code.',
+        userinfo_failed: 'Could not fetch your Roblox profile.',
+        already_linked:  'This Roblox account is already linked to another CAD user.',
+        server_error:    'An unexpected error occurred. Please try again.',
+      };
+      showRobloxNotif('✗ ' + (errorMap[robloxError] || 'Roblox linking failed.'), 'error');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  })();
+
+  function showRobloxNotif(msg, type) {
+    if (!robloxNotif) return;
+    robloxNotif.textContent = msg;
+    robloxNotif.className   = 'roblox-notif roblox-notif--' + type;
+    robloxNotif.style.display = '';
+    setTimeout(function () { robloxNotif.style.display = 'none'; }, 6000);
+  }
+
+  // Load current Roblox link status
+  (function loadRobloxStatus() {
+    if (!btnRoblox) return;
+
+    apiFetch('/auth/roblox/me')
+      .then(function (data) {
+        if (data && data.roblox_username) {
+          setRobloxLinked(data.roblox_username);
+        } else {
+          setRobloxUnlinked();
+        }
+      })
+      .catch(function () { setRobloxUnlinked(); });
+  })();
+
+  function setRobloxLinked(robloxUsername) {
+    if (!robloxSubText || !btnRoblox) return;
+    robloxSubText.innerHTML = 'Linked as <span class="roblox-card__username">@' + esc(robloxUsername) + '</span>';
+    btnRoblox.textContent   = 'Unlink';
+    btnRoblox.className     = 'roblox-link-btn roblox-link-btn--unlink';
+    btnRoblox.onclick       = doRobloxUnlink;
+  }
+
+  function setRobloxUnlinked() {
+    if (!robloxSubText || !btnRoblox) return;
+    robloxSubText.textContent = 'Link your Roblox account to show your username in the CAD and enable ERLC integration.';
+    btnRoblox.textContent     = 'Link Roblox';
+    btnRoblox.className       = 'roblox-link-btn roblox-link-btn--link';
+    btnRoblox.onclick         = doRobloxLink;
+  }
+
+  function doRobloxLink() {
+    // Redirect to Roblox OAuth — userId passed as query param for the callback
+    window.location.href = '/auth/roblox/link?userId=' + encodeURIComponent(userId);
+  }
+
+  function doRobloxUnlink() {
+    if (!confirm('Are you sure you want to unlink your Roblox account?')) return;
+
+    apiFetch('/auth/roblox/unlink', { method: 'DELETE' })
+      .then(function () {
+        setRobloxUnlinked();
+        showRobloxNotif('Roblox account unlinked.', 'success');
+      })
+      .catch(function (err) {
+        showRobloxNotif('✗ ' + err.message, 'error');
+      });
+  }
 
   /* ── Dashboard navigation ────────────────────────────────── */
   btnDashboard.addEventListener('click', function () { window.location.href = 'dashboard.html'; });
@@ -279,31 +346,23 @@
       alert('You have no servers to leave (you are the owner of all your servers).');
       return;
     }
-    startVerification(
-      'Leave All Servers?',
-      'leave_all_servers',
-      function () {
-        Promise.all(leavable.map(function (s) {
-          return apiFetch('/servers/' + (s.id || s.idserver) + '/leave', { method: 'DELETE' }).catch(function () {});
-        })).then(function () { loadServers(); });
-      }
-    );
+    startVerification('Leave All Servers?', 'leave_all_servers', function () {
+      Promise.all(leavable.map(function (s) {
+        return apiFetch('/servers/' + (s.id || s.idserver) + '/leave', { method: 'DELETE' }).catch(function () {});
+      })).then(function () { loadServers(); });
+    });
   });
 
   btnDeleteAcct.addEventListener('click', function () {
-    startVerification(
-      'Delete Your Account?',
-      'delete_account',
-      function () {
-        ['cad_username','cad_user_id','cad_discord_id','cad_servers',
-         'cad_active_server','cad_active_server_name','cad_officer_id',
-         'cad_officer_dept','cad_join_date'].forEach(remove);
-        window.location.href = 'index.html';
-      }
-    );
+    startVerification('Delete Your Account?', 'delete_account', function () {
+      ['cad_username','cad_user_id','cad_discord_id','cad_servers',
+       'cad_active_server','cad_active_server_name','cad_officer_id',
+       'cad_officer_dept','cad_join_date'].forEach(remove);
+      window.location.href = 'index.html';
+    });
   });
 
-  /* ── Verification modal logic ────────────────────────────── */
+  /* ── Verification modal ──────────────────────────────────── */
   function startVerification(title, action, callback) {
     pendingVerifyAction   = action;
     pendingVerifyCallback = callback;
@@ -327,23 +386,15 @@
     btnSendCode.textContent = 'Sending…';
     btnSendCode.disabled    = true;
 
-    apiFetch('/verification/send', {
-      method: 'POST',
-      body: JSON.stringify({ action: pendingVerifyAction }),
-    })
+    apiFetch('/verification/send', { method: 'POST', body: JSON.stringify({ action: pendingVerifyAction }) })
       .then(function (data) {
         verifyStep2Desc.textContent = 'Enter the 6-digit code sent to ' + data.maskedEmail + ':';
         verifyStep1.style.display   = 'none';
         verifyStep2.style.display   = '';
         inputVerifyCode.focus();
       })
-      .catch(function (err) {
-        verifyStep1Error.textContent = err.message;
-      })
-      .finally(function () {
-        btnSendCode.textContent = 'Send Code';
-        btnSendCode.disabled    = false;
-      });
+      .catch(function (err) { verifyStep1Error.textContent = err.message; })
+      .finally(function () { btnSendCode.textContent = 'Send Code'; btnSendCode.disabled = false; });
   });
 
   btnSubmitCode.addEventListener('click', function () {
@@ -354,31 +405,20 @@
     btnSubmitCode.textContent = 'Verifying…';
     btnSubmitCode.disabled    = true;
 
-    apiFetch('/verification/verify', {
-      method: 'POST',
-      body: JSON.stringify({ code, action: pendingVerifyAction }),
-    })
+    apiFetch('/verification/verify', { method: 'POST', body: JSON.stringify({ code, action: pendingVerifyAction }) })
       .then(function () {
         const cb = pendingVerifyCallback;
         closeVerifyModal();
         if (typeof cb === 'function') cb();
       })
-      .catch(function (err) {
-        verifyStep2Error.textContent = err.message;
-      })
-      .finally(function () {
-        btnSubmitCode.textContent = 'Confirm';
-        btnSubmitCode.disabled    = false;
-      });
+      .catch(function (err) { verifyStep2Error.textContent = err.message; })
+      .finally(function () { btnSubmitCode.textContent = 'Confirm'; btnSubmitCode.disabled = false; });
   });
 
   [btnVerifyClose, btnVerifyCancel1, btnVerifyCancel2].forEach(function (btn) {
     if (btn) btn.addEventListener('click', closeVerifyModal);
   });
-
-  modalVerify.addEventListener('click', function (e) {
-    if (e.target === modalVerify) closeVerifyModal();
-  });
+  modalVerify.addEventListener('click', function (e) { if (e.target === modalVerify) closeVerifyModal(); });
 
   /* ── Confirm modal ───────────────────────────────────────── */
   function openConfirm(title, desc, onConfirm) {
@@ -388,16 +428,10 @@
     modalConfirm.classList.add('open');
   }
 
-  function closeConfirm() {
-    modalConfirm.classList.remove('open');
-    pendingConfirmAction = null;
-  }
+  function closeConfirm() { modalConfirm.classList.remove('open'); pendingConfirmAction = null; }
 
-  btnConfirmYes.addEventListener('click', function () {
-    if (typeof pendingConfirmAction === 'function') pendingConfirmAction();
-    closeConfirm();
-  });
-  btnConfirmNo.addEventListener('click', closeConfirm);
+  btnConfirmYes.addEventListener('click',   function () { if (typeof pendingConfirmAction === 'function') pendingConfirmAction(); closeConfirm(); });
+  btnConfirmNo.addEventListener('click',    closeConfirm);
   btnConfirmClose.addEventListener('click', closeConfirm);
   modalConfirm.addEventListener('click', function (e) { if (e.target === modalConfirm) closeConfirm(); });
 

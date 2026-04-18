@@ -262,7 +262,7 @@ router.get('/my-servers/:userId', verifyUser, async (req, res) => {
 
 // PATCH /servers/:serverId/update
 router.patch('/:serverId/update', verifyUser, async (req, res) => {
-  const { name, description, joinCode, discordId, iconUrl } = req.body;
+  const { name, description, joinCode, discordId, iconUrl, erlcServerKey } = req.body;
   const { serverId } = req.params;
 
   try {
@@ -278,9 +278,10 @@ router.patch('/:serverId/update', verifyUser, async (req, res) => {
          description = COALESCE(?, description),
          join_code = COALESCE(?, join_code),
          discord_id = COALESCE(?, discord_id),
+         erlc_server_key = COALESCE(?, erlc_server_key),
          icon_url  = COALESCE(?, icon_url)
        WHERE idserver = ?`,
-      [name || null, description || null, joinCode || null, discordId || null, iconUrl || null, serverId]
+      [name || null, description || null, joinCode || null, discordId || null, erlcServerKey || null, iconUrl || null, serverId]
     );
 
     const [rows] = await pool.query('SELECT * FROM servers WHERE idserver = ?', [serverId]);

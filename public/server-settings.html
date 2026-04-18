@@ -23,39 +23,20 @@
 
   <!-- ======== LEFT: MEMBER LIST PANEL ======== -->
   <div class="ss-members-panel" id="ss-members-panel">
-
-    <!-- Header — 4 columns: Member | Role | Date Joined | Action -->
     <div class="ss-members-hdr">
       <span class="ss-mhdr-col ss-mhdr-col--name">Member</span>
       <span class="ss-mhdr-col ss-mhdr-col--role">Role</span>
       <span class="ss-mhdr-col ss-mhdr-col--joined">Date Joined</span>
       <span class="ss-mhdr-col ss-mhdr-col--action">Action</span>
     </div>
-
-    <!-- Body – rows injected by server-settings.js -->
     <div class="ss-members-body" id="ss-members-body"></div>
-
-    <!-- Footer -->
     <div class="ss-members-footer">
       <span class="ss-members-count" id="ss-member-count">–</span>
     </div>
-
   </div>
 
   <!-- ======== RIGHT: SERVER CONFIG ======== -->
   <div class="ss-config" id="ss-config">
-
-    <!-- Server Logo -->
-    <div class="ss-logo-area" id="ss-logo-area">
-      <input class="ss-logo-file-input" type="file" id="logo-file-input" accept="image/*">
-      <img  class="ss-logo-preview" id="logo-preview" alt="Server Logo">
-      <div  class="ss-logo-overlay" id="logo-overlay">
-        <span class="ss-logo-icon">🖼️</span>
-        <p    class="ss-logo-hint">Server Logo</p>
-        <p    class="ss-logo-sub">Click to upload</p>
-      </div>
-      <button class="ss-logo-clear-btn" id="btn-logo-clear">✕ Remove</button>
-    </div>
 
     <!-- Server Name -->
     <div class="ss-field-section">
@@ -72,7 +53,7 @@
       <div class="ss-field-box ss-field-box--row">
         <input class="ss-field-input ss-mono" id="input-join-code"
                placeholder="XXXXXXXX" maxlength="12" autocomplete="off">
-        <button class="ss-inline-btn"           id="btn-copy-code">Copy</button>
+        <button class="ss-inline-btn"                    id="btn-copy-code">Copy</button>
         <button class="ss-inline-btn ss-inline-btn--alt" id="btn-regen-code">Regen</button>
       </div>
     </div>
@@ -94,6 +75,27 @@
         <input class="ss-field-input ss-mono" id="input-discord-id"
                placeholder="Discord guild ID" autocomplete="off">
       </div>
+    </div>
+
+    <!-- ── ERLC Integration ── -->
+    <div class="ss-field-section">
+      <label class="ss-field-label" for="input-erlc-key">
+        ERLC Server Key
+        <span style="font-size:0.6875rem;color:rgba(255,255,255,0.35);font-weight:500;margin-left:0.5rem;">
+          Emergency Response: Liberty County
+        </span>
+      </label>
+      <div class="ss-field-box ss-field-box--row">
+        <input class="ss-field-input ss-mono" id="input-erlc-key"
+               placeholder="Paste your ERLC server key…"
+               type="password" autocomplete="off">
+        <button class="ss-inline-btn ss-inline-btn--alt" id="btn-test-erlc">Test</button>
+      </div>
+      <p id="erlc-status" style="font-size:0.8125rem;font-weight:600;min-height:1.125rem;margin-top:0.25rem;"></p>
+      <p style="font-size:0.6875rem;color:rgba(255,255,255,0.3);margin-top:0.25rem;line-height:1.5;">
+        Get your key from the PRC Dashboard → Server Settings → API Key.
+        The key is stored encrypted and never exposed to clients.
+      </p>
     </div>
 
     <!-- Status messages -->
@@ -124,7 +126,7 @@
     </div>
   </div>
 
-  <!-- ======== MODAL: CHANGE ROLE (future) ======== -->
+  <!-- ======== MODAL: CHANGE ROLE ======== -->
   <div class="modal-overlay" id="modal-role">
     <div class="modal-box ss-modal-box">
       <button class="close-btn" id="btn-role-close">✕</button>
@@ -148,7 +150,6 @@
       <button class="close-btn" id="btn-delete-close">✕</button>
       <p class="ss-modal-title ss-modal-title--danger">Delete this server?</p>
 
-      <!-- Step 1: send code -->
       <div id="delete-step-1">
         <p class="ss-modal-desc">
           All data, members, calls, BOLOs, and reports will be permanently deleted.
@@ -161,7 +162,6 @@
         </div>
       </div>
 
-      <!-- Step 2: verify + confirm name -->
       <div id="delete-step-2" style="display:none">
         <p class="ss-modal-desc" id="delete-code-desc">
           Enter the 6-digit code sent to your email, then type the server name to confirm.
@@ -185,7 +185,6 @@
   </div>
 
 </div><!-- /.page-wrapper -->
-
 <script src="js/server-settings.js"></script>
 </body>
 </html>
