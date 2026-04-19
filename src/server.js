@@ -37,9 +37,6 @@ app.use(cors({
   credentials: true
 }));
 
-// Optional: handle preflight requests
-app.options('*', cors());
-
 /* =========================
    CORE MIDDLEWARE
 ========================= */
