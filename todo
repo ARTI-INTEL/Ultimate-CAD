@@ -1,5 +1,9 @@
 # TODO:
-
+Pre Release:
+    Setup CORS
+    Add Logs
+    separate mailing to mailer.js
+    Toast style popup notifications
 
 # FIX:
 
@@ -18,3 +22,4 @@ VC Radio(Using Mumble)
 Employee Management(Infractions, LOA etc.)
 Bodycam System
 Discord Integ(Using Bot or Webhooks)
+Desktop Application

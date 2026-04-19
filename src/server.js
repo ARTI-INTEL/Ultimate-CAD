@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import dotenv from 'dotenv';
 
 import authRoutes         from './routes/auth.routes.js';
@@ -20,13 +21,36 @@ import erlcRoutes         from './jobs/erlcPoller.js';
 dotenv.config();
 
 const app  = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+/* =========================
+   SECURITY MIDDLEWARE
+========================= */
+
+// Helmet (sets secure HTTP headers)
+app.use(helmet());
+
+// CORS (restrict origins in production)
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:5500',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
+
+// Optional: handle preflight requests
+app.options('*', cors());
+
+/* =========================
+   CORE MIDDLEWARE
+========================= */
+
 app.use(express.json());
 app.use(express.static('public'));
 
-// Routes
+/* =========================
+   ROUTES
+========================= */
+
 app.use('/auth',          authRoutes);
 app.use('/auth/roblox',   robloxRoutes);
 app.use('/users',         userRoutes);
@@ -42,6 +66,10 @@ app.use('/firearms',      firearmRoutes);
 app.use('/verification',  verificationRoutes);
 app.use('/erlc',          erlcRoutes);
 
+/* =========================
+   START SERVER
+========================= */
+
 app.listen(PORT, () => {
-  console.log(`Ultimate CAD server running on http://localhost:${PORT}`);
+  console.log(`Ultimate CAD server running on ${PORT}`);
 });
