@@ -33,13 +33,8 @@
 
   <!-- ======== PANEL: MAP ======== -->
   <div class="panel" id="panel-map">
-    <div class="dot-map-placeholder">
-      <div class="dot-map-inner">
-        <div class="dot-map-icon">🗺️</div>
-        <p class="dot-map-title">Map View</p>
-        <p class="dot-map-subtitle">Integrate your map here</p>
-      </div>
-    </div>
+    <!-- cad-map.js renders a live canvas into #dot-map-container -->
+    <div class="dot-map-placeholder" id="dot-map-container"></div>
   </div>
 
   <!-- ======== PANEL: CAD ======== -->
@@ -64,35 +59,23 @@
     <div class="dot-search-section dot-search-ped-section">
       <p class="dot-search-label">Search PED</p>
       <div class="dot-search-input-wrap">
-        <input
-          class="dot-search-input"
-          id="dot-ped-search"
-          placeholder="Enter First Name or Last Name"
-          autocomplete="off"
-        >
+        <input class="dot-search-input" id="dot-ped-search" placeholder="Enter First Name or Last Name" autocomplete="off">
       </div>
     </div>
 
     <div class="dot-search-section dot-search-car-section">
       <p class="dot-search-label">Search Car</p>
       <div class="dot-search-input-wrap">
-        <input
-          class="dot-search-input"
-          id="dot-car-search"
-          placeholder="Enter License Plate or VIN"
-          autocomplete="off"
-        >
+        <input class="dot-search-input" id="dot-car-search" placeholder="Enter License Plate or VIN" autocomplete="off">
       </div>
     </div>
 
-    <!-- PED results -->
     <div class="tbl-hdr dot-ped-results-hdr">
       <span class="tbl-col dot-ped-col-fn">First Name</span>
       <span class="tbl-col dot-ped-col-ln">Last Name</span>
     </div>
     <div class="tbl-body" id="dot-ped-results"></div>
 
-    <!-- Car results -->
     <div class="tbl-hdr dot-car-results-hdr">
       <span class="tbl-col dot-car-col-owner">Owner</span>
       <span class="tbl-col dot-car-col-plate">Plate</span>
@@ -101,7 +84,6 @@
     </div>
     <div class="tbl-body" id="dot-car-results"></div>
 
-    <!-- PED Detail popup -->
     <div class="modal-overlay" id="dot-ped-detail">
       <div class="modal-box dot-ped-detail-box">
         <button class="close-btn" id="dot-ped-detail-close">✕</button>
@@ -131,12 +113,7 @@
       <span class="tbl-col dot-col-priority">Priority</span>
       <span class="tbl-col dot-col-unit">Unit</span>
       <div class="dot-history-search-wrap">
-        <input
-          class="dot-history-search-input"
-          id="dot-hist-search"
-          placeholder="Search..."
-          autocomplete="off"
-        >
+        <input class="dot-history-search-input" id="dot-hist-search" placeholder="Search..." autocomplete="off">
       </div>
     </div>
     <div class="tbl-body dot-history-body" id="dot-history-list"></div>
@@ -173,17 +150,13 @@
         <div class="fld dot-fld-select">
           <label>Priority</label>
           <select id="dot-call-priority">
-            <option>Low</option>
-            <option>Medium</option>
-            <option>High</option>
-            <option>Critical</option>
+            <option>Low</option><option>Medium</option><option>High</option><option>Critical</option>
           </select>
         </div>
         <div class="fld dot-fld-select">
           <label>Status</label>
           <select id="dot-call-status">
-            <option>ACTIVE</option>
-            <option>CLOSED</option>
+            <option>ACTIVE</option><option>CLOSED</option>
           </select>
         </div>
       </div>
@@ -199,7 +172,7 @@
 
 </div><!-- /.page-wrapper -->
 
-
+<script src="js/cad-map.js"></script>
 <script src="js/dot.js"></script>
 </body>
 </html>

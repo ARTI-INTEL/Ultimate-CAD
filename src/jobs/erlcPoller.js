@@ -1,27 +1,24 @@
 /**
- * erlc.routes.js  Ultimate CAD – ERLC API Proxy
+ * erlcPoller.js  Ultimate CAD – ERLC API Proxy
  *
  * Proxies requests to https://api.policeroleplay.community/v1/
  * using the per-server ERLC key stored in the DB.
  *
- * All routes require:
- *   - verifyUser  (x-user-id header)
- *   - verifyMember (must be a member of the CAD server)
- *
- * ENV:  (none needed – key lives in servers.erlc_server_key)
- *
- * ERLC API docs: https://apidocs.policeroleplay.community/
+ * Endpoints added in this revision:
+ *   GET  /erlc/:serverId/live-units       – ERLC players merged with CAD units
+ *   GET  /erlc/:serverId/emergency-calls  – In-game 911 / emergency calls
+ *   POST /erlc/:serverId/import-call      – Import an ERLC call into the CAD
  */
- 
+
 import { Router } from 'express';
 import pool from '../db.js';
-import { verifyUser, verifyMember } from '../middleware/auth.middleware.js';
- 
+import { verifyUser, verifyMember, verifyUnit } from '../middleware/auth.middleware.js';
+
 const router = Router();
 const ERLC_BASE = 'https://api.policeroleplay.community/v1';
- 
+
 /* ── Helpers ──────────────────────────────────────────────── */
- 
+
 async function getServerKey(serverId) {
   const [rows] = await pool.query(
     'SELECT erlc_server_key FROM servers WHERE idserver = ?',
@@ -29,7 +26,7 @@ async function getServerKey(serverId) {
   );
   return rows[0]?.erlc_server_key || null;
 }
- 
+
 async function erlcFetch(key, path, opts = {}) {
   const res = await fetch(`${ERLC_BASE}${path}`, {
     ...opts,
@@ -39,10 +36,10 @@ async function erlcFetch(key, path, opts = {}) {
       ...(opts.headers || {}),
     },
   });
- 
-  if (res.status === 204) return null;          // no content
+
+  if (res.status === 204) return null;
   const body = await res.json().catch(() => ({}));
- 
+
   if (!res.ok) {
     const msg = body?.message || body?.error || `ERLC API error ${res.status}`;
     const err = new Error(msg);
@@ -51,17 +48,17 @@ async function erlcFetch(key, path, opts = {}) {
   }
   return body;
 }
- 
+
 function erlcHandler(path, method = 'GET', bodyFn = null) {
   return async (req, res) => {
     try {
       const key = await getServerKey(req.params.serverId);
       if (!key)
         return res.status(400).json({ error: 'No ERLC server key configured. Add it in Server Settings.' });
- 
+
       const opts = { method };
       if (bodyFn) opts.body = JSON.stringify(bodyFn(req));
- 
+
       const data = await erlcFetch(key, path, opts);
       res.json(data ?? { success: true });
     } catch (err) {
@@ -69,49 +66,166 @@ function erlcHandler(path, method = 'GET', bodyFn = null) {
     }
   };
 }
- 
-/* ── Read-only endpoints ──────────────────────────────────── */
- 
-// GET /erlc/:serverId/server  – server metadata (name, owner, join key, team balance)
-router.get('/:serverId/server', verifyUser, verifyMember, erlcHandler('/server'));
- 
-// GET /erlc/:serverId/players  – online players [{Player, Permission, Team, ...}]
-router.get('/:serverId/players', verifyUser, verifyMember, erlcHandler('/server/players'));
- 
-// GET /erlc/:serverId/joinlogs  – recent join / leave events
-router.get('/:serverId/joinlogs', verifyUser, verifyMember, erlcHandler('/server/joinlogs'));
- 
-// GET /erlc/:serverId/killlogs  – recent kill events
-router.get('/:serverId/killlogs', verifyUser, verifyMember, erlcHandler('/server/killlogs'));
- 
-// GET /erlc/:serverId/commandlogs  – recent admin commands
+
+/* ── Standard read-only endpoints ─────────────────────────── */
+
+router.get('/:serverId/server',      verifyUser, verifyMember, erlcHandler('/server'));
+router.get('/:serverId/players',     verifyUser, verifyMember, erlcHandler('/server/players'));
+router.get('/:serverId/joinlogs',    verifyUser, verifyMember, erlcHandler('/server/joinlogs'));
+router.get('/:serverId/killlogs',    verifyUser, verifyMember, erlcHandler('/server/killlogs'));
 router.get('/:serverId/commandlogs', verifyUser, verifyMember, erlcHandler('/server/commandlogs'));
- 
-// GET /erlc/:serverId/bans  – current ban list
-router.get('/:serverId/bans', verifyUser, verifyMember, erlcHandler('/server/bans'));
- 
-// GET /erlc/:serverId/vehicles  – spawned vehicles in-game
-router.get('/:serverId/vehicles', verifyUser, verifyMember, erlcHandler('/server/vehicles'));
- 
-// GET /erlc/:serverId/queue  – players in server queue
-router.get('/:serverId/queue', verifyUser, verifyMember, erlcHandler('/server/queue'));
- 
-// GET /erlc/:serverId/staff  – moderation staff list
-router.get('/:serverId/staff', verifyUser, verifyMember, erlcHandler('/server/staff'));
- 
-/* ── Moderation endpoints (owner / admin only in ERLC) ───── */
- 
-// POST /erlc/:serverId/bans  – ban a player
-// Body: { UserIds: [number], Reason: string, Duration?: number }
+router.get('/:serverId/bans',        verifyUser, verifyMember, erlcHandler('/server/bans'));
+router.get('/:serverId/vehicles',    verifyUser, verifyMember, erlcHandler('/server/vehicles'));
+router.get('/:serverId/queue',       verifyUser, verifyMember, erlcHandler('/server/queue'));
+router.get('/:serverId/staff',       verifyUser, verifyMember, erlcHandler('/server/staff'));
+
+/* ─────────────────────────────────────────────────────────── */
+/*  NEW: GET /erlc/:serverId/live-units                        */
+/*                                                             */
+/*  Returns ERLC player list fused with clocked-in CAD units. */
+/*  Matching is done by roblox_username == ERLC Player name.  */
+/*  Response shape:                                            */
+/*    { players: [...], units: [...], linked: [...] }          */
+/*  where linked[i] = unit row + { erlcPlayer, position }     */
+/* ─────────────────────────────────────────────────────────── */
+router.get('/:serverId/live-units', verifyUser, verifyMember, async (req, res) => {
+  const { serverId } = req.params;
+  try {
+    /* 1. Load CAD units for this server */
+    const [units] = await pool.query(
+      `SELECT u.id, u.user_id, u.name, u.callsign, u.department,
+              u.status, u.location, u.current_call, u.clocked_in,
+              us.roblox_username
+       FROM units u
+       LEFT JOIN users us ON us.iduser = u.user_id
+       WHERE u.server_id = ?
+       ORDER BY u.department, u.callsign`,
+      [serverId]
+    );
+
+    /* 2. Try to fetch ERLC player list (graceful fail if no key) */
+    const key = await getServerKey(serverId);
+    let players = [];
+    if (key) {
+      players = await erlcFetch(key, '/server/players').catch(() => []) || [];
+    }
+
+    /* 3. Match each CAD unit to an ERLC player by Roblox username */
+    const linked = units.map((unit) => {
+      const erlcPlayer = players.find(
+        (p) =>
+          p.Player &&
+          unit.roblox_username &&
+          p.Player.toLowerCase() === unit.roblox_username.toLowerCase()
+      ) || null;
+
+      return {
+        ...unit,
+        erlcPlayer,
+        position: erlcPlayer?.Position || null,
+      };
+    });
+
+    res.json({ players, units, linked });
+  } catch (err) {
+    console.error('[live-units]', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ─────────────────────────────────────────────────────────── */
+/*  NEW: GET /erlc/:serverId/emergency-calls                   */
+/*                                                             */
+/*  Returns active in-game 911 / emergency calls from ERLC.   */
+/*  Falls back gracefully if the endpoint is unavailable or    */
+/*  the server key is not configured.                          */
+/*                                                             */
+/*  Response: array of ERLC call objects, normalised to:       */
+/*    { erlcCallId, caller, nature, location, status, rawPosition } */
+/* ─────────────────────────────────────────────────────────── */
+router.get('/:serverId/emergency-calls', verifyUser, verifyMember, async (req, res) => {
+  const { serverId } = req.params;
+  try {
+    const key = await getServerKey(serverId);
+    if (!key) return res.json([]);
+
+    /* Try the ERLC /server/calls endpoint (available on some versions) */
+    const rawCalls = await erlcFetch(key, '/server/calls').catch(() => null);
+
+    if (rawCalls && Array.isArray(rawCalls) && rawCalls.length) {
+      const normalised = rawCalls.map((c, i) => ({
+        erlcCallId:  c.CallId   || c.Id    || String(i + 1),
+        caller:      c.Caller   || c.Player || 'Unknown',
+        nature:      c.Nature   || c.CallType || 'Emergency',
+        location:    c.Location ? (c.Location.Name || JSON.stringify(c.Location)) : 'Unknown',
+        status:      c.Status   || 'Pending',
+        rawPosition: c.Location?.Position || c.Position || null,
+      }));
+      return res.json(normalised);
+    }
+
+    /* Fallback: parse command logs for 911 dispatch patterns */
+    const logs = await erlcFetch(key, '/server/commandlogs').catch(() => []) || [];
+    const callPattern = /(?:911|emergency|dispatch|call)\s*[:\-–]?\s*(.+)/i;
+    const parsed = [];
+    logs.slice(0, 50).forEach((log, i) => {
+      const match = (log.Command || log.Text || '').match(callPattern);
+      if (match) {
+        parsed.push({
+          erlcCallId:  'LOG-' + i,
+          caller:      log.Player || 'Unknown',
+          nature:      'Emergency (log)',
+          location:    match[1].trim().substring(0, 60),
+          status:      'Pending',
+          rawPosition: null,
+        });
+      }
+    });
+
+    res.json(parsed);
+  } catch (err) {
+    console.error('[emergency-calls]', err);
+    res.json([]); // always return an empty array rather than erroring
+  }
+});
+
+/* ─────────────────────────────────────────────────────────── */
+/*  NEW: POST /erlc/:serverId/import-call                      */
+/*                                                             */
+/*  Converts an ERLC emergency call into a CAD call.           */
+/*  Body: { erlcCallId, caller, nature, location, priority }   */
+/*  Requires the user to be clocked in as a unit.             */
+/* ─────────────────────────────────────────────────────────── */
+router.post('/:serverId/import-call', verifyUser, verifyUnit, async (req, res) => {
+  const { serverId } = req.params;
+  const { nature, location, priority } = req.body;
+
+  if (!nature || !location)
+    return res.status(400).json({ error: 'nature and location are required' });
+
+  try {
+    const [result] = await pool.query(
+      `INSERT INTO calls (server_id, nature, location, priority)
+       VALUES (?, ?, ?, ?)`,
+      [serverId, nature, location, priority || 'Low']
+    );
+    const [rows] = await pool.query('SELECT * FROM calls WHERE id = ?', [result.insertId]);
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('[import-call]', err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+/* ── Moderation endpoints ──────────────────────────────────── */
+
 router.post('/:serverId/bans', verifyUser, verifyMember, async (req, res) => {
   try {
     const key = await getServerKey(req.params.serverId);
     if (!key) return res.status(400).json({ error: 'No ERLC server key configured.' });
- 
     const { UserIds, Reason, Duration } = req.body;
     if (!UserIds || !Reason)
       return res.status(400).json({ error: 'UserIds and Reason are required.' });
- 
     const data = await erlcFetch(key, '/server/bans', {
       method: 'POST',
       body: JSON.stringify({ UserIds, Reason, Duration: Duration ?? null }),
@@ -121,17 +235,13 @@ router.post('/:serverId/bans', verifyUser, verifyMember, async (req, res) => {
     res.status(err.status || 500).json({ error: err.message });
   }
 });
- 
-// DELETE /erlc/:serverId/bans  – unban a player
-// Body: { UserIds: [number] }
+
 router.delete('/:serverId/bans', verifyUser, verifyMember, async (req, res) => {
   try {
     const key = await getServerKey(req.params.serverId);
     if (!key) return res.status(400).json({ error: 'No ERLC server key configured.' });
- 
     const { UserIds } = req.body;
     if (!UserIds) return res.status(400).json({ error: 'UserIds is required.' });
- 
     const data = await erlcFetch(key, '/server/bans', {
       method: 'DELETE',
       body: JSON.stringify({ UserIds }),
@@ -141,17 +251,13 @@ router.delete('/:serverId/bans', verifyUser, verifyMember, async (req, res) => {
     res.status(err.status || 500).json({ error: err.message });
   }
 });
- 
-// POST /erlc/:serverId/command  – execute a server command
-// Body: { command: string }
+
 router.post('/:serverId/command', verifyUser, verifyMember, async (req, res) => {
   try {
     const key = await getServerKey(req.params.serverId);
     if (!key) return res.status(400).json({ error: 'No ERLC server key configured.' });
- 
     const { command } = req.body;
     if (!command) return res.status(400).json({ error: 'command is required.' });
- 
     const data = await erlcFetch(key, '/server/command', {
       method: 'POST',
       body: JSON.stringify({ command }),
@@ -161,15 +267,12 @@ router.post('/:serverId/command', verifyUser, verifyMember, async (req, res) => 
     res.status(err.status || 500).json({ error: err.message });
   }
 });
- 
-/* ── Key validation helper ────────────────────────────────── */
- 
-// POST /erlc/:serverId/validate-key  – test that a key works
-// Body: { key: string }
+
+/* ── Key validation ───────────────────────────────────────── */
+
 router.post('/:serverId/validate-key', verifyUser, verifyMember, async (req, res) => {
   const { key } = req.body;
   if (!key) return res.status(400).json({ error: 'key is required.' });
- 
   try {
     await erlcFetch(key, '/server');
     res.json({ valid: true });
@@ -177,6 +280,5 @@ router.post('/:serverId/validate-key', verifyUser, verifyMember, async (req, res
     res.json({ valid: false, reason: err.message });
   }
 });
- 
+
 export default router;
- 

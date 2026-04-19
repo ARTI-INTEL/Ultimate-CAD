@@ -38,13 +38,8 @@
 
   <!-- ======== PANEL: MAP ======== -->
   <div class="panel" id="panel-map">
-    <div class="leo-map-placeholder">
-      <div class="leo-map-inner">
-        <div class="leo-map-icon">🗺️</div>
-        <p class="leo-map-title">Map View</p>
-        <p class="leo-map-subtitle">Integrate your map here</p>
-      </div>
-    </div>
+    <!-- cad-map.js renders a live canvas into #leo-map-container -->
+    <div class="leo-map-placeholder" id="leo-map-container"></div>
   </div>
 
   <!-- ======== PANEL: CAD ======== -->
@@ -286,6 +281,7 @@
   </div>
 
 </div><!-- /.page-wrapper -->
+<script src="js/cad-map.js"></script>
 <script src="js/leo.js"></script>
 </body>
 </html>

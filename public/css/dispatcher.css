@@ -957,3 +957,93 @@ body.index-bg { background: #222; }
   font-size: 1rem;
   color: rgba(255,255,255,0.25);
 }
+
+/* ============================================================
+   ERLC LIVE MAP & EMERGENCY CALLS  dispatcher-erlc.css
+   Append these rules to the bottom of dispatcher.css
+   ============================================================ */
+
+/* ── ERLC Emergency Calls section (CAD panel) ─────────────── */
+
+/* Section title positioning – sits between active calls and BOLOs */
+#cad-erlc-title {
+  left: 5.375rem;
+  top: 12.25rem;       /* below the existing calls section */
+}
+
+/* ERLC calls table header */
+.d-erlc-hdr {
+  position: absolute;
+  left: 5.375rem;
+  top: 14.875rem;
+  width: 109.25rem;
+  height: 2.5625rem;
+}
+
+/* ERLC calls table body */
+.d-erlc-body {
+  position: absolute;
+  left: 5.375rem;
+  top: 17.4375rem;
+  width: 109.25rem;
+  min-height: 2.625rem;
+  max-height: 5rem;
+  overflow-y: auto;
+}
+
+/* Column label positions inside the ERLC header */
+.d-col-erlc-id     { left: 1.0625rem; }
+.d-col-erlc-caller { left: 8.625rem;  }
+.d-col-erlc-nature { left: 21.375rem; }
+.d-col-erlc-loc    { left: 37.375rem; }
+.d-col-erlc-status { left: 88.625rem; }
+
+/* Shift BOLOs section down to make room for ERLC calls section */
+#cad-bolos-title {
+  top: 23.125rem !important;   /* was 13.875rem */
+}
+
+.d-bolos-hdr {
+  top: 25.5625rem !important;  /* was 16.875rem */
+}
+
+.d-bolos-body {
+  top: 28.125rem !important;   /* was 19.4375rem */
+}
+
+/* Create BOLO button */
+#btn-create-bolo {
+  top: 30.875rem !important;   /* was 23rem */
+}
+
+/* Shift Units section down accordingly */
+#cad-units-title {
+  top: 33.75rem !important;    /* was 28.4375rem */
+}
+
+.d-units-hdr {
+  top: 36.375rem !important;   /* was 31.4375rem */
+}
+
+.d-units-body {
+  top: 38.9375rem !important;  /* was 34rem */
+  max-height: 20.125rem !important;
+}
+
+/* ── Import button (inside ERLC call rows) ─────────────────── */
+.d-import-call-btn {
+  background: #2954c3;
+  border: none;
+  color: #fff;
+  border-radius: 0.5rem;
+  padding: 0.1875rem 0.75rem;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  margin-left: auto;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.d-import-call-btn:hover    { background: #3a6ae0; }
+.d-import-call-btn:disabled { opacity: 0.5; cursor: not-allowed; }

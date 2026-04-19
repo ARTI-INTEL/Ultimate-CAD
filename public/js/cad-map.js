@@ -1,0 +1,459 @@
+/**
+ * cad-map.js  Ultimate CAD – ERLC Live Map Component
+ *
+ * Canvas-based live map that plots ERLC player positions, CAD unit
+ * markers, and active call pins. Works in all CAD pages.
+ *
+ * Usage:
+ *   var map = new CadMap({
+ *     containerId : 'cad-map-container',   // element to render into
+ *     serverId    : '123',
+ *     userId      : '456',
+ *     pollInterval: 8000,                  // ms between ERLC fetches
+ *   });
+ *   map.destroy(); // stop polling + remove canvas
+ */
+
+(function (global) {
+  'use strict';
+
+  /* ── Liberty County ERLC coordinate bounds (Roblox studs) ── */
+  var BOUNDS = { minX: -3200, maxX: 3200, minZ: -3200, maxZ: 3200 };
+
+  /* ── Known Liberty County landmark positions for call pinning ─ */
+  var LC_LOCATIONS = [
+    { names: ['spawn', 'garage', 'central garage'], x: 0,     z: 0      },
+    { names: ['police', 'pd', 'police dept', 'police department', 'police station'], x: -200,  z: 100    },
+    { names: ['fire', 'fire station', 'firedept', 'fire department', 'hospital', 'ems'],          x: 300,   z: -400   },
+    { names: ['highway', 'freeway', 'interstate'],              x: 800,   z: 600    },
+    { names: ['airport', 'airfield'],                           x: -1800, z: 1800   },
+    { names: ['beach', 'shore', 'coastal'],                    x: 2200,  z: 2400   },
+    { names: ['downtown', 'city', 'city center', 'centre'],    x: -100,  z: -100   },
+    { names: ['suburbs', 'residential'],                        x: 900,   z: 900    },
+    { names: ['industrial', 'warehouse', 'factory'],           x: -1200, z: -800   },
+    { names: ['park', 'forest', 'woods'],                      x: 1600,  z: -1400  },
+    { names: ['dock', 'port', 'harbor'],                       x: 2800,  z: 0      },
+    { names: ['mountain', 'hill', 'ridge'],                    x: -2500, z: -2000  },
+    { names: ['gas station'],                                  x: 400,   z: 300    },
+    { names: ['convenience', 'store', 'shop', 'mall'],        x: -600,  z: 500    },
+    { names: ['school', 'university'],                         x: -1000, z: 1200   },
+    { names: ['north'],                                        x: 0,     z: -2500  },
+    { names: ['south'],                                        x: 0,     z: 2500   },
+    { names: ['east'],                                         x: 2500,  z: 0      },
+    { names: ['west'],                                         x: -2500, z: 0      },
+  ];
+
+  /* ── Priority colour palette ──────────────────────────────── */
+  var PRIORITY_COLOR = {
+    Low: '#00ff2f', Medium: '#ffbb00', High: '#ff8800', Critical: '#ff0004'
+  };
+
+  /* ── Team → colour mapping ────────────────────────────────── */
+  function teamColor(team) {
+    var t = (team || '').toLowerCase();
+    if (t.includes('police') || t.includes('sheriff') || t.includes('state patrol') || t.includes('leo'))
+      return '#00b2ff';
+    if (t.includes('fire') || t.includes('ems') || t.includes('rescue') || t.includes('medic'))
+      return '#ff4444';
+    if (t.includes('transport') || t.includes('dot') || t.includes('highway'))
+      return '#ffbb00';
+    if (t.includes('civilian'))
+      return '#888888';
+    return '#bbbbbb';
+  }
+
+  /* ── Fuzzy location → ERLC coordinates ───────────────────── */
+  function locationToCoords(locationStr) {
+    if (!locationStr) return null;
+    var loc = locationStr.toLowerCase();
+
+    // Parse explicit "(x, z)" or "x:123 z:-456" patterns if a user typed them
+    var explicit = loc.match(/\(?\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*\)?/);
+    if (explicit) return { x: parseFloat(explicit[1]), z: parseFloat(explicit[2]) };
+
+    // Fuzzy match known landmarks
+    var best = null;
+    var bestScore = 0;
+    LC_LOCATIONS.forEach(function (lm) {
+      lm.names.forEach(function (name) {
+        if (loc.includes(name) && name.length > bestScore) {
+          best = lm;
+          bestScore = name.length;
+        }
+      });
+    });
+    return best ? { x: best.x + (Math.random() * 200 - 100), z: best.z + (Math.random() * 200 - 100) } : null;
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /*  CadMap constructor                                         */
+  /* ═══════════════════════════════════════════════════════════ */
+  function CadMap(options) {
+    this.containerId   = options.containerId;
+    this.serverId      = options.serverId;
+    this.userId        = options.userId;
+    this.pollInterval  = options.pollInterval || 8000;
+
+    this.players = [];   // ERLC player list
+    this.linked  = [];   // CAD units with ERLC position attached
+    this.calls   = [];   // Active CAD calls (with optional coords)
+    this.erlcCalls = []; // ERLC emergency 911 calls
+
+    this._canvas     = null;
+    this._ctx        = null;
+    this._mapImage   = null;
+    this._pollTimer  = null;
+    this._animFrame  = null;
+    this._mounted    = false;
+
+    this._callCoordCache = {}; // cache resolved call coords by id
+
+    this._resizeHandler = this._resize.bind(this);
+    this._init();
+  }
+
+  CadMap.prototype._init = function () {
+    var container = document.getElementById(this.containerId);
+    if (!container) return;
+
+    /* Remove any existing placeholder content */
+    container.innerHTML = '';
+
+    /* Outer wrapper fills the container */
+    var wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:relative;width:100%;height:100%;background:#0d1b3e;overflow:hidden;';
+    container.appendChild(wrapper);
+    this._wrapper = wrapper;
+
+    /* Canvas */
+    var canvas = document.createElement('canvas');
+    canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;';
+    wrapper.appendChild(canvas);
+    this._canvas = canvas;
+    this._ctx    = canvas.getContext('2d');
+
+    /* Overlay: status bar */
+    var statusBar = document.createElement('div');
+    statusBar.id = this.containerId + '-status';
+    statusBar.style.cssText = [
+      'position:absolute;top:0.5rem;left:50%;transform:translateX(-50%);',
+      'background:rgba(0,0,0,0.6);color:rgba(255,255,255,0.7);',
+      'font-family:Inter,sans-serif;font-size:0.6875rem;font-weight:700;',
+      'padding:0.25rem 0.75rem;border-radius:0.5rem;pointer-events:none;',
+      'white-space:nowrap;',
+    ].join('');
+    statusBar.textContent = 'Connecting to ERLC…';
+    wrapper.appendChild(statusBar);
+    this._statusBar = statusBar;
+
+    /* Overlay: loading spinner for first load */
+    var spinner = document.createElement('div');
+    spinner.style.cssText = [
+      'position:absolute;inset:0;display:flex;flex-direction:column;',
+      'align-items:center;justify-content:center;',
+      'color:rgba(255,255,255,0.35);font-family:Inter,sans-serif;',
+      'font-size:0.9375rem;font-weight:600;gap:0.5rem;pointer-events:none;',
+    ].join('');
+    spinner.innerHTML = '<div style="font-size:2.5rem;">🗺️</div><span>Loading live map…</span>';
+    wrapper.appendChild(spinner);
+    this._spinner = spinner;
+
+    this._mounted = true;
+    this._resize();
+    window.addEventListener('resize', this._resizeHandler);
+
+    this._tryLoadMapImage();
+    this._poll();
+  };
+
+  CadMap.prototype._tryLoadMapImage = function () {
+    var url = "images/erlc_map.png"; 
+    if (!url) return;
+    var img = new Image();
+    var self = this;
+    img.onload  = function () { self._mapImage = img; self._render(); };
+    img.onerror = function () { self._mapImage = null; };
+    img.src = url;
+  };
+
+  CadMap.prototype._resize = function () {
+    if (!this._canvas || !this._wrapper) return;
+    this._canvas.width  = this._wrapper.clientWidth  || 600;
+    this._canvas.height = this._wrapper.clientHeight || 400;
+    this._render();
+  };
+
+  /* ── Coordinate conversion ───────────────────────────────── */
+  CadMap.prototype._cx = function (x) {
+    return ((x - BOUNDS.minX) / (BOUNDS.maxX - BOUNDS.minX)) * this._canvas.width;
+  };
+  CadMap.prototype._cz = function (z) {
+    // ERLC Z increases southward; canvas Y increases downward → direct mapping
+    return ((z - BOUNDS.minZ) / (BOUNDS.maxZ - BOUNDS.minZ)) * this._canvas.height;
+  };
+
+  /* ── Rendering ───────────────────────────────────────────── */
+  CadMap.prototype._render = function () {
+    var ctx = this._ctx;
+    var w   = this._canvas.width;
+    var h   = this._canvas.height;
+    if (!ctx || !w || !h) return;
+
+    ctx.clearRect(0, 0, w, h);
+
+    if (this._mapImage) {
+      ctx.drawImage(this._mapImage, 0, 0, w, h);
+      ctx.fillStyle = 'rgba(0,0,0,0.25)';
+      ctx.fillRect(0, 0, w, h);
+    } else {
+      this._drawBackground(ctx, w, h);
+    }
+
+    this._drawCallPins(ctx);
+    this._drawPlayers(ctx);
+    this._drawLegend(ctx, w, h);
+  };
+
+  CadMap.prototype._drawBackground = function (ctx, w, h) {
+    /* Deep blue ocean-like background */
+    var grad = ctx.createRadialGradient(w * 0.5, h * 0.4, 0, w * 0.5, h * 0.5, w * 0.7);
+    grad.addColorStop(0, '#122244');
+    grad.addColorStop(1, '#060f22');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    /* Major grid */
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = 1;
+    var cols = 8, rows = 6;
+    for (var c = 1; c < cols; c++) {
+      var gx = (c / cols) * w;
+      ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, h); ctx.stroke();
+    }
+    for (var r = 1; r < rows; r++) {
+      var gy = (r / rows) * h;
+      ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(w, gy); ctx.stroke();
+    }
+
+    /* Center axes */
+    var cx = this._cx(0), cy = this._cz(0);
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, h); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(w, cy); ctx.stroke();
+    ctx.setLineDash([]);
+
+    /* Compass rose */
+    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.font = 'bold 11px Inter,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('N', w / 2, 14);
+    ctx.fillText('S', w / 2, h - 4);
+    ctx.textAlign = 'left';
+    ctx.fillText('W', 4, h / 2 + 4);
+    ctx.textAlign = 'right';
+    ctx.fillText('E', w - 2, h / 2 + 4);
+    ctx.textAlign = 'left';
+  };
+
+  CadMap.prototype._drawCallPins = function (ctx) {
+    var self = this;
+    this.calls.forEach(function (call) {
+      var coords = self._callCoordCache[call.id];
+      if (!coords) {
+        coords = locationToCoords(call.location);
+        if (coords) self._callCoordCache[call.id] = coords;
+      }
+      if (!coords) return;
+
+      var px = self._cx(coords.x);
+      var py = self._cz(coords.z);
+      var color = PRIORITY_COLOR[call.priority] || '#ffffff';
+
+      /* Pin body */
+      ctx.beginPath();
+      ctx.arc(px, py, 8, 0, Math.PI * 2);
+      ctx.fillStyle = color + 'cc';
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      /* Call ID label */
+      ctx.fillStyle = '#000';
+      ctx.font = 'bold 9px Inter,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(String(call.id), px, py + 3);
+      ctx.textAlign = 'left';
+
+      /* Nature label below */
+      ctx.fillStyle = '#fff';
+      ctx.font = '9px Inter,sans-serif';
+      ctx.textAlign = 'center';
+      var nature = (call.nature || '').substring(0, 14);
+      ctx.fillText(nature, px, py + 19);
+      ctx.textAlign = 'left';
+    });
+  };
+
+  CadMap.prototype._drawPlayers = function (ctx) {
+    var self = this;
+
+    /* Draw all ERLC players as small dots */
+    this.players.forEach(function (p) {
+      if (!p.Position) return;
+      var px = self._cx(p.Position.x);
+      var py = self._cz(p.Position.z);
+      var color = teamColor(p.Team);
+
+      ctx.beginPath();
+      ctx.arc(px, py, 3, 0, Math.PI * 2);
+      ctx.fillStyle = color + '99';
+      ctx.fill();
+    });
+
+    /* Draw CAD units (linked to ERLC) as larger dots with labels */
+    this.linked.forEach(function (unit) {
+      if (!unit.position) return;
+      var px = self._cx(unit.position.x);
+      var py = self._cz(unit.position.z);
+      var color = teamColor(unit.erlcPlayer ? unit.erlcPlayer.Team : '');
+
+      /* Pulsing ring */
+      ctx.beginPath();
+      ctx.arc(px, py, 9, 0, Math.PI * 2);
+      ctx.strokeStyle = color + '55';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      /* Solid dot */
+      ctx.beginPath();
+      ctx.arc(px, py, 5, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      /* Callsign label */
+      var label = (unit.callsign || unit.name || '').substring(0, 14);
+      if (label) {
+        ctx.fillStyle = 'rgba(0,0,0,0.65)';
+        var lw = ctx.measureText(label).width + 6;
+        ctx.fillRect(px + 7, py - 9, lw, 13);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 9px Inter,sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(label, px + 10, py + 1);
+      }
+    });
+  };
+
+  CadMap.prototype._drawLegend = function (ctx, w, h) {
+    var items = [
+      { color: '#00b2ff', label: 'LEO' },
+      { color: '#ff4444', label: 'Fire / EMS' },
+      { color: '#ffbb00', label: 'DOT' },
+      { color: '#888888', label: 'Civilian' },
+    ];
+    var padX = 8, padY = 8, lineH = 16;
+    var boxH = items.length * lineH + 10;
+    var boxW = 88;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.65)';
+    ctx.beginPath();
+    ctx.roundRect
+      ? ctx.roundRect(padX, h - padY - boxH, boxW, boxH, 4)
+      : ctx.rect(padX, h - padY - boxH, boxW, boxH);
+    ctx.fill();
+
+    items.forEach(function (item, i) {
+      var ly = h - padY - boxH + 7 + i * lineH;
+      ctx.beginPath();
+      ctx.arc(padX + 10, ly + 4, 4, 0, Math.PI * 2);
+      ctx.fillStyle = item.color;
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.font = '9px Inter,sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(item.label, padX + 18, ly + 8);
+    });
+
+    /* Unit count */
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '9px Inter,sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(
+      this.players.length + ' online · ' + this.linked.filter(function (u) { return u.position; }).length + ' located',
+      w - 6, h - 6
+    );
+    ctx.textAlign = 'left';
+  };
+
+  /* ── Polling ─────────────────────────────────────────────── */
+  CadMap.prototype._poll = function () {
+    var self = this;
+    this._fetch();
+    this._pollTimer = setInterval(function () { self._fetch(); }, this.pollInterval);
+  };
+
+  CadMap.prototype._fetch = function () {
+    var self = this;
+    var headers = { 'x-user-id': self.userId };
+
+    /* ERLC live units (players + linked CAD units) */
+    fetch('/erlc/' + self.serverId + '/live-units', { headers: headers })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data) return;
+        self.players = data.players || [];
+        self.linked  = data.linked  || [];
+        if (self._spinner) self._spinner.style.display = 'none';
+        self._setStatus(
+          self.players.length
+            ? (self.players.length + ' players online – ' + new Date().toLocaleTimeString())
+            : 'ERLC connected – no players online'
+        );
+        self._render();
+      })
+      .catch(function () {
+        self._setStatus('ERLC offline or key not configured');
+      });
+
+    /* Active CAD calls */
+    fetch('/calls/' + self.serverId, { headers: headers })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (calls) {
+        self.calls = calls || [];
+        self._render();
+      })
+      .catch(function () {});
+  };
+
+  CadMap.prototype._setStatus = function (msg) {
+    if (this._statusBar) this._statusBar.textContent = msg;
+  };
+
+  /* ── Public API ──────────────────────────────────────────── */
+
+  /** Force an immediate data refresh */
+  CadMap.prototype.refresh = function () { this._fetch(); };
+
+  /** Returns the latest linked unit array for use in tables */
+  CadMap.prototype.getLinkedUnits = function () { return this.linked; };
+
+  /** Cleanly remove the map and stop polling */
+  CadMap.prototype.destroy = function () {
+    if (this._pollTimer)  clearInterval(this._pollTimer);
+    if (this._animFrame)  cancelAnimationFrame(this._animFrame);
+    window.removeEventListener('resize', this._resizeHandler);
+    if (this._wrapper && this._wrapper.parentNode) {
+      this._wrapper.parentNode.removeChild(this._wrapper);
+    }
+    this._mounted = false;
+  };
+
+  global.CadMap = CadMap;
+
+}(window));

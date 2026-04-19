@@ -43,13 +43,8 @@
 
   <!-- ======== PANEL: MAP ======== -->
   <div class="panel" id="panel-map">
-    <div class="d-map-placeholder">
-      <div class="d-map-inner">
-        <div class="d-map-icon">🗺️</div>
-        <p class="d-map-title">Map View</p>
-        <p class="d-map-subtitle">Integrate your map here</p>
-      </div>
-    </div>
+    <!-- cad-map.js renders the live ERLC map into this container -->
+    <div class="d-map-placeholder" id="d-map-container"></div>
   </div>
 
   <!-- ======== PANEL: CAD ======== -->
@@ -66,6 +61,17 @@
     </div>
     <div class="tbl-body d-calls-body" id="d-calls-list"></div>
     <button class="act-btn d-cad-btn" id="btn-create-call">Create Call</button>
+
+    <!-- ERLC In-Game Emergency Calls -->
+    <span class="d-section-title" id="cad-erlc-title">911 Calls</span>
+    <div class="tbl-hdr d-erlc-hdr">
+      <span class="tbl-col d-col-erlc-id">ERLC ID</span>
+      <span class="tbl-col d-col-erlc-caller">Caller</span>
+      <span class="tbl-col d-col-erlc-nature">Nature</span>
+      <span class="tbl-col d-col-erlc-loc">Location</span>
+      <span class="tbl-col d-col-erlc-status">Status</span>
+    </div>
+    <div class="tbl-body d-erlc-body" id="d-erlc-calls-list"></div>
 
     <!-- Active BOLOs -->
     <span class="d-section-title" id="cad-bolos-title">Active BOLO's</span>
@@ -93,7 +99,6 @@
   <!-- ======== PANEL: SEARCH ======== -->
   <div class="panel" id="panel-search">
 
-    <!-- PED Search -->
     <div class="d-search-block" id="d-ped-block">
       <p class="d-search-label">Search PED</p>
       <div class="d-search-input-box">
@@ -101,7 +106,6 @@
       </div>
     </div>
 
-    <!-- Car Search -->
     <div class="d-search-block" id="d-car-block">
       <p class="d-search-label">Search Car</p>
       <div class="d-search-input-box">
@@ -109,7 +113,6 @@
       </div>
     </div>
 
-    <!-- Gun Search -->
     <div class="d-search-block" id="d-gun-block">
       <p class="d-search-label">Search Gun</p>
       <div class="d-search-input-box">
@@ -117,14 +120,12 @@
       </div>
     </div>
 
-    <!-- PED results -->
     <div class="tbl-hdr d-ped-hdr">
       <span class="tbl-col d-col-ped-fn">First Name</span>
       <span class="tbl-col d-col-ped-ln">Last Name</span>
     </div>
     <div class="tbl-body d-ped-body" id="d-ped-results"></div>
 
-    <!-- Car results -->
     <div class="tbl-hdr d-car-hdr">
       <span class="tbl-col d-col-car-owner">Owner</span>
       <span class="tbl-col d-col-car-plate">Plate</span>
@@ -133,7 +134,6 @@
     </div>
     <div class="tbl-body d-car-body" id="d-car-results"></div>
 
-    <!-- Gun results -->
     <div class="tbl-hdr d-gun-hdr">
       <span class="tbl-col d-col-gun-owner">Owner</span>
       <span class="tbl-col d-col-gun-serial">Serial #</span>
@@ -251,6 +251,7 @@
 
 </div><!-- /.page-wrapper -->
 
+<script src="js/cad-map.js"></script>
 <script src="js/dispatcher.js"></script>
 </body>
 </html>

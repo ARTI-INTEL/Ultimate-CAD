@@ -1,7 +1,9 @@
 /**
  * dispatcher.js  Ultimate CAD Dispatcher
- * Full API integration: calls, BOLOs, active units, search, history.
- * Polls live data every 10 seconds.
+ *
+ * Full API integration: calls, BOLOs, active units (with live ERLC locations),
+ * ERLC in-game emergency call import, ERLC live map, search, history.
+ * Polls live data every 10 seconds; ERLC data every 8 seconds.
  */
 
 (function () {
@@ -11,9 +13,9 @@
 
   function get(key) { try { return localStorage.getItem(key); } catch (_) { return null; } }
 
-  const userId    = get('cad_user_id');
-  const serverId  = get('cad_active_server');
-  const unitId = get('cad_unit_id');
+  const userId   = get('cad_user_id');
+  const serverId = get('cad_active_server');
+  const unitId   = get('cad_unit_id');
 
   if (!userId || !serverId) { window.location.href = 'server-page.html'; return; }
 
@@ -28,14 +30,55 @@
   }
 
   const $ = id => document.getElementById(id);
-  const esc = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-  function priClass(p) { return {Low:'pri-low',Medium:'pri-medium',High:'pri-high',Critical:'pri-critical'}[p]||''; }
+  function priClass(p) {
+    return { Low: 'pri-low', Medium: 'pri-medium', High: 'pri-high', Critical: 'pri-critical' }[p] || '';
+  }
 
-  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     PANEL SWITCHING
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  const PANELS = ['home','map','cad','search','reports','callhistory','notepad'];
+  /* ─────────────────────────────────────────────────────────── */
+  /*  Live ERLC map instance                                     */
+  /* ─────────────────────────────────────────────────────────── */
+  var _cadMap = null;
+
+  function initMap() {
+    if (_cadMap) return; // already initialised
+    if (typeof CadMap === 'undefined') return;
+    _cadMap = new CadMap({
+      containerId:  'd-map-container',
+      serverId:     serverId,
+      userId:       userId,
+      pollInterval: 8000,
+    });
+  }
+
+  function destroyMap() {
+    if (_cadMap) { _cadMap.destroy(); _cadMap = null; }
+  }
+
+  /* ─────────────────────────────────────────────────────────── */
+  /*  ERLC live unit data (used to enrich the units table)       */
+  /* ─────────────────────────────────────────────────────────── */
+  var _linkedUnits = []; // latest linked unit array from /erlc/.../live-units
+
+  function fetchLinkedUnits() {
+    fetch(API_BASE + '/erlc/' + serverId + '/live-units', { headers: authHeaders })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data) return;
+        _linkedUnits = data.linked || [];
+        // Re-render the units table if the CAD panel is active
+        if ($('panel-cad') && $('panel-cad').classList.contains('active')) {
+          fetchUnits();
+        }
+      })
+      .catch(function () {});
+  }
+
+  /* ─────────────────────────────────────────────────────────── */
+  /*  PANEL SWITCHING                                            */
+  /* ─────────────────────────────────────────────────────────── */
+  const PANELS = ['home', 'map', 'cad', 'search', 'reports', 'callhistory', 'notepad'];
 
   function showPanel(id) {
     PANELS.forEach(function (p) {
@@ -44,7 +87,15 @@
       if (panel) panel.classList.toggle('active', p === id);
       if (btn)   btn.classList.toggle('d-btn--active', p === id);
     });
-    if (id === 'cad') { fetchCalls(); fetchBolos(); fetchUnits(); }
+
+    if (id === 'map') {
+      initMap();
+    } else {
+      /* Keep the map alive in the background so it still polls,
+         but only destroy when navigating away entirely */
+    }
+
+    if (id === 'cad') { fetchCalls(); fetchBolos(); fetchUnits(); fetchErlcCalls(); }
     if (id === 'callhistory') fetchHistory();
   }
 
@@ -55,12 +106,13 @@
 
   $('btn-clockout').addEventListener('click', function () {
     if (unitId) apiFetch('/units/clock-out/' + unitId, { method: 'DELETE' }).catch(function () {});
+    destroyMap();
     window.location.href = 'server-page.html';
   });
 
-  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     STATUS BUTTONS
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  /* ─────────────────────────────────────────────────────────── */
+  /*  STATUS BUTTONS                                             */
+  /* ─────────────────────────────────────────────────────────── */
   let currentStatus = null;
   document.querySelectorAll('.d-status-btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
@@ -74,10 +126,10 @@
     });
   });
 
-  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     MODAL HELPERS
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  const MODALS = ['d-call-modal','d-bolo-modal'];
+  /* ─────────────────────────────────────────────────────────── */
+  /*  MODAL HELPERS                                              */
+  /* ─────────────────────────────────────────────────────────── */
+  const MODALS = ['d-call-modal', 'd-bolo-modal'];
   function openModal(id)  { $(id).classList.add('open'); }
   function closeModal(id) { $(id).classList.remove('open'); }
 
@@ -98,9 +150,9 @@
     });
   }
 
-  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     ACTIVE CALLS
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  /* ─────────────────────────────────────────────────────────── */
+  /*  ACTIVE CALLS                                               */
+  /* ─────────────────────────────────────────────────────────── */
   function fetchCalls() {
     apiFetch('/calls/' + serverId)
       .then(function (rows) { renderCalls(rows); })
@@ -112,11 +164,11 @@
     if (!calls.length) { el.innerHTML = '<div class="d-empty">No active calls.</div>'; return; }
     el.innerHTML = calls.map(function (c) {
       return '<div class="tbl-row">' +
-        '<span class="d-row-cell" style="width:6.25rem">' + esc(c.id)       + '</span>' +
-        '<span class="d-row-cell" style="flex:1">'      + esc(c.nature)   + '</span>' +
-        '<span class="d-row-cell" style="width:18.75rem">' + esc(c.location) + '</span>' +
+        '<span class="d-row-cell" style="width:6.25rem">'    + esc(c.id)       + '</span>' +
+        '<span class="d-row-cell" style="flex:1">'           + esc(c.nature)   + '</span>' +
+        '<span class="d-row-cell" style="width:18.75rem">'   + esc(c.location) + '</span>' +
         '<span class="d-row-cell ' + priClass(c.priority) + '" style="width:7.5rem">' + esc(c.priority) + '</span>' +
-        '<span class="d-row-cell" style="width:7.5rem">' + esc(c.units || '') + '</span>' +
+        '<span class="d-row-cell" style="width:7.5rem">'     + esc(c.units || '') + '</span>' +
         '<button class="d-code4-btn" data-id="' + c.id + '">CODE 4</button>' +
         '</div>';
     }).join('');
@@ -145,14 +197,82 @@
       .then(function () {
         fetchCalls();
         closeModal('d-call-modal');
-        clearFields(['d-call-nature','d-call-title','d-call-location','d-call-desc']);
+        clearFields(['d-call-nature', 'd-call-title', 'd-call-location', 'd-call-desc']);
       })
       .catch(function (err) { alert(err.message); });
   });
 
-  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     ACTIVE BOLOs
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  /* ─────────────────────────────────────────────────────────── */
+  /*  ERLC IN-GAME EMERGENCY CALLS                               */
+  /* ─────────────────────────────────────────────────────────── */
+  function fetchErlcCalls() {
+    const el = $('d-erlc-calls-list');
+    if (!el) return;
+
+    fetch(API_BASE + '/erlc/' + serverId + '/emergency-calls', { headers: authHeaders })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (calls) { renderErlcCalls(calls); })
+      .catch(function () { renderErlcCalls([]); });
+  }
+
+  function renderErlcCalls(calls) {
+    const el = $('d-erlc-calls-list');
+    if (!el) return;
+
+    if (!calls.length) {
+      el.innerHTML = '<div class="d-empty">No ERLC in-game calls – configure your ERLC Server Key in Server Settings to enable.</div>';
+      return;
+    }
+
+    el.innerHTML = calls.map(function (c) {
+      return '<div class="tbl-row">' +
+        '<span class="d-row-cell" style="width:7.5rem;color:rgba(255,255,255,0.55);font-size:1rem;">'  + esc(c.erlcCallId) + '</span>' +
+        '<span class="d-row-cell" style="width:12.5rem">'  + esc(c.caller)   + '</span>' +
+        '<span class="d-row-cell" style="width:15.625rem">' + esc(c.nature)   + '</span>' +
+        '<span class="d-row-cell" style="flex:1">'          + esc(c.location) + '</span>' +
+        '<span class="d-row-cell" style="width:6.875rem;color:' + (c.status === 'Pending' ? '#ffbb00' : '#00ff2f') + '">' + esc(c.status) + '</span>' +
+        '<button class="d-import-call-btn" ' +
+          'data-nature="' + esc(c.nature) + '" ' +
+          'data-location="' + esc(c.location) + '" ' +
+          'data-erlcid="' + esc(c.erlcCallId) + '">' +
+          'Import' +
+        '</button>' +
+        '</div>';
+    }).join('');
+
+    el.querySelectorAll('.d-import-call-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        btn.disabled = true;
+        btn.textContent = '…';
+
+        apiFetch('/erlc/' + serverId + '/import-call', {
+          method: 'POST',
+          body: JSON.stringify({
+            erlcCallId: btn.dataset.erlcid,
+            nature:     btn.dataset.nature   || 'Emergency',
+            location:   btn.dataset.location || 'Unknown',
+            priority:   'High',
+          }),
+        })
+          .then(function () {
+            btn.textContent = '✓ Done';
+            btn.style.background = '#00aa22';
+            fetchCalls();
+            // Refresh map to show new call pin
+            if (_cadMap) _cadMap.refresh();
+          })
+          .catch(function (err) {
+            btn.disabled = false;
+            btn.textContent = 'Import';
+            alert('Import failed: ' + err.message);
+          });
+      });
+    });
+  }
+
+  /* ─────────────────────────────────────────────────────────── */
+  /*  ACTIVE BOLOs                                               */
+  /* ─────────────────────────────────────────────────────────── */
   function fetchBolos() {
     apiFetch('/bolos/' + serverId)
       .then(function (rows) { renderBolos(rows); })
@@ -165,9 +285,9 @@
     el.innerHTML = bolos.map(function (b) {
       const desc = b.description || '';
       return '<div class="tbl-row">' +
-        '<span class="d-row-cell" style="width:13.75rem">' + esc(b.type) + '</span>' +
+        '<span class="d-row-cell" style="width:13.75rem">' + esc(b.type)   + '</span>' +
         '<span class="d-row-cell" style="width:21.875rem">' + esc(b.reason) + '</span>' +
-        '<span class="d-row-cell" style="flex:1">'      + esc(desc.substring(0,80)) + (desc.length>80?'…':'') + '</span>' +
+        '<span class="d-row-cell" style="flex:1">' + esc(desc.substring(0, 80)) + (desc.length > 80 ? '…' : '') + '</span>' +
         '<button class="d-remove-btn" data-id="' + b.id + '">Remove</button>' +
         '</div>';
     }).join('');
@@ -197,14 +317,14 @@
       .then(function () {
         fetchBolos();
         closeModal('d-bolo-modal');
-        clearFields(['d-bolo-loc','d-bolo-desc']);
+        clearFields(['d-bolo-loc', 'd-bolo-desc']);
       })
       .catch(function (err) { alert(err.message); });
   });
 
-  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     ACTIVE UNITS (real units on duty)
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  /* ─────────────────────────────────────────────────────────── */
+  /*  ACTIVE UNITS  (enriched with ERLC live location)          */
+  /* ─────────────────────────────────────────────────────────── */
   function fetchUnits() {
     apiFetch('/units/' + serverId)
       .then(function (rows) { renderUnits(rows); })
@@ -214,29 +334,46 @@
   function renderUnits(units) {
     const el = $('d-units-list');
     if (!units.length) { el.innerHTML = '<div class="d-empty">No units on duty.</div>'; return; }
+
+    /* Build a quick lookup: unit.id → linked entry (with ERLC position) */
+    var linkedMap = {};
+    _linkedUnits.forEach(function (lu) { linkedMap[lu.id] = lu; });
+
     el.innerHTML = units.map(function (u) {
-      const dept = (u.department || '').toLowerCase();
+      const dept      = (u.department || '').toLowerCase();
       const typeLabel = dept.includes('fire') || dept.includes('rescue') ? 'FD' :
                         dept.includes('transport') || dept.includes('dot') ? 'DOT' : 'LEO';
-      const typeClass = typeLabel === 'LEO' ? 'd-row-cell--leo' : typeLabel === 'FD' ? 'd-row-cell--fd' : '';
+      const typeClass  = typeLabel === 'LEO' ? 'd-row-cell--leo' : typeLabel === 'FD' ? 'd-row-cell--fd' : '';
       const statusColor = u.status === 'AVAILABLE' ? 'd-row-cell--green' : '';
 
+      /* ERLC live position */
+      var linkedUnit   = linkedMap[u.id];
+      var liveLocation = '';
+      if (linkedUnit && linkedUnit.position) {
+        var pos = linkedUnit.position;
+        liveLocation = '📍 ' + Math.round(pos.x) + ', ' + Math.round(pos.z);
+      } else {
+        liveLocation = u.location || '';
+      }
+
       return '<div class="tbl-row">' +
-        '<span class="d-row-cell" style="width:7.5rem">'  + esc(u.callsign)    + '</span>' +
+        '<span class="d-row-cell" style="width:7.5rem">'   + esc(u.callsign)    + '</span>' +
         '<span class="d-row-cell ' + typeClass + '" style="width:10rem">' + esc(typeLabel) + '</span>' +
-        '<span class="d-row-cell" style="flex:1">'       + esc(u.department)  + '</span>' +
-        '<span class="d-row-cell" style="width:18.75rem">'  + esc(u.location || '') + '</span>' +
-        '<span class="d-row-cell ' + statusColor + '">'  + esc(u.status)      + '</span>' +
+        '<span class="d-row-cell" style="flex:1">'         + esc(u.department)  + '</span>' +
+        '<span class="d-row-cell" style="width:18.75rem">' + esc(liveLocation)  + '</span>' +
+        '<span class="d-row-cell ' + statusColor + '">'    + esc(u.status)      + '</span>' +
         '</div>';
     }).join('');
   }
 
-  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     SEARCH
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  /* ─────────────────────────────────────────────────────────── */
+  /*  SEARCH                                                     */
+  /* ─────────────────────────────────────────────────────────── */
   function doSearch(q, cb) {
-    if (q.length < 2) { cb({ characters:[], vehicles:[], firearms:[] }); return; }
-    apiFetch('/search/' + serverId + '?q=' + encodeURIComponent(q)).then(cb).catch(function () { cb({ characters:[], vehicles:[], firearms:[] }); });
+    if (q.length < 2) { cb({ characters: [], vehicles: [], firearms: [] }); return; }
+    apiFetch('/search/' + serverId + '?q=' + encodeURIComponent(q))
+      .then(cb)
+      .catch(function () { cb({ characters: [], vehicles: [], firearms: [] }); });
   }
 
   function makeEmpty(msg) { return '<div class="d-empty">' + msg + '</div>'; }
@@ -244,7 +381,7 @@
   $('d-ped-search').addEventListener('input', function () {
     const q = this.value.toLowerCase().trim();
     doSearch(q, function (data) {
-      const el = $('d-ped-results');
+      const el    = $('d-ped-results');
       const chars = data.characters || [];
       el.innerHTML = chars.length
         ? chars.map(function (c) {
@@ -257,15 +394,15 @@
   $('d-car-search').addEventListener('input', function () {
     const q = this.value.toLowerCase().trim();
     doSearch(q, function (data) {
-      const el = $('d-car-results');
+      const el   = $('d-car-results');
       const vehs = data.vehicles || [];
       el.innerHTML = vehs.length
         ? vehs.map(function (v) {
             return '<div class="tbl-row">' +
               '<span class="d-row-cell" style="width:11.875rem">' + esc(v.owner_name || '') + '</span>' +
-              '<span class="d-row-cell" style="width:8.125rem">' + esc(v.plate) + '</span>' +
-              '<span class="d-row-cell" style="flex:1">'      + esc(v.model) + '</span>' +
-              '<span class="d-row-cell">'                     + esc(v.color || '') + '</span></div>';
+              '<span class="d-row-cell" style="width:8.125rem">'  + esc(v.plate)            + '</span>' +
+              '<span class="d-row-cell" style="flex:1">'          + esc(v.model)            + '</span>' +
+              '<span class="d-row-cell">'                         + esc(v.color || '')      + '</span></div>';
           }).join('')
         : makeEmpty('No results.');
     });
@@ -274,7 +411,7 @@
   $('d-gun-search').addEventListener('input', function () {
     const q = this.value.toLowerCase().trim();
     doSearch(q, function (data) {
-      const el = $('d-gun-results');
+      const el  = $('d-gun-results');
       const fas = data.firearms || [];
       el.innerHTML = fas.length
         ? fas.map(function (f) {
@@ -284,9 +421,9 @@
     });
   });
 
-  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     CALL HISTORY
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  /* ─────────────────────────────────────────────────────────── */
+  /*  CALL HISTORY                                               */
+  /* ─────────────────────────────────────────────────────────── */
   let historyData = [];
 
   function fetchHistory() {
@@ -300,8 +437,8 @@
     if (!list.length) { el.innerHTML = '<div class="d-empty">No calls found.</div>'; return; }
     el.innerHTML = list.map(function (c) {
       return '<div class="tbl-row">' +
-        '<span class="d-row-cell" style="width:6.25rem">' + esc(c.id)       + '</span>' +
-        '<span class="d-row-cell" style="flex:1">'      + esc(c.nature)   + '</span>' +
+        '<span class="d-row-cell" style="width:6.25rem">'  + esc(c.id)       + '</span>' +
+        '<span class="d-row-cell" style="flex:1">'         + esc(c.nature)   + '</span>' +
         '<span class="d-row-cell" style="width:18.75rem">' + esc(c.location) + '</span>' +
         '<span class="d-row-cell ' + priClass(c.priority) + '" style="width:7.5rem">' + esc(c.priority) + '</span>' +
         '<span class="d-row-cell">' + esc(c.units || '') + '</span>' +
@@ -316,28 +453,36 @@
     }));
   });
 
-  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     NOTEPAD
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  /* ─────────────────────────────────────────────────────────── */
+  /*  NOTEPAD                                                    */
+  /* ─────────────────────────────────────────────────────────── */
   const notepad = $('d-notepad-text');
   try { const s = localStorage.getItem('cad_dispatcher_notepad'); if (s) notepad.value = s; } catch (_) {}
   notepad.addEventListener('input', function () {
     try { localStorage.setItem('cad_dispatcher_notepad', notepad.value); } catch (_) {}
   });
 
-  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     INIT + POLLING
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  /* ─────────────────────────────────────────────────────────── */
+  /*  INIT + POLLING                                             */
+  /* ─────────────────────────────────────────────────────────── */
   fetchCalls();
   fetchBolos();
   fetchUnits();
   fetchHistory();
+  fetchErlcCalls();
+  fetchLinkedUnits();
 
-  // Poll live CAD data every 10 seconds
+  /* Poll CAD data every 10 s */
   setInterval(function () {
     fetchCalls();
     fetchBolos();
     fetchUnits();
   }, 10000);
+
+  /* Poll ERLC live unit positions every 8 s */
+  setInterval(fetchLinkedUnits, 8000);
+
+  /* Poll ERLC emergency calls every 15 s */
+  setInterval(fetchErlcCalls, 15000);
 
 })();
