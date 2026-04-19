@@ -281,4 +281,117 @@ router.post('/:serverId/validate-key', verifyUser, verifyMember, async (req, res
   }
 });
 
+
+// ═══════════════════════════════════════════════════════════════
+// ADDITIONS FOR  src/jobs/erlcPoller.js
+//
+// Paste these route definitions BEFORE the final  export default router;
+// line.  pool is already imported in that file.
+// ═══════════════════════════════════════════════════════════════
+ 
+// ── GET /erlc/:serverId/calls ────────────────────────────────
+// Returns the current list of active 911 / dispatch calls from ERLC.
+router.get('/:serverId/calls', verifyUser, verifyMember, async (req, res) => {
+  try {
+    const key = await getServerKey(req.params.serverId);
+    if (!key)
+      return res.status(400).json({ error: 'No ERLC server key configured. Add it in Server Settings.' });
+ 
+    let data;
+    try {
+      data = await erlcFetch(key, '/server/calls');
+    } catch {
+      // Some ERLC servers / key tiers don't expose this endpoint
+      return res.json([]);
+    }
+ 
+    // ERLC may return an array or { Calls: [...] }
+    const calls = Array.isArray(data) ? data
+                : (data?.Calls || data?.calls || []);
+    res.json(calls);
+  } catch (err) {
+    res.status(err.status || 500).json({ error: err.message });
+  }
+});
+ 
+// ── POST /erlc/:serverId/sync-calls ─────────────────────────
+// Imports active ERLC 911 calls into the CAD database as ACTIVE calls.
+// Deduplication: calls tagged [ERLC-<id>] in the `nature` column are
+// not re-inserted on subsequent syncs.
+router.post('/:serverId/sync-calls', verifyUser, verifyMember, async (req, res) => {
+  const { serverId } = req.params;
+ 
+  try {
+    const key = await getServerKey(serverId);
+    if (!key)
+      return res.status(400).json({ error: 'No ERLC server key configured.' });
+ 
+    // ── Fetch ERLC calls ──────────────────────────────────
+    let erlcData;
+    try {
+      erlcData = await erlcFetch(key, '/server/calls');
+    } catch {
+      return res.json({ synced: 0, total: 0, message: 'ERLC calls endpoint unavailable for this server key.' });
+    }
+ 
+    const erlcCalls = Array.isArray(erlcData) ? erlcData
+                    : (erlcData?.Calls || erlcData?.calls || []);
+ 
+    if (!erlcCalls.length) {
+      return res.json({ synced: 0, total: 0 });
+    }
+ 
+    // ── Sync each call ────────────────────────────────────
+    let synced = 0;
+    for (const call of erlcCalls) {
+      const erlcId   = String(call.Id   ?? call.id   ?? call.CallId ?? '');
+      const nature   = String(call.Description ?? call.Nature   ?? call.description ?? 'ERLC Call');
+      const location = String(call.Location    ?? call.location ?? 'Unknown');
+      const priority = call.Priority ?? call.priority ?? 'Medium';
+ 
+      if (!erlcId) continue;
+ 
+      const tag = `[ERLC-${erlcId}]`;
+ 
+      // Check whether we already have an active CAD call for this ERLC call
+      const [existing] = await pool.query(
+        "SELECT id FROM calls WHERE server_id = ? AND nature LIKE ? AND status = 'ACTIVE'",
+        [serverId, `${tag}%`]
+      );
+ 
+      if (!existing.length) {
+        await pool.query(
+          "INSERT INTO calls (server_id, nature, location, priority, status) VALUES (?, ?, ?, ?, 'ACTIVE')",
+          [serverId, `${tag} ${nature}`, location, priority]
+        );
+        synced++;
+      }
+    }
+ 
+    res.json({ synced, total: erlcCalls.length });
+  } catch (err) {
+    console.error('[ERLC sync-calls]', err);
+    res.status(err.status || 500).json({ error: err.message });
+  }
+});
+ 
+// ── GET /erlc/:serverId/players/positions ────────────────────
+// Convenience endpoint: returns only players that have Position data,
+// formatted for the CADMap module.
+router.get('/:serverId/players/positions', verifyUser, verifyMember, async (req, res) => {
+  try {
+    const key = await getServerKey(req.params.serverId);
+    if (!key)
+      return res.json([]);
+ 
+    const data = await erlcFetch(key, '/server/players');
+    const all  = Array.isArray(data) ? data : (data?.Players || data?.players || []);
+ 
+    const withPos = all.filter(p => p.Position || p.position);
+    res.json(withPos);
+  } catch (err) {
+    res.json([]);
+  }
+});
+ 
 export default router;

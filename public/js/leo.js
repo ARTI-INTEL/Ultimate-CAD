@@ -617,17 +617,50 @@
     try { localStorage.setItem('cad_leo_notepad', notepad.value); } catch (_) {}
   });
 
-  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     INIT + POLLING
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── EDIT 3 ──────────────────────────────────────────────────
+   ADD this function anywhere before the INIT block at the bottom.
+   It syncs ERLC in-game 911 calls into the CAD database. */
+ 
+  function syncERLCCalls() {
+    apiFetch('/erlc/' + serverId + '/sync-calls', { method: 'POST', body: '{}' })
+      .then(function (r) {
+        if (r.synced > 0) {
+          // Refresh the active-calls list if the CAD panel is visible
+          if (document.getElementById('panel-cad').classList.contains('active')) {
+            fetchCalls();
+          }
+        }
+      })
+      .catch(function () { /* ERLC not configured – silent */ });
+  }
+ 
+ 
+/* ── EDIT 4 ──────────────────────────────────────────────────
+   REPLACE the existing INIT + POLLING block at the bottom of the IIFE:
+ 
+   OLD:
+     fetchCalls();
+     fetchBolos();
+     loadReport('warning');
+     setInterval(function () {
+       fetchCalls();
+       fetchBolos();
+     }, 12000);
+ 
+   NEW: */
+ 
   fetchCalls();
   fetchBolos();
   loadReport('warning');
-
-  // Poll active calls and BOLOs every 12 seconds
+ 
+  // Sync ERLC in-game calls into CAD on load and every 30 s
+  syncERLCCalls();
+  setInterval(syncERLCCalls, 30000);
+ 
   setInterval(function () {
     fetchCalls();
     fetchBolos();
   }, 12000);
+ 
 
 })();

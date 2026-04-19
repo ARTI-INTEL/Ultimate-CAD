@@ -462,27 +462,31 @@
     try { localStorage.setItem('cad_dispatcher_notepad', notepad.value); } catch (_) {}
   });
 
-  /* ─────────────────────────────────────────────────────────── */
-  /*  INIT + POLLING                                             */
-  /* ─────────────────────────────────────────────────────────── */
+/* EDIT 3 – ADD syncERLCCalls before init block: */
+  function syncERLCCalls() {
+    apiFetch('/erlc/' + serverId + '/sync-calls', { method: 'POST', body: '{}' })
+      .then(function (r) {
+        if (r.synced > 0) {
+          fetchCalls(); // dispatcher always refreshes calls
+        }
+      })
+      .catch(function () {});
+  }
+ 
+/* EDIT 4 – REPLACE bottom init block with: */
   fetchCalls();
   fetchBolos();
   fetchUnits();
   fetchHistory();
-  fetchErlcCalls();
-  fetchLinkedUnits();
-
-  /* Poll CAD data every 10 s */
+ 
+  // Sync ERLC calls on load + every 30 s (dispatcher is the primary sync point)
+  syncERLCCalls();
+  setInterval(syncERLCCalls, 30000);
+ 
   setInterval(function () {
     fetchCalls();
     fetchBolos();
     fetchUnits();
   }, 10000);
-
-  /* Poll ERLC live unit positions every 8 s */
-  setInterval(fetchLinkedUnits, 8000);
-
-  /* Poll ERLC emergency calls every 15 s */
-  setInterval(fetchErlcCalls, 15000);
 
 })();

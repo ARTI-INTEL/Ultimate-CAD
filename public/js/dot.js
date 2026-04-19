@@ -343,10 +343,24 @@
     try { localStorage.setItem('cad_dot_notepad', notepad.value); } catch (_) {}
   });
 
-  /* ── Init + polling ──────────────────────────────────────── */
+/* EDIT 3 – ADD syncERLCCalls before init block: */
+  function syncERLCCalls() {
+    apiFetch('/erlc/' + serverId + '/sync-calls', { method: 'POST', body: '{}' })
+      .then(function (r) {
+        if (r.synced > 0 && document.getElementById('panel-cad').classList.contains('active')) {
+          fetchCalls();
+        }
+      })
+      .catch(function () {});
+  }
+ 
+/* EDIT 4 – REPLACE bottom init block with: */
   showPanel('home');
   fetchCalls();
   dotShowReport('incident');
+ 
+  syncERLCCalls();
+  setInterval(syncERLCCalls, 30000);
   setInterval(fetchCalls, 12000);
 
 })();
