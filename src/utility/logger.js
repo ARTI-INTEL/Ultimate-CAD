@@ -1,107 +1,79 @@
-import fs   from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+/**
+ * logger.js  Ultimate CAD – Application Logger
+ * Structured logger with level filtering, colorized output, and an
+ * Express request-logger middleware.  Zero external dependencies.
+ *
+ * Log level is controlled by the LOG_LEVEL env variable:
+ *   error | warn | info | http | debug   (default: info)
+ */
 
-// Resolve /logs directory relative to this file
-const __filename = fileURLToPath(import.meta.url);
-const __dirname  = path.dirname(__filename);
+const LEVELS = { error: 0, warn: 1, info: 2, http: 3, debug: 4 };
 
-// Go up two levels: src/utils → src → project root → logs/
-const LOGS_DIR = path.join(__dirname, "../../logs");
+const COLORS = {
+  error : '\x1b[31m',  // red
+  warn  : '\x1b[33m',  // yellow
+  info  : '\x1b[36m',  // cyan
+  http  : '\x1b[35m',  // magenta
+  debug : '\x1b[37m',  // white
+  reset : '\x1b[0m',
+};
 
-// Create the directory if it does not already exist (first run)
-if (!fs.existsSync(LOGS_DIR)) {
-  fs.mkdirSync(LOGS_DIR, { recursive: true });
-}
+const currentLevel = LEVELS[(process.env.LOG_LEVEL || 'info').toLowerCase()] ?? LEVELS.info;
 
-// Helpers
-
-/** Returns a full ISO timestamp: 2026-04-08T14:32:00.000Z */
 function timestamp() {
   return new Date().toISOString();
 }
 
-/**
- * Appends a single line to a log file.
- * Uses the async fire-and-forget variant so it never blocks the event loop.
- * @param {string} filename  Basename, e.g. "app.log"
- * @param {string} line      Text to append (newline is added automatically)
- */
-function writeLine(filename, line) {
-  const filePath = path.join(LOGS_DIR, filename);
-  fs.appendFile(filePath, line + "\n", (err) => {
-    if (err) console.error("[logger] Could not write to log file:", err.message);
-  });
+function log(level, message, meta = {}) {
+  if (LEVELS[level] > currentLevel) return;
+
+  const color = COLORS[level] ?? '';
+  const reset = COLORS.reset;
+  const label = level.toUpperCase().padEnd(5);
+  const ts    = timestamp();
+
+  const metaStr = Object.keys(meta).length
+    ? ' ' + JSON.stringify(meta)
+    : '';
+
+  const line = `${color}[${ts}] [${label}]${reset} ${message}${metaStr}`;
+
+  if (level === 'error') {
+    console.error(line);
+  } else if (level === 'warn') {
+    console.warn(line);
+  } else {
+    console.log(line);
+  }
 }
 
-// ─── Public API ──────────────────────────────────────────────────────────────
+export const logger = {
+  error : (msg, meta) => log('error', msg, meta ?? {}),
+  warn  : (msg, meta) => log('warn',  msg, meta ?? {}),
+  info  : (msg, meta) => log('info',  msg, meta ?? {}),
+  http  : (msg, meta) => log('http',  msg, meta ?? {}),
+  debug : (msg, meta) => log('debug', msg, meta ?? {}),
+};
 
 /**
- * Log an informational message.
- * Written to:  app.log  +  stdout
- *
- * @param {string} message
- * @param {string} [context]  Optional label, e.g. "AircraftPoller"
- */
-export function logInfo(message, context = "App") {
-  const line = `[${timestamp()}] [INFO] [${context}] ${message}`;
-  console.log(line);
-  writeLine("app.log", line);
-}
-
-/**
- * Log an error message.
- * Written to:  error.log  +  app.log  +  stderr
- *
- * @param {string|Error} message
- * @param {string} [context]
- */
-export function logError(message, context = "App") {
-  const text = message instanceof Error
-    ? `${message.message}\n  Stack: ${message.stack}`
-    : String(message);
-
-  const line = `[${timestamp()}] [ERROR] [${context}] ${text}`;
-  console.error(line);
-  writeLine("error.log", line);
-  writeLine("app.log",   line);
-}
-
-/**
- * Express middleware — logs every HTTP request.
- * Written to:  access.log  +  stdout
- *
- * Usage in server.js:
- *   import { requestLogger } from "./utils/logger.js";
- *   app.use(requestLogger);
+ * Express HTTP request logger middleware.
+ * Usage: app.use(requestLogger)
  */
 export function requestLogger(req, res, next) {
   const start = Date.now();
 
-  res.on("finish", () => {
-    const ms      = Date.now() - start;
-    const status  = res.statusCode;
-    const method  = req.method;
-    const url     = req.originalUrl || req.url;
-    const ip      = req.ip || req.socket?.remoteAddress || "-";
+  res.on('finish', () => {
+    const ms     = Date.now() - start;
+    const status = res.statusCode;
+    const method = req.method.padEnd(7);
+    const url    = req.originalUrl;
 
-    // Colour-code status in terminal only
-    const statusLabel =
-      status >= 500 ? `\x1b[31m${status}\x1b[0m` :  // red
-      status >= 400 ? `\x1b[33m${status}\x1b[0m` :  // yellow
-      status >= 300 ? `\x1b[36m${status}\x1b[0m` :  // cyan
-                      `\x1b[32m${status}\x1b[0m`;    // green
+    const statusColor = status >= 500 ? COLORS.error
+                      : status >= 400 ? COLORS.warn
+                      : status >= 300 ? COLORS.debug
+                      : COLORS.info;
 
-    // Plain text for the file (no ANSI codes)
-    const fileLine  = `[${timestamp()}] [ACCESS] ${method} ${url} ${status} ${ms}ms — ${ip}`;
-    const termLine  = `[${timestamp()}] [ACCESS] ${method} ${url} ${statusLabel} ${ms}ms — ${ip}`;
-    
-    writeLine("access.log", fileLine);
-
-    // Errors also go to error log
-    if (status >= 500) {
-      writeLine("error.log", fileLine);
-    }
+    log('http', `${statusColor}${status}${COLORS.reset} ${method} ${url} ${ms}ms`);
   });
 
   next();

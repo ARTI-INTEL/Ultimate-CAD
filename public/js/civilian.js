@@ -69,7 +69,7 @@
         renderFirearms();
       })
       .catch(function (err) {
-        console.error('Load error:', err);
+        Toast.error('Failed to load data: ' + err.message);
       });
   }
 
@@ -142,7 +142,6 @@
       opt.textContent = c.first_name + ' ' + c.last_name;
       sel.appendChild(opt);
     });
-    // Pre-select if a character is active
     if (selectedCharId) sel.value = selectedCharId;
   }
 
@@ -290,10 +289,13 @@
 
   /* ── Submit: Create Character ───────────────────────────── */
   $('btn-submit-char').addEventListener('click', function () {
-    const fn = $('char-fn').value.trim();
-    const ln = $('char-ln').value.trim();
+    const fn  = $('char-fn').value.trim();
+    const ln  = $('char-ln').value.trim();
     const dob = $('char-dob').value.trim();
-    if (!fn || !ln || !dob) { alert('First name, last name, and D.O.B. are required.'); return; }
+    if (!fn || !ln || !dob) {
+      Toast.warning('First name, last name, and D.O.B. are required.');
+      return;
+    }
 
     apiFetch('/characters', {
       method: 'POST',
@@ -318,8 +320,9 @@
         closeModal('modal-character');
         clearFields(['char-fn','char-ln','char-dob','char-age','char-gender','char-occ',
                      'char-height','char-weight','char-skin','char-hair','char-eye','char-addr']);
+        Toast.success('Character created successfully!');
       })
-      .catch(function (err) { alert(err.message); });
+      .catch(function (err) { Toast.error(err.message); });
   });
 
   /* ── Submit: Add Vehicle ────────────────────────────────── */
@@ -327,7 +330,10 @@
     const plate   = $('veh-plate').value.trim();
     const model   = $('veh-model').value.trim();
     const ownerId = $('veh-owner-select') ? $('veh-owner-select').value : '';
-    if (!plate || !model) { alert('Plate and model are required.'); return; }
+    if (!plate || !model) {
+      Toast.warning('Plate and model are required.');
+      return;
+    }
 
     apiFetch('/vehicles', {
       method: 'POST',
@@ -349,8 +355,9 @@
         renderVehiclesSubTable(selectedCharId);
         closeModal('modal-vehicle');
         clearFields(['veh-plate','veh-model','veh-color','veh-vin','veh-reg','veh-insexp']);
+        Toast.success('Vehicle added successfully!');
       })
-      .catch(function (err) { alert(err.message); });
+      .catch(function (err) { Toast.error(err.message); });
   });
 
   /* ── Submit: Register Firearm ───────────────────────────── */
@@ -358,7 +365,10 @@
     const serial  = $('fa-serial').value.trim();
     const type    = $('fa-type').value.trim();
     const ownerId = $('fa-owner-select') ? $('fa-owner-select').value : '';
-    if (!serial || !type) { alert('Serial number and type are required.'); return; }
+    if (!serial || !type) {
+      Toast.warning('Serial number and type are required.');
+      return;
+    }
 
     apiFetch('/firearms', {
       method: 'POST',
@@ -376,8 +386,9 @@
         renderFirearmsSubTable(selectedCharId);
         closeModal('modal-firearm');
         clearFields(['fa-serial','fa-name','fa-type']);
+        Toast.success('Firearm registered successfully!');
       })
-      .catch(function (err) { alert(err.message); });
+      .catch(function (err) { Toast.error(err.message); });
   });
 
   /* ── Init ───────────────────────────────────────────────── */
