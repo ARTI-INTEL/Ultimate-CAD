@@ -2,7 +2,7 @@ import { Router }               from 'express';
 import pool                        from '../db.js';
 import { verifyUser }              from '../middleware/auth.middleware.js';
 import { sendVerificationCode }    from '../utility/mailler.js';
-import { logger }                  from '../utility/logger.js';
+import {logInfo,logError,requestLogger}                  from '../utility/logger.js';
 
 const router = Router();
 

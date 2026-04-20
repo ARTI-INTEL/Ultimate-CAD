@@ -25,6 +25,7 @@ import { Router } from 'express';
 import pool from '../db.js';
 import { verifyUser } from '../middleware/auth.middleware.js';
 import { configDotenv } from 'dotenv';
+import { logError } from '../utility/logger.js';
 
 configDotenv();
 
@@ -124,7 +125,7 @@ router.get('/callback', async (req, res) => {
     });
 
     if (!tokenRes.ok) {
-      console.error('[Roblox OAuth] Token exchange failed:', await tokenRes.text());
+      logError('[Roblox OAuth] Token exchange failed:', await tokenRes.text());
       return res.redirect('/settings.html?roblox_error=token_failed');
     }
 
@@ -136,7 +137,7 @@ router.get('/callback', async (req, res) => {
     });
 
     if (!meRes.ok) {
-      console.error('[Roblox OAuth] Userinfo failed:', await meRes.text());
+      logError('[Roblox OAuth] Userinfo failed:', await meRes.text());
       return res.redirect('/settings.html?roblox_error=userinfo_failed');
     }
 
@@ -165,7 +166,7 @@ router.get('/callback', async (req, res) => {
 
     return res.redirect(`/settings.html?roblox_success=1&roblox_username=${encodeURIComponent(robloxUsername)}`);
   } catch (err) {
-    console.error('[Roblox OAuth] Unexpected error:', err);
+    logError('[Roblox OAuth] Unexpected error:', err);
     return res.redirect('/settings.html?roblox_error=server_error');
   }
 });
@@ -179,7 +180,7 @@ router.delete('/unlink', verifyUser, async (req, res) => {
     );
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    logError('[Roblox OAuth] Unexpected error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -194,7 +195,7 @@ router.get('/me', verifyUser, async (req, res) => {
     if (!rows.length) return res.status(404).json({ error: 'User not found' });
     res.json(rows[0]);
   } catch (err) {
-    console.error(err);
+    logError('[Roblox OAuth] Unexpected error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });

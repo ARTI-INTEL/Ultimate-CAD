@@ -18,7 +18,7 @@ router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -32,7 +32,7 @@ router.get('/:serverId/history', verifyUser, verifyMember, async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -51,7 +51,7 @@ router.post('/', verifyUser, verifyUnit, async (req, res) => {
     const [rows] = await pool.query('SELECT * FROM calls WHERE id = ?', [result.insertId]);
     res.json(rows[0]);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -66,7 +66,7 @@ router.patch('/:callId', verifyUser, verifyUnit, async (req, res) => {
     );
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -84,7 +84,7 @@ router.patch('/:callId/close', verifyUser, verifyUnit, async (req, res) => {
     );
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });

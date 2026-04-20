@@ -13,6 +13,7 @@
 import { Router } from 'express';
 import pool from '../db.js';
 import { verifyUser, verifyMember, verifyUnit } from '../middleware/auth.middleware.js';
+import { logError } from '../utility/logger.js';
 
 const router = Router();
 const ERLC_BASE = 'https://api.policeroleplay.community/v1';
@@ -128,7 +129,7 @@ router.get('/:serverId/live-units', verifyUser, verifyMember, async (req, res) =
 
     res.json({ players, units, linked });
   } catch (err) {
-    console.error('[live-units]', err);
+    logError('[live-units]', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -184,7 +185,7 @@ router.get('/:serverId/emergency-calls', verifyUser, verifyMember, async (req, r
 
     res.json(parsed);
   } catch (err) {
-    console.error('[emergency-calls]', err);
+    logError('[emergency-calls]', err);
     res.json([]); // always return an empty array rather than erroring
   }
 });
@@ -212,7 +213,7 @@ router.post('/:serverId/import-call', verifyUser, verifyUnit, async (req, res) =
     const [rows] = await pool.query('SELECT * FROM calls WHERE id = ?', [result.insertId]);
     res.json(rows[0]);
   } catch (err) {
-    console.error('[import-call]', err);
+    logError('[import-call]', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -370,7 +371,7 @@ router.post('/:serverId/sync-calls', verifyUser, verifyMember, async (req, res) 
  
     res.json({ synced, total: erlcCalls.length });
   } catch (err) {
-    console.error('[ERLC sync-calls]', err);
+    logError('[ERLC sync-calls]', err);
     res.status(err.status || 500).json({ error: err.message });
   }
 });

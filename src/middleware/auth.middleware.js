@@ -1,4 +1,5 @@
 import pool from '../db.js';
+import { logError } from '../utility/logger.js';
 
 /**
  * verifyUser
@@ -26,7 +27,7 @@ export async function verifyUser(req, res, next) {
     req.user = rows[0]; // attach user to request for downstream use
     next();
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error during auth' });
   }
 }
@@ -53,7 +54,7 @@ export async function verifyMember(req, res, next) {
 
     next();
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error during auth' });
   }
 }
@@ -86,7 +87,7 @@ export async function verifyUnit(req, res, next) {
     req.unit = rows[0]; // attach unit session to request
     next();
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error during auth' });
   }
 }

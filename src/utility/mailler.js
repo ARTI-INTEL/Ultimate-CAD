@@ -5,7 +5,7 @@
  */
 
 import nodemailer from 'nodemailer';
-import { logger } from './logger.js';
+import {logInfo,logError,requestLogger} from './logger.js';
 
 const FROM_ADDRESS = process.env.SMTP_FROM || '"Ultimate CAD" <noreply@ultimatecad.com>';
 

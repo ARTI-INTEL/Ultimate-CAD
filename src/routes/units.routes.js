@@ -21,7 +21,7 @@ router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -68,7 +68,7 @@ router.post('/clock-in', verifyUser, async (req, res) => {
     const [rows] = await pool.query('SELECT * FROM units WHERE id = ?', [unitId]);
     res.json(rows[0]);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -90,7 +90,7 @@ router.delete('/clock-out/:unitId', verifyUser, async (req, res) => {
     );
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -112,7 +112,7 @@ router.patch('/:unitId/status', verifyUser, async (req, res) => {
     );
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });

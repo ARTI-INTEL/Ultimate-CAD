@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  console.log('[CadMapInit] Script loaded');
+  toast('[CadMapInit] Script loaded');
 
   /* ── Detect which CAD page we are on ─────────────────────── */
   var containerMap = {
@@ -47,7 +47,7 @@
   }
 
   if (typeof CadMap === 'undefined') {
-    console.error('[CadMapInit] CadMap is not loaded!');
+    logError('[CadMapInit] CadMap is not loaded!');
     return;
   }
 
@@ -96,7 +96,7 @@
   var navBtn = document.getElementById(navBtnId);
 
   if (!navBtn) {
-    console.error('[CadMapInit] Nav button not found:', navBtnId);
+    logError('[CadMapInit] Nav button not found:', navBtnId);
     return;
   }
 

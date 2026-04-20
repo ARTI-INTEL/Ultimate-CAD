@@ -13,7 +13,7 @@ router.get('/login/:discordId', async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -36,7 +36,7 @@ router.post('/register', async (req, res) => {
       const [rows] = await pool.query('SELECT * FROM users WHERE discord_id = ?', [discordId]);
       return res.json(rows[0]);
     }
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -51,7 +51,7 @@ router.get('/getUserByDiscordId/:discordId', async (req, res) => {
     if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
     res.json(rows[0]);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -69,7 +69,7 @@ router.patch('/update', verifyUser, async (req, res) => {
     const [rows] = await pool.query('SELECT * FROM users WHERE iduser = ?', [req.user.iduser]);
     res.json(rows[0]);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -85,7 +85,7 @@ router.patch('/email', verifyUser, async (req, res) => {
     await pool.query('UPDATE users SET email = ? WHERE iduser = ?', [email, req.user.iduser]);
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -100,7 +100,7 @@ router.get('/me', verifyUser, async (req, res) => {
     if (!rows.length) return res.status(404).json({ error: 'User not found' });
     res.json(rows[0]);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });

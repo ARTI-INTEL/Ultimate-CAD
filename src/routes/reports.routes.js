@@ -108,7 +108,7 @@ router.get('/:serverId/character', verifyUser, verifyMember, async (req, res) =>
 
     res.json(rows.map(function (row) { return buildReportSummary(normalizeReport(row)); }));
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -122,7 +122,7 @@ router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
     );
     res.json(rows.map(normalizeReport));
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -143,7 +143,7 @@ router.post('/', verifyUser, verifyUnit, async (req, res) => {
     );
     res.json({ success: true, reportId: result.insertId });
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });

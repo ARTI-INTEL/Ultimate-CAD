@@ -142,7 +142,7 @@ router.get('/discord/callback', async (req, res) => {
 
     return res.redirect(`/index.html?${params.toString()}`);
   } catch (err) {
-    console.error(err);
+    logError(err);
     return res.redirect('/index.html?auth_error=discord_oauth_failed');
   }
 });
@@ -179,7 +179,7 @@ router.get('/discord/owner-guilds', verifyUser, async (req, res) => {
 
     res.json(ownerGuilds);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Failed to load Discord servers' });
   }
 });

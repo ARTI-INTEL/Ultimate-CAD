@@ -38,7 +38,7 @@ router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
 
     res.json({ characters, vehicles, firearms });
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });

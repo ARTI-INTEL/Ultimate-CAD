@@ -13,7 +13,7 @@ router.get('/:serverId', verifyUser, verifyMember, async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -32,7 +32,7 @@ router.post('/', verifyUser, verifyUnit, async (req, res) => {
     const [rows] = await pool.query('SELECT * FROM bolos WHERE id = ?', [result.insertId]);
     res.json(rows[0]);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -47,7 +47,7 @@ router.patch('/:boloId', verifyUser, verifyUnit, async (req, res) => {
     );
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -58,7 +58,7 @@ router.delete('/:boloId', verifyUser, verifyUnit, async (req, res) => {
     await pool.query('UPDATE bolos SET active = 0 WHERE id = ?', [req.params.boloId]);
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });

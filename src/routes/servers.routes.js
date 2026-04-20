@@ -18,7 +18,7 @@ router.get('/check/:discordGuildId', async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -33,7 +33,7 @@ router.get('/name/:serverId', async (req, res) => {
     if (rows.length === 0) return res.status(404).json({ error: 'Server not found' });
     res.json(rows[0]);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -48,7 +48,7 @@ router.get('/join-code/:serverId', async (req, res) => {
     if (rows.length === 0) return res.status(404).json({ error: 'Server not found' });
     res.json(rows[0]);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -62,7 +62,7 @@ router.get('/members/:serverId/:userId', async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -97,7 +97,7 @@ router.get('/:serverId/members', verifyUser, async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -128,7 +128,7 @@ router.delete('/:serverId/members/:memberId', verifyUser, async (req, res) => {
     );
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -156,7 +156,7 @@ router.delete('/:serverId/leave', verifyUser, async (req, res) => {
     );
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -173,7 +173,7 @@ router.post('/members', async (req, res) => {
     );
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -200,7 +200,7 @@ router.post('/join', verifyUser, async (req, res) => {
 
     res.json(server);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -236,7 +236,7 @@ router.post('/create', verifyUser, async (req, res) => {
     const [rows] = await pool.query('SELECT * FROM servers WHERE idserver = ?', [result.insertId]);
     res.json(rows[0]);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -255,7 +255,7 @@ router.get('/my-servers/:userId', verifyUser, async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -287,7 +287,7 @@ router.patch('/:serverId/update', verifyUser, async (req, res) => {
     const [rows] = await pool.query('SELECT * FROM servers WHERE idserver = ?', [serverId]);
     res.json(rows[0]);
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -308,7 +308,7 @@ router.delete('/:serverId', verifyUser, async (req, res) => {
     await pool.query('DELETE FROM servers WHERE idserver = ?', [serverId]);
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    logError(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
